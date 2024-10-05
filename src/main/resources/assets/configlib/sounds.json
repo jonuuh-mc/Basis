@@ -1,0 +1,6 @@
+{
+  "click":{
+    "category": "neutral",
+    "sounds":[{"name":"configlib:click","stream":true}]
+  }
+}

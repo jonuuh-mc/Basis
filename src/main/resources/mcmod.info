@@ -1,0 +1,16 @@
+[
+    {
+        "modid": "modTemplate",
+        "name": "ModTemplate",
+        "description": "...",
+        "version": "${version}",
+        "mcversion": "${mcversion}",
+        "url": "",
+        "updateUrl": "",
+        "authorList": ["jonuuh"],
+        "credits": "",
+        "logoFile": "",
+        "screenshots": [],
+        "dependencies": []
+    }
+]
