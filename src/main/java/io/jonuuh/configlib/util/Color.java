@@ -1,5 +1,6 @@
 package io.jonuuh.configlib.util;
 
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Color
@@ -37,19 +38,67 @@ public class Color
         this.a = 1.0F;
     }
 
+    public Color(int decimalARGB)
+    {
+        String argbHex = Integer.toHexString(decimalARGB);
+
+        float[] c = hexToColor(argbHex.substring(2));
+
+        this.r = c[0];
+        this.g = c[1];
+        this.b = c[2];
+        this.a = Integer.valueOf(argbHex.substring(0, 2), 16) / 255F;
+
+//        this(Integer.toHexString(argbDecimal).substring(2));
+//        this.a = Integer.valueOf(Integer.toHexString(argbDecimal).substring(0, 2), 16) / 255F;
+    }
+
+    public long toDecimalARGB()
+    {
+        String s = "";
+
+        s = s + Integer.toHexString((int) (a * 255));
+        s = s + Integer.toHexString((int) (r * 255));
+        s = s + Integer.toHexString((int) (g * 255));
+        s = s + Integer.toHexString((int) (b * 255));
+
+        return (int) Long.parseLong(s, 16);
+    }
+
     public static Color getRandom(float a)
     {
-        int randomHex = ThreadLocalRandom.current().nextInt(0xFFFFFF + 1);
-//        System.out.println(randomHex + " " + Integer.toHexString(randomHex));
-
-        Color c = new Color(Integer.toHexString(randomHex));
-        return a == 1 ? c : c.setA(a);
+        int randomHexInt = ThreadLocalRandom.current().nextInt(0xFFFFFF + 1);
+        Color color = new Color(Integer.toHexString(randomHexInt));
+        return a == 1.0F ? color : color.setA(a);
     }
 
     public static Color getRandom()
     {
-        return getRandom(1);
+        return getRandom(1.0F);
     }
+
+//    public static void convert(int color)
+//    {
+//        float alpha = (float) (color >> 24 & 255) /*/ 255.0F*/;
+//        float red = (float) (color >> 16 & 255) /*/ 255.0F*/;
+//        float green = (float) (color >> 8 & 255) /*/ 255.0F*/;
+//        float blue = (float) (color & 255) /*/ 255.0F*/;
+//
+//        float[] floatArr = new float[]{red, green, blue, alpha};
+//
+//        float[] floatArrNorm = new float[]{red / 255.0F, green / 255.0F, blue / 255.0F, alpha / 255.0F};
+//        System.out.println(Arrays.toString(floatArr) + " " + Arrays.toString(floatArrNorm));
+//    }
+//
+//    public static int convertToInt(float alpha, float red, float green, float blue)
+//    {
+//        int a = ((int) alpha & 255) << 24;  // Shift alpha to bits 24-31
+//        int r = ((int) red & 255) << 16;    // Shift red to bits 16-23
+//        int g = ((int) green & 255) << 8;   // Shift green to bits 8-15
+//        int b = ((int) blue & 255);         // Blue stays in bits 0-7
+//
+//        return a | r | g | b;  // Combine all components into one integer
+//    }
 
     public float getR()
     {

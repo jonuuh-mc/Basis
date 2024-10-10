@@ -1,4 +1,4 @@
-package io.jonuuh.configlib.gui.elements;
+package io.jonuuh.configlib.gui.elements.interactable;
 
 import io.jonuuh.configlib.util.Color;
 import io.jonuuh.configlib.gui.GuiUtils;
