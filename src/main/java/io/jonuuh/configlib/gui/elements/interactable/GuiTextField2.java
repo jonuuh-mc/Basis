@@ -42,14 +42,25 @@ public class GuiTextField2 extends GuiInteractableElement
 ////        setSelectionPos(cursorPos);
 //    }
 
+    public void setSelectionPos(int selectionPos)
+    {
+        this.selectionPos = (int) clamp(selectionPos, 0, text.length());
+    }
+
     public void setCursorPos(int cursorPos)
     {
         this.cursorPos = (int) clamp(cursorPos, 0, text.length());
     }
 
+    public void moveCursorAndSelection(int amount)
+    {
+        setCursorPos(cursorPos + amount);
+        setSelectionPos(selectionPos + amount);
+    }
+
     private int getCursorScreenPos()
     {
-        return xPos + fontRenderer.getStringWidth(text.substring(0, cursorPos));
+        return xPos + fontRenderer.getStringWidth(getTextBeforeCursor()) - 1;
     }
 
     private String getTextBelowMouseX(int mouseX)
@@ -57,9 +68,68 @@ public class GuiTextField2 extends GuiInteractableElement
         return fontRenderer.trimStringToWidth(text, mouseX - xPos + 1);
     }
 
+    public int getSelectionStart()
+    {
+        return Math.min(cursorPos, selectionPos);
+    }
+
+    private int getSelectionEnd()
+    {
+        return Math.max(cursorPos, selectionPos);
+    }
+
     public String getSelectedText()
     {
-        return text.substring(Math.min(cursorPos, selectionPos), Math.max(cursorPos, selectionPos));
+        return text.substring(getSelectionStart(), getSelectionEnd());
+    }
+
+    public String getTextBeforeCursor()
+    {
+        return text.substring(0, cursorPos);
+    }
+
+    public String getTextAfterCursor()
+    {
+        return text.substring(cursorPos);
+    }
+
+    public String deleteCharsFromIndex(String str, int startIndex, int charAmount)
+    {
+        if (charAmount < 0)
+        {
+            startIndex += charAmount; // subtract (add negative)
+            startIndex += 1; // make startIndex always inclusive
+            charAmount *= -1;
+        }
+
+        System.out.println("str: " + str + " startIndex: " + startIndex + " charAmount: " + charAmount);
+
+        if (startIndex < 0 || startIndex == str.length() - 1)
+        {
+            return str;
+        }
+
+        return str.substring(0, startIndex) + str.substring(startIndex + charAmount);
+    }
+
+//    public String deleteCharsFromStart(String str, int charAmount)
+//    {
+//        return str.substring(charAmount);
+//    }
+//
+//    public String deleteCharsFromEnd(String str, int charAmount)
+//    {
+//        return str.substring(0, str.length() - charAmount);
+//    }
+
+    public void clearSelection()
+    {
+        selectionPos = cursorPos;
+    }
+
+    public boolean hasSelection()
+    {
+        return selectionPos != cursorPos;
     }
 
     protected double clamp(double value, double min, double max)
@@ -80,25 +150,24 @@ public class GuiTextField2 extends GuiInteractableElement
 
         if (wasDrawn)
         {
-            fontRenderer.drawString(text, xPos, yPos, -1);
+            if (mouseDown)
+            {
+                selectionPos = getTextBelowMouseX(mouseX).length();
+            }
 
-            if (focused && (cursorFlashCounter % 20 < 10 || isTyping))
+            GuiUtils.drawRectangle(GL11.GL_POLYGON, xPos, yPos, width, height, new Color("#242424").setA(0.75F));
+
+            if (hasSelection())
+            {
+                drawSelectionHighlight();
+            }
+
+            if (/*Minecraft.getMinecraft().inGameHasFocus &&*/ focused && (cursorFlashCounter % 20 < 10 || isTyping))
             {
                 GuiUtils.drawRectangle(GL11.GL_POLYGON, getCursorScreenPos(), yPos - 2, 1, fontRenderer.FONT_HEIGHT + 2, new Color("#00ff00")/*.setA(0.5F)*/);
             }
 
-            if (mouseDown)
-            {
-                String s = getTextBelowMouseX(mouseX);
-                System.out.println(s);
-
-                selectionPos = s.length();
-            }
-
-            if (selectionPos != cursorPos)
-            {
-                drawSelectionHighlight();
-            }
+            fontRenderer.drawString(text, xPos, yPos, -1);
         }
         return wasDrawn;
     }
@@ -107,12 +176,10 @@ public class GuiTextField2 extends GuiInteractableElement
     {
         int cursorX = getCursorScreenPos();
         int rectWidth = fontRenderer.getStringWidth(getSelectedText()) - 1;
-        int rectX = (selectionPos >= cursorPos) ? cursorX : cursorX - rectWidth;
-
-//        System.out.println(selectedText);
+        int rectX = (selectionPos >= cursorPos) ? cursorX + 1 : cursorX - rectWidth;
 //        System.out.println("cursorPos: " + cursorPos + ", selectionPos: " + selectionPos);
 
-        GuiUtils.drawRectangle(GL11.GL_POLYGON, rectX, yPos, rectWidth, fontRenderer.FONT_HEIGHT - 1, new Color("#3399FF").setA(0.5F));
+        GuiUtils.drawRectangle(GL11.GL_POLYGON, rectX, yPos, rectWidth, fontRenderer.FONT_HEIGHT - 1, new Color("#009ac2").setA(0.75F)); // 3399FF
     }
 
     public void onMousePress(int mouseX, int mouseY)
@@ -132,6 +199,12 @@ public class GuiTextField2 extends GuiInteractableElement
         }
 
         cursorPos = getTextBelowMouseX(mouseX).length();
+        clearSelection(); // TODO: redundant, set to cursorPos anyway in onScreenDraw
+
+//        System.out.println(deleteCharsFromIndex("HelloWorld12345", 0, 2));
+//        System.out.println(deleteCharsFromIndex("HelloWorld12345", 0, -2));
+//        System.out.println(deleteCharsFromIndex("HelloWorld12345", 14, 2));
+//        System.out.println(deleteCharsFromIndex("HelloWorld12345", 14, -16));
 
 //        if (enableBackgroundDrawing)
 //        {
@@ -144,18 +217,36 @@ public class GuiTextField2 extends GuiInteractableElement
 //        }
     }
 
-    public void deleteText(int charAmount)
+    public void deleteText(int charAmount, boolean backward)
     {
-        if (text.substring(0, cursorPos).length() < charAmount)
+        if (backward && getTextBeforeCursor().length() < charAmount)
         {
             return;
         }
+        else if (!backward && getTextAfterCursor().length() < charAmount)
+        {
+            return;
+        }
+//        System.out.println(charAmount);
 
-        String before = text.substring(0, cursorPos - charAmount);
-        String after = text.substring(cursorPos);
+        String before;
+        String after;
+
+        if (backward)
+        {
+            String s = getTextBeforeCursor();
+            before = deleteCharsFromIndex(s, s.length() - 1, -charAmount)  /*text.substring(0, cursorPos - charAmount)*/;
+            after = getTextAfterCursor();
+            setCursorPos(cursorPos - charAmount);
+        }
+        else
+        {
+            before = getTextBeforeCursor();
+            after = text.substring(cursorPos + charAmount);
+        }
 
         text = before + after;
-        setCursorPos(cursorPos - charAmount);
+        clearSelection();
     }
 
     /**
@@ -168,17 +259,17 @@ public class GuiTextField2 extends GuiInteractableElement
         String before;
         String after;
 
-        if (selectionPos != cursorPos)
+        if (hasSelection())
         {
             System.out.println("INDEX: " + text.indexOf(getSelectedText()));
 
             before = text.substring(0, selectionPos);
-            after = text.substring(cursorPos);
+            after = getTextAfterCursor();
         }
         else
         {
-            before = text.substring(0, cursorPos);
-            after = text.substring(cursorPos);
+            before = getTextBeforeCursor();
+            after = getTextAfterCursor();
         }
 
         text = before + textInFiltered + after;
@@ -266,13 +357,30 @@ public class GuiTextField2 extends GuiInteractableElement
                 case Keyboard.KEY_BACK:
                     if (enabled)
                     {
-                        deleteText(1);
+//                        int deletionAmt = (selectionPos < cursorPos) ? -getSelectedText().length()
+//                                : (selectionPos > cursorPos) ? getSelectedText().length() : 1;
+
+                        deleteText(hasSelection() ? getSelectedText().length() : 1, selectionPos <= cursorPos);
+
+//                        if (selectionPos == cursorPos)
+//                        {
+//                            deleteText(1);
+//                        }
+//                        else if (selectionPos > cursorPos)
+//                        {
+//                            deleteText(getSelectedText().length());
+//                        }
+//                        else if (selectionPos < cursorPos)
+//                        {
+//                            deleteText(getSelectedText().length());
+//                        }
                     }
                     break;
 //                    return true;
 
                 case Keyboard.KEY_LEFT:
-                    setCursorPos(cursorPos - 1);
+//                    setCursorPos(cursorPos - 1);
+                    moveCursorAndSelection(-1);
                     break;
 //                    if (GuiScreen.isShiftKeyDown())
 //                    {
@@ -285,7 +393,8 @@ public class GuiTextField2 extends GuiInteractableElement
 //                    return true;
 
                 case Keyboard.KEY_RIGHT:
-                    setCursorPos(cursorPos + 1);
+                    moveCursorAndSelection(1);
+//                    setCursorPos(cursorPos + 1);
                     break;
 //                    if (GuiScreen.isShiftKeyDown())
 //                    {
