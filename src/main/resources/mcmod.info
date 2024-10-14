@@ -1,8 +1,8 @@
 [
     {
-        "modid": "modTemplate",
-        "name": "ModTemplate",
-        "description": "...",
+        "modid": "",
+        "name": "",
+        "description": "",
         "version": "${version}",
         "mcversion": "${mcversion}",
         "url": "",

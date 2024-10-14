@@ -1,0 +1,6 @@
+{
+  "click":{
+    "category": "neutral",
+    "sounds":[{"name":"core-config:click","stream":true}]
+  }
+}
