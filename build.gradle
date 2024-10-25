@@ -1,6 +1,5 @@
 buildscript {
     repositories {
-//        jcenter() // TODO: is this needed
         maven {
             name = "forge"
             url = "http://files.minecraftforge.net/maven"
@@ -13,9 +12,9 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'java'
 
-version = "1.0.0"
-group = "io.jonuuh.modid"
-archivesBaseName = "modid-1.8.9"
+version = "0.0.0"
+group = "io.jonuuh.core"
+archivesBaseName = "Core-1.8.9"
 
 sourceCompatibility = targetCompatibility = 1.8
 
@@ -24,22 +23,6 @@ minecraft {
     runDir = "run"
     mappings = "stable_22"
     makeObfSourceJar = false
-}
-
-dependencies {}
-
-processResources {
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
-
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-        expand 'version': project.version, 'mcversion': project.minecraft.version
-    }
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
 }
 
 apply plugin: 'maven-publish'
@@ -58,16 +41,29 @@ publishing {
 
     publications {
         maven(MavenPublication) {
+            groupId "io.jonuuh"
+            artifactId "jonuuh-mc-core"
+            version version
+//            exclude sourceSets.main.resources.srcDirs "a"
             from components.java
         }
     }
 }
 
-// Exclude "versions" folder when building or publishing
+// Exclude when building or publishing
 sourceSets {
     main {
+//        java {
+//            exclude "io/jonuuh/core/local"
+//        }
+
         resources {
-            exclude "versions"
+            exclude "assets/versions"
         }
     }
 }
+
+//task runClientPatch() {
+//    outputs.upToDateWhen { false }
+//}
+//runClientPatch.finalizedBy runClient
