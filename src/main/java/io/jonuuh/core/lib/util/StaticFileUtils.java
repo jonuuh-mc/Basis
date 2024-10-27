@@ -31,7 +31,7 @@ public abstract class StaticFileUtils
 
             if (asset == null)
             {
-                ModLogger.INSTANCE.error("Failed to access static asset via raw api ({}) or via raw usercontent ({})", assetPath, fallbackAssetPath);
+                Log4JLogger.INSTANCE.error("Failed to access static asset via raw api ({}) or via raw usercontent ({})", assetPath, fallbackAssetPath);
             }
         }
 
@@ -50,7 +50,7 @@ public abstract class StaticFileUtils
         }
         catch (IOException exception)
         {
-            ModLogger.INSTANCE.error("Failed to connect to {}", url, exception);
+            Log4JLogger.INSTANCE.error("Failed to connect to {}", url, exception);
             return null;
         }
     }
@@ -68,7 +68,7 @@ public abstract class StaticFileUtils
         }
         catch (IOException | GeneralSecurityException exception)
         {
-            ModLogger.INSTANCE.error("Failed to connect to {}", url, exception);
+            Log4JLogger.INSTANCE.error("Failed to connect to {}", url, exception);
             return null;
         }
     }
@@ -89,7 +89,7 @@ public abstract class StaticFileUtils
         }
         catch (IOException exception)
         {
-            ModLogger.INSTANCE.error("Failed to parse content for {}", httpsURLConnection.getURL().toString(), exception);
+            Log4JLogger.INSTANCE.error("Failed to parse content for {}", httpsURLConnection.getURL().toString(), exception);
             return null;
         }
     }
@@ -133,95 +133,4 @@ public abstract class StaticFileUtils
 
         return certificateStr;
     }
-
-//    public static String getGithubRepoAsset(String user, String repo, String assetPath, String fallbackAssetPath)
-//    {
-//        String assetString = null;
-//
-//        JsonObject githubRepoAsset = getGithubRepoAssetViaApi(user, repo, assetPath);
-////        System.out.println(githubRepoAsset);
-//
-//        if (githubRepoAsset != null)
-//        {
-//            String githubRepoAssetContentString = getJsonObjectElementAsString(githubRepoAsset, "content");
-////          System.out.println(githubRepoAssetContentString);
-//
-//            if (githubRepoAssetContentString != null)
-//            {
-//                String githubRepoAssetContentStringCleaned = githubRepoAssetContentString.replace("\"", "").replace("\\n", "");
-////              System.out.println(githubRepoAssetContentStringCleaned);
-//                assetString = decodeBase64String(githubRepoAssetContentStringCleaned);
-//            }
-//        }
-//        else
-//        {
-//            // IOException: File not found (or more commonly?, api ratelimit hit (60/hour per un-auth user (ip address)))
-//            assetString = getGithubRepoAssetViaRawUrl(user, repo, fallbackAssetPath);
-//        }
-//
-//        return assetString;
-//    }
-
-//    public static String decodeBase64String(String str)
-//    {
-//        byte[] decoded = Base64.getDecoder().decode(str);
-//        return new String(decoded, StandardCharsets.UTF_8);
-//
-////        List<String> list = Arrays.asList(jsonObject.get("content").toString().replace("\"", "").split("\\\\n"));
-////        System.out.println(list);
-////
-////        list = list.stream().map(s -> new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8)).collect(Collectors.toList());
-////        System.out.println(list);
-//    }
-//
-//    public static String getJsonObjectElementAsString(JsonObject jsonObject, String memberName)
-//    {
-//        if (jsonObject != null)
-//        {
-//            JsonElement jsonObjectElement = jsonObject.get(memberName);
-//
-//            if (jsonObjectElement != null)
-//            {
-//                return jsonObjectElement.toString();
-//            }
-//        }
-//        return null;
-//    }
-//
-//    public static JsonObject getGithubRepoAssetViaApi(String user, String repo, String assetPath)
-//    {
-//        try
-//        {
-//            String url = String.format("https://api.github.com/repos/%s/%s/contents/%s", user, repo, assetPath);
-//            HttpsURLConnection httpsURLConnection = (HttpsURLConnection) new URL(url).openConnection();
-//
-//            Scanner scanner = new Scanner(httpsURLConnection.getInputStream()).useDelimiter("\\A");
-//            String urlContent = scanner.next();
-//            scanner.close();
-//            httpsURLConnection.disconnect();
-//
-//            return parseJsonObject(urlContent);
-//        }
-//        catch (IOException e)
-//        {
-//            System.out.println("Failed to access asset from github repo via github api");
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
-
-//    public static JsonObject parseJsonObject(String jsonString)
-//    {
-//        try
-//        {
-//            JsonElement jsonElement = new JsonParser().parse(jsonString);
-//            return jsonElement.isJsonObject() ? jsonElement.getAsJsonObject() : null;
-//        }
-//        catch (JsonParseException e)
-//        {
-//            System.out.println("Failed to parse json");
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
 }

@@ -24,4 +24,10 @@ public class BoolSetting extends Setting<Boolean>
     {
         this(false);
     }
+
+    @Override
+    public BoolSetting copy()
+    {
+        return new BoolSetting(this);
+    }
 }

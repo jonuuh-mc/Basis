@@ -6,6 +6,7 @@ import io.jonuuh.core.lib.config.gui.elements.interactable.sliders.GuiSlider;
 import io.jonuuh.core.lib.config.gui.elements.interactable.GuiInteractableElement;
 import io.jonuuh.core.lib.config.gui.elements.interactable.GuiSwitch;
 import io.jonuuh.core.lib.config.Config;
+import io.jonuuh.core.lib.config.gui.elements.interactable.sliders.GuiVerticalSlider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +15,7 @@ public class SettingsGuiImpl extends AbstractSettingsGui
 {
     public SettingsGuiImpl(String configCategory)
     {
-        super(Config.getInstance().getSettings(configCategory)); // TODO: should pass Config thru constructor to ensure non-null?
+        super(Config.INSTANCE.getSettings(configCategory)); // TODO: should pass Config thru constructor to ensure non-null?
     }
 
     @Override
@@ -31,6 +32,7 @@ public class SettingsGuiImpl extends AbstractSettingsGui
 
         map.put("RENDER_RANGE", new GuiIntSlider(this, -100, 50, 200, 12, 0, 20/*mc.gameSettings.renderDistanceChunks * 16*/, settings.getIntListSetting("RENDER_RANGE").getValue()));
 
+        map.put("something", new GuiVerticalSlider(this, -150, 0, 16, 200, 0, 100, settings.getDoubleListSetting("FAT_SLIDER").getValue()));
 //        int[] ints = settings.getIntListSettingValue("RENDER_RANGE");
 //        map.put("RENDER_RANGE", new GuiDualSlider(this, -50, 50, 0, 100, ints[0], ints[1]));
 //

@@ -24,4 +24,10 @@ public class DoubleSetting extends Setting<Double>
     {
         this(0.0);
     }
+
+    @Override
+    public DoubleSetting copy()
+    {
+        return new DoubleSetting(this);
+    }
 }

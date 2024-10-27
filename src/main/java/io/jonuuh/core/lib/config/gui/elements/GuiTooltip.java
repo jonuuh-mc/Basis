@@ -1,6 +1,6 @@
 package io.jonuuh.core.lib.config.gui.elements;
 
-import io.jonuuh.core.lib.util.GuiUtils;
+import io.jonuuh.core.lib.util.RenderUtils;
 import io.jonuuh.core.lib.config.gui.elements.interactable.GuiInteractableElement;
 import io.jonuuh.core.lib.util.Color;
 import net.minecraft.client.Minecraft;
@@ -94,9 +94,9 @@ public class GuiTooltip
     {
 //        System.out.println("drawing tooltip for: " + currentElement);
 
-        GuiUtils.drawRoundedRect(GL11.GL_POLYGON, posX - padding, posY - padding, rectWidth, rectHeight, 2, color, true);
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, posX - padding, posY - padding, rectWidth, rectHeight, 2, color, true);
 
-        GuiUtils.drawTriangle(GL11.GL_POLYGON, posX - padding + (rectWidth / 2F) - (triWidth / 2F), posY - padding + rectHeight, triWidth, triHeight, color, 0);
+        RenderUtils.drawTriangle(GL11.GL_POLYGON, posX - padding + (rectWidth / 2F) - (triWidth / 2F), posY - padding + rectHeight, triWidth, triHeight, color, 0);
 
         mc.fontRendererObj.drawString(str, posX, posY, -1, false);
 

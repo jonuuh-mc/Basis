@@ -1,6 +1,6 @@
 package io.jonuuh.core.lib.update;
 
-import io.jonuuh.core.lib.util.ModLogger;
+import io.jonuuh.core.lib.util.Log4JLogger;
 
 class Version implements Comparable<Version>
 {
@@ -10,7 +10,7 @@ class Version implements Comparable<Version>
     {
         if (versionStr == null || !versionStr.matches("^[0-9]+\\.[0-9]+\\.[0-9]+$"))
         {
-            ModLogger.INSTANCE.warn("Semver string '"+ versionStr + "' is invalid");
+            Log4JLogger.INSTANCE.warn("Semver string '"+ versionStr + "' is invalid");
             parts = new int[]{-1, -1, -1};
             return;
         }

@@ -11,6 +11,7 @@ import io.jonuuh.core.lib.config.setting.types.IntSetting;
 import io.jonuuh.core.lib.config.setting.types.StringListSetting;
 import io.jonuuh.core.lib.config.setting.types.StringSetting;
 import io.jonuuh.core.lib.util.ChatLogger;
+import io.jonuuh.core.lib.util.Log4JLogger;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -26,39 +27,23 @@ import java.util.stream.Collectors;
 
 public class Config
 {
-    private static Config instance;
+    public static Config INSTANCE;
     private final Configuration configuration;
     private final Map<String, Settings> configCategorySettingsMap;
     private final String MASTER_CATEGORY = "master";
 
     public static void createInstance(File file, List<Settings> settingsList)
     {
-        if (instance != null)
+        if (INSTANCE != null)
         {
             throw new IllegalStateException("Config instance has already been created");
         }
-
-        instance = new Config(file, settingsList);
+        INSTANCE = new Config(file, settingsList);
     }
 
     public static void createInstance(File file, Settings masterSettings)
     {
-        if (instance != null)
-        {
-            throw new IllegalStateException("Config instance has already been created");
-        }
-
-        instance = new Config(file, Collections.singletonList(masterSettings));
-    }
-
-    public static Config getInstance()
-    {
-        if (instance == null)
-        {
-            throw new NullPointerException("Config instance has not been created");
-        }
-
-        return instance;
+        createInstance(file, Collections.singletonList(masterSettings));
     }
 
     private Config(File file, List<Settings> settingsList)
@@ -77,7 +62,7 @@ public class Config
         // TODO: finish this
         if (categories.size() != new HashSet<>(categories).size())
         {
-            System.out.println("WARNING: Settings list contains multiple instances with the same category. For each duplicate, the last in the list will be used.");
+            Log4JLogger.INSTANCE.warn("Settings list contains multiple instances with the same category ({}). For each duplicate, the last in the list will be used.", categories);
         }
 
         this.configuration = new Configuration(file);
@@ -114,7 +99,6 @@ public class Config
         return getSettings(MASTER_CATEGORY);
     }
 
-    // TODO: finish this
     public void putAndLoadSettings(Settings settings)
     {
         configCategorySettingsMap.put(settings.configurationCategory, settings);
@@ -123,7 +107,6 @@ public class Config
 
     /**
      * Saves the actual forge configuration <p> (writes configuration's properties to mod's .cfg file)
-     *
      * @see net.minecraftforge.common.config.ConfigCategory#write(BufferedWriter, int)
      */
     public void saveConfiguration()
@@ -136,7 +119,11 @@ public class Config
         }
     }
 
-    // Load settings (read from Configuration category, write into respective Settings)
+    /**
+     * Load the properties for some Configuration category into their respective Settings
+     * <p>
+     * Read each Configuration property for this category -> Write value into each Setting
+     */
     public void loadSettings(String category)
     {
         Settings settings = getSettings(category);
@@ -148,7 +135,11 @@ public class Config
         }
     }
 
-    // Save settings (read from Settings, write into respective Configuration category)
+    /**
+     * Save the properties for some Configuration category to the mod's .cfg file
+     * <p>
+     * Read value from each Setting -> Write values into respective Configuration properties -> Write Configuration properties to file
+     */
     public void saveSettings(String category)
     {
         Settings settings = getSettings(category);
@@ -183,9 +174,6 @@ public class Config
      * Load a configuration property into a setting.
      * <p>
      * Read from Configuration property -> Write into Setting
-     *
-     * @param property the property
-     * @param setting  the setting
      */
     private void loadSetting(Property property, Setting<?> setting)
     {
@@ -224,9 +212,6 @@ public class Config
      * Save a setting into a configuration property.
      * <p>
      * Read from Setting -> Write into Configuration property
-     *
-     * @param property the property
-     * @param setting  the setting
      */
     private void saveSetting(Property property, Setting<?> setting)
     {
@@ -271,7 +256,6 @@ public class Config
      * @param category    the configuration category in which to look for the property
      * @param setting     the setting whose value to use for the property if it does not exist
      * @param settingName the property's key (name) in the configuration
-     * @return the property
      * @see net.minecraftforge.common.config.Configuration#get(java.lang.String, java.lang.String, java.lang.String, java.lang.String, net.minecraftforge.common.config.Property.Type)
      */
     private Property getProperty(String category, Setting<?> setting, String settingName)

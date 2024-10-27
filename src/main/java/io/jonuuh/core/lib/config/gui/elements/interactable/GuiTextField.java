@@ -1,6 +1,6 @@
 package io.jonuuh.core.lib.config.gui.elements.interactable;
 
-import io.jonuuh.core.lib.util.GuiUtils;
+import io.jonuuh.core.lib.util.RenderUtils;
 import io.jonuuh.core.lib.config.gui.ISettingsGui;
 import io.jonuuh.core.lib.util.Color;
 import net.minecraft.client.Minecraft;
@@ -150,32 +150,28 @@ public class GuiTextField extends GuiInteractableElement
     // 12345678901234567890
 
     @Override
-    public boolean onScreenDraw(Minecraft mc, int mouseX, int mouseY)
+    public void onScreenDraw(Minecraft mc, int mouseX, int mouseY)
     {
-        boolean wasDrawn = super.onScreenDraw(mc, mouseX, mouseY);
+        super.onScreenDraw(mc, mouseX, mouseY);
 
-        if (wasDrawn)
+        if (mouseDown)
         {
-            if (mouseDown)
-            {
-                setSelectionPos(getTextBelowMouseX(mouseX).length());
-            }
-
-            GuiUtils.drawRectangle(GL11.GL_POLYGON, xPos, yPos, width, height, new Color("#242424").setA(0.75F));
-
-            if (hasSelection())
-            {
-                drawSelectionHighlight();
-            }
-
-            if (Display.isActive() && focused && (cursorFlashCounter % 20 < 10 || isTyping))
-            {
-                GuiUtils.drawRectangle(GL11.GL_POLYGON, getCursorScreenPos(), yPos - 2, 1, fontRenderer.FONT_HEIGHT + 2, new Color("#00ff00")/*.setA(0.5F)*/);
-            }
-
-            fontRenderer.drawString(text, xPos, yPos, -1);
+            setSelectionPos(getTextBelowMouseX(mouseX).length());
         }
-        return wasDrawn;
+
+        RenderUtils.drawRectangle(GL11.GL_POLYGON, xPos, yPos, width, height, new Color("#242424").setA(0.75F));
+
+        if (hasSelection())
+        {
+            drawSelectionHighlight();
+        }
+
+        if (Display.isActive() && focused && (cursorFlashCounter % 20 < 10 || isTyping))
+        {
+            RenderUtils.drawRectangle(GL11.GL_POLYGON, getCursorScreenPos(), yPos - 2, 1, fontRenderer.FONT_HEIGHT + 2, new Color("#00ff00")/*.setA(0.5F)*/);
+        }
+
+        fontRenderer.drawString(text, xPos, yPos, -1);
     }
 
     public void drawSelectionHighlight()
@@ -185,7 +181,7 @@ public class GuiTextField extends GuiInteractableElement
         int rectX = isSelectionForward() ? cursorX + 1 : cursorX - rectWidth;
 //        System.out.println("cursorPos: " + cursorPos + ", selectionPos: " + selectionPos);
 
-        GuiUtils.drawRectangle(GL11.GL_POLYGON, rectX, yPos, rectWidth, fontRenderer.FONT_HEIGHT - 1, new Color("#009ac2").setA(0.75F)); // 3399FF
+        RenderUtils.drawRectangle(GL11.GL_POLYGON, rectX, yPos, rectWidth, fontRenderer.FONT_HEIGHT - 1, new Color("#009ac2").setA(0.75F)); // 3399FF
     }
 
     public void onMousePress(int mouseX, int mouseY)

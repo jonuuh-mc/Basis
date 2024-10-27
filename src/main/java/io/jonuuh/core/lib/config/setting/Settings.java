@@ -26,17 +26,28 @@ public class Settings extends HashMap<String, Setting<?>>
         this("master");
     }
 
-//    public Settings deepCopy()
-//    {
-//        Settings settingsClone = new Settings(this.configurationCategory);
-//
-//        for (Entry<String, Setting<?>> entry : this.entrySet())
-//        {
-//            settingsClone.put(entry.getKey(), new Setting(entry.getValue()));
-//        }
-//
-//        return settingsClone;
-//    }
+    /**
+     * Deep copy these Settings into a new Settings
+     * <p>
+     * This also copies the configuration category, which shouldn't be desirable at all (saving to file will overwrite)
+     */
+    public Settings deepCopy()
+    {
+        Settings settings = new Settings(this.configurationCategory);
+        return deepCopyInto(settings);
+    }
+
+    /**
+     * Deep copy the keys and values of these Settings into the given Settings.
+     */
+    public Settings deepCopyInto(Settings settings)
+    {
+        for (Entry<String, Setting<?>> entry : this.entrySet())
+        {
+            settings.put(entry.getKey(), entry.getValue().copy());
+        }
+        return settings;
+    }
 
     // TODO: won't reset ui elements
     public void reset()
@@ -49,22 +60,22 @@ public class Settings extends HashMap<String, Setting<?>>
 
     public void load()
     {
-        Config.getInstance().loadSettings(configurationCategory);
+        Config.INSTANCE.loadSettings(configurationCategory);
     }
 
     public void save()
     {
-        Config.getInstance().saveSettings(configurationCategory);
+        Config.INSTANCE.saveSettings(configurationCategory);
     }
 
     public void load(String settingName)
     {
-        Config.getInstance().loadSetting(configurationCategory, settingName);
+        Config.INSTANCE.loadSetting(configurationCategory, settingName);
     }
 
     public void save(String settingName)
     {
-        Config.getInstance().saveSetting(configurationCategory, settingName);
+        Config.INSTANCE.saveSetting(configurationCategory, settingName);
     }
 
     //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////
@@ -117,5 +128,11 @@ public class Settings extends HashMap<String, Setting<?>>
     {
         Setting<?> setting = get(settingName);
         return (setting instanceof StringListSetting) ? ((StringListSetting) setting) : null;
+    }
+
+    @Override
+    public String toString()
+    {
+        return configurationCategory + "=" + super.toString();
     }
 }

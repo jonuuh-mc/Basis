@@ -28,6 +28,12 @@ public class StringListSetting extends Setting<String[]>
     }
 
     @Override
+    public StringListSetting copy()
+    {
+        return new StringListSetting(this);
+    }
+
+    @Override
     public String toString()
     {
         return this.getClass().getSimpleName() + "{" + "value=" + Arrays.toString(value) + '}';

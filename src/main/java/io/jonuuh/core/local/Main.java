@@ -10,7 +10,7 @@ import io.jonuuh.core.lib.config.setting.types.IntListSetting;
 import io.jonuuh.core.lib.config.setting.types.StringSetting;
 import io.jonuuh.core.lib.update.UpdateHandler;
 import io.jonuuh.core.lib.util.ChatLogger;
-import io.jonuuh.core.lib.util.ModLogger;
+import io.jonuuh.core.lib.util.Log4JLogger;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -23,28 +23,25 @@ import org.lwjgl.input.Keyboard;
 @Mod(modid = Main.modID, version = Main.version, acceptedMinecraftVersions = "[1.8.9]")
 public class Main
 {
-    public static final String modID = "modid";
+    public static final String modID = "core";
     public static final String version = "0.0.0";
-    public final ModLogger modLogger;
 
     public Main()
     {
-        this.modLogger = ModLogger.createInstance(modID);
+        Log4JLogger.createInstance(modID);
+        ChatLogger.createInstance("\u00a7f[\u00a76" + modID + "\u00a7f] ");
     }
 
     @Mod.EventHandler
     public void FMLPreInit(FMLPreInitializationEvent event)
     {
-        Settings masterSettings = initSettings();
-        Config.createInstance(event.getSuggestedConfigurationFile(), masterSettings);
+        Config.createInstance(event.getSuggestedConfigurationFile(), initMasterSettings());
     }
 
     @Mod.EventHandler
     public void FMLInit(FMLInitializationEvent event)
     {
-        UpdateHandler.createInstance("barriermodels", version); // TODO: should be in FMLInit probably (has event listeners)
-
-        ChatLogger.createInstance("\u00a7f[\u00a76Core\u00a7f] ");
+        UpdateHandler.createInstance(modID, version); // TODO: should be in FMLInit probably (has event listeners)
 
         KeyBinding keyBinding = new KeyBinding("<description>", Keyboard.KEY_NONE, modID);
         ClientRegistry.registerKeyBinding(keyBinding);
@@ -53,7 +50,7 @@ public class Main
         ClientCommandHandler.instance.registerCommand(new CommandOpenSettingsGui(modID, new SettingsGuiImpl("master")));
     }
 
-    private Settings initSettings()
+    private Settings initMasterSettings()
     {
         Settings settings = new Settings();
         settings.put("DRAW_BACKGROUND", new BoolSetting(true));

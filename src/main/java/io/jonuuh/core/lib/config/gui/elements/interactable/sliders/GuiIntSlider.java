@@ -1,6 +1,7 @@
 package io.jonuuh.core.lib.config.gui.elements.interactable.sliders;
 
 import io.jonuuh.core.lib.config.gui.ISettingsGui;
+import io.jonuuh.core.lib.util.MathUtils;
 
 import java.util.Arrays;
 
@@ -61,18 +62,18 @@ public class GuiIntSlider extends GuiSlider
 
         for (int i = 0; i < normalPointerValues.length; i++)
         {
-            normalPointerValues[i] = clamp(normalize(values[i]));
+            normalPointerValues[i] = MathUtils.clamp(MathUtils.normalize(values[i], min, max));
         }
     }
 
     public int getIntValue(int pointerIndex)
     {
-        return (int) denormalize(getNormalizedValue(pointerIndex));
+        return (int) MathUtils.denormalize(getNormalizedValue(pointerIndex), min, max);
     }
 
     public void setIntValue(int pointerIndex, int value)
     {
-        setNormalizedValue(pointerIndex, normalize(value));
+        setNormalizedValue(pointerIndex, MathUtils.normalize(value, min, max));
     }
 
 //    public double getNormalizedValue(int pointerIndex)
@@ -90,7 +91,7 @@ public class GuiIntSlider extends GuiSlider
         double minValue = hasLeftAdjacent ? (normalPointerValues[pointerIndex - 1]) : 0;
         double maxValue = hasRightAdjacent ? (normalPointerValues[pointerIndex + 1]) : 1;
 
-        double value = clamp(normalValue, minValue, maxValue);
+        double value = MathUtils.clamp(normalValue, minValue, maxValue);
 
 //        System.out.println("PRE:" + value);
         value = Math.round(value * max) / max; // round (up?) to multiple (ex: 20 -> 0.05, 10 -> 0.1)

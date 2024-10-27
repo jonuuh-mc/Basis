@@ -1,6 +1,7 @@
 package io.jonuuh.core.lib.config.gui.elements.interactable.sliders;
 
-import io.jonuuh.core.lib.util.GuiUtils;
+import io.jonuuh.core.lib.util.MathUtils;
+import io.jonuuh.core.lib.util.RenderUtils;
 import io.jonuuh.core.lib.config.gui.ISettingsGui;
 import io.jonuuh.core.lib.config.gui.elements.interactable.GuiInteractableElement;
 import io.jonuuh.core.lib.config.gui.elements.GuiTooltip;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class GuiSlider/*<T>*/ extends GuiInteractableElement
+public class GuiSlider extends GuiInteractableElement
 {
     protected final double min;
     protected final double max;
@@ -26,8 +27,7 @@ public class GuiSlider/*<T>*/ extends GuiInteractableElement
     public GuiSlider(ISettingsGui parent, int xPos, int yPos, int width, int height, /*boolean isVertical,*/ double min, double max, double[] startValues)
     {
         super(parent, xPos, yPos, width, height);
-        this.pointerSize = height;
-//        this.radius = Math.min(radius, (height / 2F)); // width if isVertical
+        this.pointerSize = (this instanceof GuiVerticalSlider) ? width : height;
         this.min = min;
         this.max = max;
 
@@ -45,10 +45,10 @@ public class GuiSlider/*<T>*/ extends GuiInteractableElement
         Arrays.sort(startValues);
         for (int i = 0; i < startValues.length; i++)
         {
-            normalPointerValues[i] = clamp(normalize(startValues[i]));
+            normalPointerValues[i] = MathUtils.clamp(MathUtils.normalize(startValues[i], min, max));
         }
 
-        setDrawBounds(false);
+//        setDrawBounds(false);
     }
 
     public GuiSlider(ISettingsGui parent, int xPos, int yPos, int width, int height, double min, double max, double startValue)
@@ -91,18 +91,18 @@ public class GuiSlider/*<T>*/ extends GuiInteractableElement
 
         for (int i = 0; i < normalPointerValues.length; i++)
         {
-            normalPointerValues[i] = clamp(normalize(values[i]));
+            normalPointerValues[i] = MathUtils.clamp(MathUtils.normalize(values[i], min, max));
         }
     }
 
     public double getValue(int pointerIndex)
     {
-        return denormalize(getNormalizedValue(pointerIndex));
+        return MathUtils.denormalize(getNormalizedValue(pointerIndex), min, max);
     }
 
     public void setValue(int pointerIndex, double value)
     {
-        setNormalizedValue(pointerIndex, normalize(value));
+        setNormalizedValue(pointerIndex, MathUtils.normalize(value, min, max));
     }
 
     public double getNormalizedValue(int pointerIndex)
@@ -119,7 +119,7 @@ public class GuiSlider/*<T>*/ extends GuiInteractableElement
         double minValue = hasLeftAdjacent ? (normalPointerValues[pointerIndex - 1]) : 0;
         double maxValue = hasRightAdjacent ? (normalPointerValues[pointerIndex + 1]) : 1;
 
-        normalPointerValues[pointerIndex] = clamp(normalValue, minValue, maxValue);
+        normalPointerValues[pointerIndex] = MathUtils.clamp(normalValue, minValue, maxValue);
     }
 
     public DecimalFormat getDecimalFormat()
@@ -133,41 +133,30 @@ public class GuiSlider/*<T>*/ extends GuiInteractableElement
     }
 
     @Override
-    public boolean onScreenDraw(Minecraft mc, int mouseX, int mouseY)
+    public void onScreenDraw(Minecraft mc, int mouseX, int mouseY)
     {
-        boolean wasDrawn = super.onScreenDraw(mc, mouseX, mouseY);
+        super.onScreenDraw(mc, mouseX, mouseY);
 
-        if (wasDrawn)
+        drawSlider();
+
+        if (mouseDown)
         {
-            drawSlider();
-
-            if (mouseDown)
-            {
 //                System.out.println(Arrays.toString(normalPointerValues));
-                setNormalizedValue(lastHeldPointer, getSliderValueAtMouseX(mouseX));
+            setNormalizedValue(lastHeldPointer, getSliderValueAtMousePos(mouseX, mouseY));
 
-                // TODO: don't check for pre-claim? assumes no slider overlap (drag two sliders once)
-                claimTooltipForPointer(lastHeldPointer);
+            // TODO: don't check for pre-claim? assumes no slider overlap (drag two sliders once)
+            claimTooltipForPointer(lastHeldPointer);
 
-                sendChangeToParent();
-            }
+            sendChangeToParent();
         }
-
-        return wasDrawn;
     }
 
     @Override
     public void onMousePress(int mouseX, int mouseY)
     {
         super.onMousePress(mouseX, mouseY);
-        lastHeldPointer = getClosestPointerToMouse(mouseX);
+        lastHeldPointer = getClosestPointerToMouse(mouseX, mouseY);
     }
-
-//    @Override
-//    public void onMouseRelease(int mouseX, int mouseY)
-//    {
-//        mouseDown = false;
-//    }
 
     protected void drawSlider()
     {
@@ -176,19 +165,19 @@ public class GuiSlider/*<T>*/ extends GuiInteractableElement
         // Draw track(s)
         for (int i = 0; i < normalPointerValues.length; i++)
         {
-            float currPointerXCenter = getPointerXCenter(i);
+            float currPointerXCenter = getPointerCenter(i);
 //            float prevPointerXCenter = getPointerXCenter(i - 1);
 
-            float trackX = i != 0 ? getPointerXCenter(i - 1) : xPos;
-            float trackWidth = i != 0 ? currPointerXCenter - getPointerXCenter(i - 1) : currPointerXCenter - xPos;
+            float trackX = i != 0 ? getPointerCenter(i - 1) : xPos;
+            float trackWidth = i != 0 ? currPointerXCenter - getPointerCenter(i - 1) : currPointerXCenter - xPos;
 
             // Left side track for each pointer
-            GuiUtils.drawRoundedRect(GL11.GL_POLYGON, trackX, yPos + trackHeight, trackWidth, trackHeight, parent.getOuterRadius(), colors.get(i), true);
+            RenderUtils.drawRoundedRect(GL11.GL_POLYGON, trackX, yPos + trackHeight, trackWidth, trackHeight, parent.getOuterRadius(), colors.get(i), true);
 
             if (i == normalPointerValues.length - 1)
             {
                 // Right side track for last pointer
-                GuiUtils.drawRoundedRect(GL11.GL_POLYGON, currPointerXCenter, yPos + trackHeight, width - (currPointerXCenter - xPos), trackHeight, parent.getOuterRadius(), colorMap.get("ACCENT"), true);
+                RenderUtils.drawRoundedRect(GL11.GL_POLYGON, currPointerXCenter, yPos + trackHeight, width - (currPointerXCenter - xPos), trackHeight, parent.getOuterRadius(), colorMap.get("ACCENT"), true);
             }
         }
 
@@ -199,7 +188,7 @@ public class GuiSlider/*<T>*/ extends GuiInteractableElement
 //            {
 //                continue;
 //            }
-            GuiUtils.drawRoundedRect(GL11.GL_POLYGON, getPointerXCenter(i) - (pointerSize / 2F), yPos, pointerSize, pointerSize, parent.getInnerRadius(), colors.get(i), true);
+            RenderUtils.drawRoundedRect(GL11.GL_POLYGON, getPointerCenter(i) - (pointerSize / 2F), yPos, pointerSize, pointerSize, parent.getInnerRadius(), colors.get(i), true);
         }
 
 //        GuiUtils.drawRoundedRect(GL11.GL_POLYGON, getPointerXCenter(lastHeldPointer) - (pointerSize / 2F), yPosition /*+ 5*/, pointerSize, pointerSize, radius * 3, colors.get(lastHeldPointer), true);
@@ -207,27 +196,36 @@ public class GuiSlider/*<T>*/ extends GuiInteractableElement
 
     // can't really move by <1 pixel; normalized val is restricted by mouseX which is an int
     // technically all sliders are int sliders bc of this?
-    public float getPointerXCenter(int pointerIndex)
+    public float getPointerCenter(int pointerIndex)
     {
-        float x = (float) (xPos + (getNormalizedValue(pointerIndex) * width));
-//        GuiUtils.drawRectangle(GL11.GL_LINE_LOOP, x, yPos, 3, 3, new Color());
+        float center = (this instanceof GuiVerticalSlider)
+                ? (float) (yPos + (getNormalizedValue(pointerIndex) * height))
+                : (float) (xPos + (getNormalizedValue(pointerIndex) * width));
 
+        if (this instanceof GuiVerticalSlider)
+        {
+            RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, xPos, center, 3, 3, new Color("#00ff00"));
+        }
+        else
+        {
+            RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, center, yPos, 3, 3, new Color("#00ff00"));
+        }
+
+        return center;
         // prevents sliders from going half off the start/end of the track
-        x = (float) clamp(x, xPos + (pointerSize / 2D), xPos + width - (pointerSize / 2D));
-
-        return x;
+//        x = (float) clamp(x, xPos + (pointerSize / 2D), xPos + width - (pointerSize / 2D));
     }
 
-    public int getClosestPointerToMouse(int mouseX)
+    public int getClosestPointerToMouse(int mouseX, int mouseY)
     {
-        double mouseXSliderVal = getSliderValueAtMouseX(mouseX);
+        double mousePosSliderVal = getSliderValueAtMousePos(mouseX, mouseY);
 
         // find the closest pointer to the mouse
         int leftmostClosestPointer = 0;
         double leastDistance = 1.0;
         for (int i = 0; i < normalPointerValues.length; i++)
         {
-            double distance = Math.abs(normalPointerValues[i] - mouseXSliderVal);
+            double distance = Math.abs(normalPointerValues[i] - mousePosSliderVal);
 
             if (distance < leastDistance) // < means always favoring leftmost pointer in a tie, <= would favor rightmost (pointers sorted ascending: left to right)
             {
@@ -250,44 +248,13 @@ public class GuiSlider/*<T>*/ extends GuiInteractableElement
 
         // if there exists an overlapping pointer to the right, and the mouse is to the right of the stacked pointers,
         // the true closest pointer must be the furthest pointer to the right in the stack
-        return (farRightOverlappedPointer != 0 && mouseXSliderVal > normalPointerValues[leftmostClosestPointer]) ? farRightOverlappedPointer : leftmostClosestPointer;
+        return (farRightOverlappedPointer != 0 && mousePosSliderVal > normalPointerValues[leftmostClosestPointer]) ? farRightOverlappedPointer : leftmostClosestPointer;
     }
-
-//    protected void update(int mouseX)
-//    {
-//        setNormalizedValue(lastHeldPointer, getSliderValueAtMouseX(mouseX));
-//
-//        updateTooltip(lastHeldPointer);
-//
-//        sendChangeToParent();
-//    }
 
     // mouse position on the slider
-    protected double getSliderValueAtMouseX(int mouseX)
+    protected double getSliderValueAtMousePos(int mouseX, int mouseY)
     {
-        return (mouseX - xPos) / (double) width;
-    }
-
-    protected double normalize(double value)
-    {
-        return (value - min) / (max - min);
-    }
-
-    protected double denormalize(double normalizedValue)
-    {
-        return normalizedValue * (max - min) + min;
-    }
-
-    protected double clamp(double value)
-    {
-        // Clamp value (0, 1)
-        return clamp(value, 0.0, 1.0);
-    }
-
-    protected double clamp(double value, double min, double max)
-    {
-        // Clamp value (min, max)
-        return Math.min((Math.max(value, min)), max);
+        return (this instanceof GuiVerticalSlider) ? ((mouseY - yPos) / (double) height) : ((mouseX - xPos) / (double) width);
     }
 
     protected void claimTooltipForPointer(int pointerIndex)
@@ -297,12 +264,12 @@ public class GuiSlider/*<T>*/ extends GuiInteractableElement
         GuiTooltip.claim(this);
 
         int strWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(tooltipStr) - 1;
-        GuiTooltip.getInstance().posX = getPointerXCenter(pointerIndex) - (strWidth / 2F);
+        GuiTooltip.getInstance().posX = getPointerCenter(pointerIndex) - (strWidth / 2F);
         GuiTooltip.getInstance().color = colors.get(pointerIndex);
     }
 
     public void claimHoverTooltip(int mouseX, int mouseY)
     {
-        claimTooltipForPointer(getClosestPointerToMouse(mouseX));
+        claimTooltipForPointer(getClosestPointerToMouse(mouseX, mouseY));
     }
 }

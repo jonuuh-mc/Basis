@@ -15,8 +15,8 @@ import io.jonuuh.core.lib.config.setting.types.DoubleSetting;
 import io.jonuuh.core.lib.config.setting.types.IntListSetting;
 import io.jonuuh.core.lib.config.setting.types.IntSetting;
 import io.jonuuh.core.lib.util.Color;
-import io.jonuuh.core.lib.util.GuiUtils;
-import io.jonuuh.core.lib.util.ModLogger;
+import io.jonuuh.core.lib.util.RenderUtils;
+import io.jonuuh.core.lib.util.Log4JLogger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import org.lwjgl.input.Keyboard;
@@ -33,7 +33,6 @@ public abstract class AbstractSettingsGui extends GuiScreen implements ISettings
     protected final Map<GuiInteractableElement, String> inverseElementMap;
     protected GuiInteractableElement lastInteracted;
     public GuiTextFieldVanilla textField;
-    public GuiTextField textField2;
 
     protected int[] center;
 
@@ -48,7 +47,7 @@ public abstract class AbstractSettingsGui extends GuiScreen implements ISettings
             {
                 if (elementMap.get(settingName) == null)
                 {
-                    ModLogger.INSTANCE.warn("No UI element found for setting '{}'", settingName);
+                    Log4JLogger.INSTANCE.warn("No UI element found for setting '{}'", settingName);
                 }
             }
 
@@ -56,7 +55,7 @@ public abstract class AbstractSettingsGui extends GuiScreen implements ISettings
             {
                 if (settings.get(elementName) == null)
                 {
-                    ModLogger.INSTANCE.warn("No setting found for UI element '{}'", elementName);
+                    Log4JLogger.INSTANCE.warn("No setting found for UI element '{}'", elementName);
                 }
             }
         }
@@ -96,8 +95,7 @@ public abstract class AbstractSettingsGui extends GuiScreen implements ISettings
         Keyboard.enableRepeatEvents(true);
         textField = new GuiTextFieldVanilla(this.fontRendererObj, this.width / 2 - 100/*- 75*/, 50, 200, 20);
 
-        textField2 = new GuiTextField(this, -100, -100, "12345678901234567890");
-        elementMap.put("TESTFIELD", textField2);
+        elementMap.put("TESTFIELD", new GuiTextField(this, -100, -100, "12345678901234567890"));
 
         for (GuiInteractableElement element : elementMap.values())
         {
@@ -160,17 +158,12 @@ public abstract class AbstractSettingsGui extends GuiScreen implements ISettings
 //        float w = (width / 2F);
 //        float h = (height / 2F);
 //        float hO = (height / 2.5F);
-//
-//        GuiUtils.drawRoundedRect(GL11.GL_POLYGON, w / 2 , hO, w, h, 6, new Color("#242424").setA(0.8F), true);
 
         int w = 200; // base element width
         int h = 120;
         int pad = 5;
 
-//        GuiUtils.drawRoundedRect(GL11.GL_POLYGON, (width / 2F) - (w) - pad, (height / 2F) - (h / 3F) - pad, (w * 2) + (pad * 2), h + (pad * 2), 6, new Color("#242424").setA(0.8F), true);
-
-        GuiUtils.drawRoundedRect(GL11.GL_POLYGON, (width / 2F) - (w / 2F) - pad, (height / 2F) - (h / 3F) - pad, w + (pad * 2), h + (pad * 2), 6, new Color("#242424").setA(0.8F), true);
-
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, (width / 2F) - (w / 2F) - pad, (height / 2F) - (h / 3F) - pad, w + (pad * 2), h + (pad * 2), 6, new Color("#242424").setA(0.8F), true);
     }
 
 //    protected double normalize(double min, double max, double value)
@@ -206,7 +199,10 @@ public abstract class AbstractSettingsGui extends GuiScreen implements ISettings
 
         for (GuiInteractableElement element : elementMap.values())
         {
-            element.onScreenDraw(mc, mouseX, mouseY);
+            if (element.isVisible())
+            {
+                element.onScreenDraw(mc, mouseX, mouseY);
+            }
         }
 
         attemptClaimDefaultTooltip(mouseX, mouseY);

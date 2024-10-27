@@ -1,7 +1,7 @@
 package io.jonuuh.core.lib.config.gui.elements.interactable;
 
 import io.jonuuh.core.lib.util.Color;
-import io.jonuuh.core.lib.util.GuiUtils;
+import io.jonuuh.core.lib.util.RenderUtils;
 import io.jonuuh.core.lib.config.gui.ISettingsGui;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
@@ -9,7 +9,7 @@ import org.lwjgl.opengl.GL11;
 public class GuiSwitch extends GuiInteractableElement
 {
     protected final float pointerSize;
-//    protected final float radius;
+    //    protected final float radius;
     protected boolean switchState;
 
     // TODO: make vertical option? subclass?
@@ -53,23 +53,18 @@ public class GuiSwitch extends GuiInteractableElement
     }
 
     @Override
-    public boolean onScreenDraw(Minecraft mc, int mouseX, int mouseY)
+    public void onScreenDraw(Minecraft mc, int mouseX, int mouseY)
     {
-        boolean wasDrawn = super.onScreenDraw(mc, mouseX, mouseY);
+        super.onScreenDraw(mc, mouseX, mouseY);
 
-        if (wasDrawn)
-        {
-            float padding = ((height - pointerSize) / 2F);
-            float pointerX = switchState ? (xPos + width - pointerSize - padding) : xPos + padding;
-            Color trackColor = switchState ? colorMap.get("BASE") : colorMap.get("DISABLED");
+        float padding = ((height - pointerSize) / 2F);
+        float pointerX = switchState ? (xPos + width - pointerSize - padding) : xPos + padding;
+        Color trackColor = switchState ? colorMap.get("BASE") : colorMap.get("DISABLED");
 
-            // Track
-            GuiUtils.drawRoundedRect(GL11.GL_POLYGON, xPos, yPos, width, height, parent.getInnerRadius(), trackColor, true);
-            // Pointer
-            GuiUtils.drawRoundedRect(GL11.GL_POLYGON, pointerX, yPos + padding, pointerSize, pointerSize, parent.getInnerRadius() - 1, colorMap.get("ACCENT"), true);
-        }
-
-        return wasDrawn;
+        // Track
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos, yPos, width, height, parent.getInnerRadius(), trackColor, true);
+        // Pointer
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, pointerX, yPos + padding, pointerSize, pointerSize, parent.getInnerRadius() - 1, colorMap.get("ACCENT"), true);
     }
 
     @Override
@@ -78,17 +73,5 @@ public class GuiSwitch extends GuiInteractableElement
         super.onMousePress(mouseX, mouseY);
         flip();
     }
-
-//    @Override
-//    public boolean canMousePress(Minecraft mc, int mouseX, int mouseY)
-//    {
-//        boolean pressed = super.canMousePress(mc, mouseX, mouseY);
-//
-//        if (pressed)
-//        {
-//            flip();
-//        }
-//        return pressed;
-//    }
 }
 

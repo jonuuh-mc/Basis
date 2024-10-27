@@ -28,6 +28,12 @@ public class DoubleListSetting extends Setting<double[]>
     }
 
     @Override
+    public DoubleListSetting copy()
+    {
+        return new DoubleListSetting(this);
+    }
+
+    @Override
     public String toString()
     {
         return this.getClass().getSimpleName() + "{" + "value=" + Arrays.toString(value) + '}';

@@ -24,4 +24,10 @@ public class IntSetting extends Setting<Integer>
     {
         this(0);
     }
+
+    @Override
+    public IntSetting copy()
+    {
+        return new IntSetting(this);
+    }
 }

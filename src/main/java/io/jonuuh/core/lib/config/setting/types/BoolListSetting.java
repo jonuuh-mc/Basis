@@ -28,6 +28,12 @@ public class BoolListSetting extends Setting<boolean[]>
     }
 
     @Override
+    public BoolListSetting copy()
+    {
+        return new BoolListSetting(this);
+    }
+
+    @Override
     public String toString()
     {
         return this.getClass().getSimpleName() + "{" + "value=" + Arrays.toString(value) + '}';

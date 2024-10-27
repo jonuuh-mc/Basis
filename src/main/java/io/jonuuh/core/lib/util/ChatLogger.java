@@ -20,7 +20,7 @@ public class ChatLogger
     {
         if (INSTANCE != null)
         {
-            throw new IllegalStateException("Config instance has already been created");
+            throw new IllegalStateException("ChatLogger instance has already been created");
         }
         INSTANCE = new ChatLogger(header);
     }
@@ -79,7 +79,6 @@ public class ChatLogger
     {
         if (!barColor.isColor())
         {
-//            System.out.println("EnumChatFormatting param should be a color");
             barColor = EnumChatFormatting.WHITE;
         }
 
@@ -96,7 +95,6 @@ public class ChatLogger
     {
         if (!barColor.isColor())
         {
-//            System.out.println("EnumChatFormatting param should be a color");
             barColor = EnumChatFormatting.WHITE;
         }
 

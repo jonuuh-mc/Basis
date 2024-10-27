@@ -1,7 +1,5 @@
 package io.jonuuh.core.lib.util;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.Session;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,24 +8,23 @@ import org.apache.logging.log4j.Logger;
  * @see net.minecraft.util.LoggingPrintStream
  * @see net.minecraft.init.Bootstrap#redirectOutputToLog()
  */
-public class ModLogger
+public class Log4JLogger
 {
-    public static ModLogger INSTANCE;
+    public static Log4JLogger INSTANCE;
     public final Logger LOGGER;
     public final String modID;
 //    private final boolean isDevEnvironment;
 
-    public static ModLogger createInstance(String modID)
+    public static void createInstance(String modID)
     {
         if (INSTANCE != null)
         {
             throw new IllegalStateException("ModLogger instance has already been created");
         }
-        INSTANCE = new ModLogger(modID);
-        return INSTANCE;
+        INSTANCE = new Log4JLogger(modID);
     }
 
-    private ModLogger(String modID)
+    private Log4JLogger(String modID)
     {
         this.LOGGER = LogManager.getLogger(modID);
         this.modID = modID;

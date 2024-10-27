@@ -28,6 +28,12 @@ public class IntListSetting extends Setting<int[]>
     }
 
     @Override
+    public IntListSetting copy()
+    {
+        return new IntListSetting(this);
+    }
+
+    @Override
     public String toString()
     {
         return this.getClass().getSimpleName() + "{" + "value=" + Arrays.toString(value) + '}';

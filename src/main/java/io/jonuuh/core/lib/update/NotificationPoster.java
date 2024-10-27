@@ -2,7 +2,7 @@ package io.jonuuh.core.lib.update;
 
 import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.config.setting.types.StringSetting;
-import io.jonuuh.core.lib.util.ModLogger;
+import io.jonuuh.core.lib.util.Log4JLogger;
 import io.jonuuh.core.lib.util.StaticFileUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.event.HoverEvent;
@@ -32,6 +32,8 @@ class NotificationPoster
         this.latestVersionStr = latestVersionStr;
         this.instantNow = Instant.now();
 
+        // if last recorded latest version (written to file via updateSettings) is less than the true latest version,
+        // a new update was released so the notif should be posted regardless of time since last post
         if (isNewUpdateAvailable())
         {
             MinecraftForge.EVENT_BUS.register(this);
@@ -40,42 +42,32 @@ class NotificationPoster
 
         Instant lastNotifInstant = getLastNotifInstant();
 
-        // if instant now is the same as the instant parsed from the setting, it should be the first ever login (or instant cfg property was corrupted)
-        // (loading the instant property from the cfg file into the setting resulted in the exact same instant, therefore the property did not exist in the cfg file)
-        if (instantNow.equals(lastNotifInstant))
+        // if lastNotifInstant is null, it should be the first ever login (or instant cfg property was corrupted)
+        if (lastNotifInstant == null)
         {
-//            updateSettings.save("LAST_UPDATE_NOTIFICATION_INSTANT"); // TODO: last in progress right here
             MinecraftForge.EVENT_BUS.register(this);
             return;
         }
 
-        ModLogger.INSTANCE.info("durationSinceLastNotif: " + Duration.between(lastNotifInstant, instantNow).toString());
-        ModLogger.INSTANCE.info("daysSinceLastNotif: " + Duration.between(lastNotifInstant, instantNow).toDays());
+        Log4JLogger.INSTANCE.info("durationSinceLastNotif: " + Duration.between(lastNotifInstant, instantNow).toString());
+        Log4JLogger.INSTANCE.info("daysSinceLastNotif: " + Duration.between(lastNotifInstant, instantNow).toDays());
 
         if (Duration.between(lastNotifInstant, instantNow).toDays() >= 7 && !updateSettings.getBoolSetting("DISABLE_REMINDING_FOR_LATEST").getValue())
         {
-//            instantSetting.setValue(instantNow.toString());
-//            updateSettings.save("LAST_UPDATE_NOTIFICATION_INSTANT");
             MinecraftForge.EVENT_BUS.register(this);
         }
     }
 
     private boolean isNewUpdateAvailable()
     {
-        StringSetting lastRecordedLatestVersion = updateSettings.getStringSetting("LAST_LATEST_VERSION");
+        Version lastRecordedLatestVersion = new Version(updateSettings.getStringSetting("LAST_LATEST_VERSION").getValue());
+        Version trueLatestVersion = new Version(latestVersionStr);
 
-        if (lastRecordedLatestVersion.getValue().isEmpty())
-        {
-            return false;
-        }
-
-        // last recorded latest version is less than the true latest version
-        boolean isNewUpdateAvailable = new Version(lastRecordedLatestVersion.getValue()).compareTo(new Version(latestVersionStr)) > 0;
+        boolean isNewUpdateAvailable = lastRecordedLatestVersion.compareTo(trueLatestVersion) < 0;
 
         if (isNewUpdateAvailable)
         {
             updateSettings.getStringSetting("LAST_LATEST_VERSION").setValue(latestVersionStr);
-            updateSettings.save("LAST_LATEST_VERSION");
         }
 
         return isNewUpdateAvailable;
@@ -85,7 +77,7 @@ class NotificationPoster
      * Try to parse the instant from the setting after loading its property from the mod's .cfg file.
      *
      * @return If the property existed, return whatever instant was in the file (actual last notif instant).
-     * Else return instantNow if the property couldn't be parsed (didn't exist - never posted a notification before, or was corrupted)
+     * Else return null if the property couldn't be parsed (didn't exist - never posted a notification before, or was corrupted)
      */
     private Instant getLastNotifInstant()
     {
@@ -95,9 +87,8 @@ class NotificationPoster
         }
         catch (DateTimeParseException e)
         {
-            ModLogger.INSTANCE.warn("Returning default last notif instant {}", instantNow);
-//            instantSetting.setValue(instantNow.toString()); // set the value but don't save yet until entityJoinWorld event
-            return instantNow;
+            Log4JLogger.INSTANCE.warn("Returning null last notif instant");
+            return null;
         }
     }
 
@@ -110,11 +101,10 @@ class NotificationPoster
         }
 
         IChatComponent notificationComponent = getNotificationComponent();
-
         Minecraft.getMinecraft().thePlayer.addChatMessage(notificationComponent);
 
         updateSettings.getStringSetting("LAST_NOTIFICATION_INSTANT").setValue(instantNow.toString());
-        updateSettings.save("LAST_NOTIFICATION_INSTANT");
+        updateSettings.save(); // save "LAST_NOTIFICATION_INSTANT" and if applicable, "LAST_LATEST_VERSION"
 
         MinecraftForge.EVENT_BUS.unregister(this);
     }

@@ -24,4 +24,10 @@ public class StringSetting extends Setting<String>
     {
         this("");
     }
+
+    @Override
+    public StringSetting copy()
+    {
+        return new StringSetting(this);
+    }
 }

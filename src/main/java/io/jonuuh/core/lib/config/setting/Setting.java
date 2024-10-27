@@ -23,6 +23,8 @@ public abstract class Setting<T>
         this(setting.type, setting.defaultValue, setting.value);
     }
 
+    public abstract Setting<T> copy();
+
     public SettingType getType()
     {
         return type;
