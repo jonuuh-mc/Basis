@@ -1,131 +1,99 @@
 package io.jonuuh.core.lib.config.gui.elements.interactable.sliders;
 
-import io.jonuuh.core.lib.config.gui.ISettingsGui;
+import io.jonuuh.core.lib.config.gui.elements.GuiContainer;
+import io.jonuuh.core.lib.config.setting.types.IntListSetting;
+import io.jonuuh.core.lib.config.setting.types.IntSetting;
 import io.jonuuh.core.lib.util.MathUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Arrays;
 
-public class GuiIntSlider extends GuiSlider
+public class GuiIntSlider extends AbstractGuiSlider<Integer>
 {
-    public GuiIntSlider(ISettingsGui parent, int xPos, int yPos, int width, int height, int min, int max, int[] startValues)
+    public GuiIntSlider(GuiContainer parent, int xPos, int yPos, int width, int height, double min, double max, Integer[] startValues, boolean isVertical)
     {
-        super(parent, xPos, yPos, width, height, min, max, Arrays.stream(startValues).asDoubleStream().toArray());
+        super(parent, xPos, yPos, width, height, min, max, startValues, isVertical);
     }
 
-    public GuiIntSlider(ISettingsGui parent, int xPos, int yPos, int width, int height, int min, int max, int startValue)
+    public GuiIntSlider(GuiContainer parent, int xPos, int yPos, double min, double max, Integer[] startValues)
     {
-        super(parent, xPos, yPos, width, height, min, max, startValue);
-//        setDecimalFormat(new DecimalFormat("#"));
+        super(parent, xPos, yPos, min, max, startValues);
     }
 
-    public GuiIntSlider(ISettingsGui parent, int xPos, int yPos, int min, int max, int[] startValues)
+    public GuiIntSlider(GuiContainer parent, int xPos, int yPos, int width, int height, double min, double max, Integer startValue, boolean isVertical)
     {
-        super(parent, xPos, yPos, min, max, Arrays.stream(startValues).asDoubleStream().toArray());
+        this(parent, xPos, yPos, width, height, min, max, new Integer[]{startValue}, isVertical);
     }
 
-    public GuiIntSlider(ISettingsGui parent, int xPos, int yPos, int min, int max, int startValue)
+    public GuiIntSlider(GuiContainer parent, int xPos, int yPos, double min, double max, Integer startValue)
     {
-        super(parent, xPos, yPos, min, max, startValue);
+        this(parent, xPos, yPos, min, max, new Integer[]{startValue});
     }
 
-    //    @Override
-//    public double getValue()
-//    {
-//        return Math.round(normalizedVal * (max - min) + min);
-//    }
-//
-//    public int getValueInt()
-//    {
-//        return (int) getValue();
-//    }
-//
-//    // Normalize TODO: is this necessary? diff from super?
-//    public void setValue(int value)
-//    {
-//        super.setValue(value);
-//    }
-
-    public int[] getIntValues()
+    @Override
+    public Integer getValue(int pointerIndex)
     {
-        int[] values = new int[normalPointerValues.length];
-
-        for (int i = 0; i < values.length; i++)
-        {
-            values[i] = getIntValue(i);
-        }
-        return values;
+        return Math.round((float) MathUtils.denormalize(getNormalizedValue(pointerIndex), min, max));
     }
 
-    public void setIntValues(int[] values)
-    {
-        Arrays.sort(values);
-
-        for (int i = 0; i < normalPointerValues.length; i++)
-        {
-            normalPointerValues[i] = MathUtils.clamp(MathUtils.normalize(values[i], min, max));
-        }
-    }
-
-    public int getIntValue(int pointerIndex)
-    {
-        return (int) MathUtils.denormalize(getNormalizedValue(pointerIndex), min, max);
-    }
-
-    public void setIntValue(int pointerIndex, int value)
+    @Override
+    public void setValue(int pointerIndex, Integer value)
     {
         setNormalizedValue(pointerIndex, MathUtils.normalize(value, min, max));
     }
 
-//    public double getNormalizedValue(int pointerIndex)
-//    {
-//        return normalPointerValues[pointerIndex];
-//    }
+    @Override
+    public Integer[] getValues()
+    {
+        Integer[] values = new Integer[normalPointerValues.length];
+
+        for (int i = 0; i < values.length; i++)
+        {
+            values[i] = getValue(i);
+        }
+        return values;
+    }
+
+    @Override
+    public void setValues(Integer[] values)
+    {
+        normalPointerValues = new double[values.length];
+
+        Arrays.sort(values);
+        for (int i = 0; i < values.length; i++)
+        {
+            double value = MathUtils.clamp(MathUtils.normalize(values[i], min, max));
+            normalPointerValues[i] = roundNormalValue(value);
+        }
+    }
 
     @Override
     public void setNormalizedValue(int pointerIndex, double normalValue)
     {
-        boolean hasLeftAdjacent = pointerIndex > 0;
-        boolean hasRightAdjacent = pointerIndex < normalPointerValues.length - 1;
-
-        // what prevents sliders from passing each other
-        double minValue = hasLeftAdjacent ? (normalPointerValues[pointerIndex - 1]) : 0;
-        double maxValue = hasRightAdjacent ? (normalPointerValues[pointerIndex + 1]) : 1;
-
-        double value = MathUtils.clamp(normalValue, minValue, maxValue);
-
-//        System.out.println("PRE:" + value);
-        value = Math.round(value * max) / max; // round (up?) to multiple (ex: 20 -> 0.05, 10 -> 0.1)
-//        System.out.println("POST:" + value);
-
-        normalPointerValues[pointerIndex] = value;
+        double value = clampBetweenAdjacents(pointerIndex, normalValue);
+        normalPointerValues[pointerIndex] = roundNormalValue(value);
     }
 
-//    protected double denormalize(double normalizedValue)
-//    {
-//        return normalizedValue * (max - min) + min;
-//    }
+    private double roundNormalValue(double normalValue)
+    {
+        //            float d = (float) (normalValue * max); // TODO: test with float (round will return int)
+//            System.out.println("PRE:" + normalValue);
+        normalValue = Math.round(normalValue * max) / max; // round (up?) to multiple (ex: 20 -> 0.05, 10 -> 0.1)
+//            System.out.println("POST:" + normalValue);
+        return normalValue;
+    }
 
-//    @Override
-//    protected double clamp(double value, double min, double max)
-//    {
-////        System.out.println(value);
-////        value = Math.round(value * max) / max; // round (up?) to multiple (ex: 20 -> 0.05, 10 -> 0.1)
-//
-////        System.out.println(value);
-//
-//        // Clamp value (min, max)
-//        return Math.min((Math.max(value, min)), max);
-//    }
-
-//    @Override
-//    protected void update(int mouseX)
-//    {
-//        normalizedVal = (mouseX - xPos) / (float) width;
-//        normalizedVal = Math.round(normalizedVal * max) / max; // round (up?) to multiple (ex: 20 -> 0.05, 10 -> 0.1)
-//        clamp();
-//
-//        updateTooltip();
-//
-//        sendChangeToParent();
-//    }
+    @Override
+    protected void updateSetting()
+    {
+        if (getNumPointers() == 1)
+        {
+            ((IntSetting) associatedSetting).setValue(getValue(0));
+        }
+        else
+        {
+            // TODO: bad design, dont know how to fix (generics cant be primitive, making the generic a primitive array makes getvalue/getvalues problematic)
+            ((IntListSetting) associatedSetting).setValue(ArrayUtils.toPrimitive(getValues()));
+        }
+    }
 }
