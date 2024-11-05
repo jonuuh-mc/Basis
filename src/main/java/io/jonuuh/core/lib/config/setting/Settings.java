@@ -1,14 +1,7 @@
 package io.jonuuh.core.lib.config.setting;
 
 import io.jonuuh.core.lib.config.Config;
-import io.jonuuh.core.lib.config.setting.types.BoolListSetting;
-import io.jonuuh.core.lib.config.setting.types.BoolSetting;
-import io.jonuuh.core.lib.config.setting.types.DoubleListSetting;
-import io.jonuuh.core.lib.config.setting.types.DoubleSetting;
-import io.jonuuh.core.lib.config.setting.types.IntListSetting;
-import io.jonuuh.core.lib.config.setting.types.IntSetting;
-import io.jonuuh.core.lib.config.setting.types.StringListSetting;
-import io.jonuuh.core.lib.config.setting.types.StringSetting;
+import io.jonuuh.core.lib.config.setting.types.Setting;
 
 import java.util.HashMap;
 
@@ -78,56 +71,16 @@ public class Settings extends HashMap<String, Setting<?>>
         Config.INSTANCE.saveSetting(configurationCategory, settingName);
     }
 
-    //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////
-
-    public BoolSetting getBoolSetting(String settingName)
+    public <T extends Setting<?>> T getAsSettingType(String settingName, Class<T> type)
     {
-        Setting<?> setting = get(settingName);
-        return (setting instanceof BoolSetting) ? ((BoolSetting) setting) : null;
-    }
-
-    public IntSetting getIntSetting(String settingName)
-    {
-        Setting<?> setting = get(settingName);
-        return (setting instanceof IntSetting) ? ((IntSetting) setting) : null;
-    }
-
-    public DoubleSetting getDoubleSetting(String settingName)
-    {
-        Setting<?> setting = get(settingName);
-        return (setting instanceof DoubleSetting) ? ((DoubleSetting) setting) : null;
-    }
-
-    public StringSetting getStringSetting(String settingName)
-    {
-        Setting<?> setting = get(settingName);
-        return (setting instanceof StringSetting) ? ((StringSetting) setting) : null;
-    }
-
-    //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////
-
-    public BoolListSetting getBoolListSetting(String settingName)
-    {
-        Setting<?> setting = get(settingName);
-        return (setting instanceof BoolListSetting) ? ((BoolListSetting) setting) : null;
-    }
-
-    public IntListSetting getIntListSetting(String settingName)
-    {
-        Setting<?> setting = get(settingName);
-        return (setting instanceof IntListSetting) ? ((IntListSetting) setting) : null;
-    }
-
-    public DoubleListSetting getDoubleListSetting(String settingName)
-    {
-        Setting<?> setting = get(settingName);
-        return (setting instanceof DoubleListSetting) ? ((DoubleListSetting) setting) : null;
-    }
-
-    public StringListSetting getStringListSetting(String settingName)
-    {
-        Setting<?> setting = get(settingName);
-        return (setting instanceof StringListSetting) ? ((StringListSetting) setting) : null;
+        try
+        {
+            return type.cast(get(settingName));
+        }
+        catch (ClassCastException e)
+        {
+            return null;
+        }
     }
 
     @Override
@@ -135,4 +88,82 @@ public class Settings extends HashMap<String, Setting<?>>
     {
         return configurationCategory + "=" + super.toString();
     }
+
+//    //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////
+//
+//    public BoolSetting getBoolSetting(String settingName)
+//    {
+//        Setting<?> setting = get(settingName);
+//        return (setting instanceof BoolSetting) ? ((BoolSetting) setting) : null;
+//    }
+//
+//    public IntSetting getIntSetting(String settingName)
+//    {
+//        Setting<?> setting = get(settingName);
+//        return (setting instanceof IntSetting) ? ((IntSetting) setting) : null;
+//    }
+//
+//    public DoubleSetting getDoubleSetting(String settingName)
+//    {
+//        Setting<?> setting = get(settingName);
+//        return (setting instanceof DoubleSetting) ? ((DoubleSetting) setting) : null;
+//    }
+//
+//    public StringSetting getStringSetting(String settingName)
+//    {
+//        Setting<?> setting = get(settingName);
+//        return (setting instanceof StringSetting) ? ((StringSetting) setting) : null;
+//    }
+//
+//    //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////
+//
+//    public BoolArrSetting getBoolArrSetting(String settingName)
+//    {
+//        Setting<?> setting = get(settingName);
+//        return (setting instanceof BoolArrSetting) ? ((BoolArrSetting) setting) : null;
+//    }
+//
+//    public IntArrSetting getIntArrSetting(String settingName)
+//    {
+//        Setting<?> setting = get(settingName);
+//        return (setting instanceof IntArrSetting) ? ((IntArrSetting) setting) : null;
+//    }
+//
+//    public DoubleArrSetting getDoubleArrSetting(String settingName)
+//    {
+//        Setting<?> setting = get(settingName);
+//        return (setting instanceof DoubleArrSetting) ? ((DoubleArrSetting) setting) : null;
+//    }
+//
+//    public StringArrSetting getStringArrSetting(String settingName)
+//    {
+//        Setting<?> setting = get(settingName);
+//        return (setting instanceof StringArrSetting) ? ((StringArrSetting) setting) : null;
+//    }
+//
+//    //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////
+//
+//    public BoolListSetting getBoolListSetting(String settingName)
+//    {
+//        Setting<?> setting = get(settingName);
+//        return (setting instanceof BoolListSetting) ? ((BoolListSetting) setting) : null;
+//    }
+//
+//    public IntListSetting getIntListSetting(String settingName)
+//    {
+//        Setting<?> setting = get(settingName);
+//        return (setting instanceof IntListSetting) ? ((IntListSetting) setting) : null;
+//    }
+//
+//    public DoubleListSetting getDoubleListSetting(String settingName)
+//    {
+//        Setting<?> setting = get(settingName);
+//        return (setting instanceof DoubleListSetting) ? ((DoubleListSetting) setting) : null;
+//    }
+//
+//    public StringListSetting getStringListSetting(String settingName)
+//    {
+//        Setting<?> setting = get(settingName);
+//        return (setting instanceof StringListSetting) ? ((StringListSetting) setting) : null;
+//    }
 }

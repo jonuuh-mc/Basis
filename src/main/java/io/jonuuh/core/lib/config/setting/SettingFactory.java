@@ -1,6 +1,6 @@
 //package io.jonuuh.core.lib.config.setting;
 //
-//import io.jonuuh.core.lib.config.setting.types.BoolSetting;
+//import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 //
 //public abstract class SettingFactory
 //{

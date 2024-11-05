@@ -1,7 +1,7 @@
-package io.jonuuh.core.lib.config.setting.types;
+package io.jonuuh.core.lib.config.setting.types.single;
 
-import io.jonuuh.core.lib.config.setting.Setting;
-import io.jonuuh.core.lib.config.setting.SettingType;
+import io.jonuuh.core.lib.config.setting.types.Setting;
+import io.jonuuh.core.lib.config.setting.types.SettingType;
 
 public class IntSetting extends Setting<Integer>
 {

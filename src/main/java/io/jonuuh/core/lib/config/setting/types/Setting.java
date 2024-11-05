@@ -1,4 +1,4 @@
-package io.jonuuh.core.lib.config.setting;
+package io.jonuuh.core.lib.config.setting.types;
 
 public abstract class Setting<T>
 {
