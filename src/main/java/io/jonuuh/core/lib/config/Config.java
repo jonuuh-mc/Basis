@@ -1,22 +1,25 @@
 package io.jonuuh.core.lib.config;
 
-import io.jonuuh.core.lib.config.setting.Setting;
 import io.jonuuh.core.lib.config.setting.Settings;
-import io.jonuuh.core.lib.config.setting.types.BoolListSetting;
-import io.jonuuh.core.lib.config.setting.types.BoolSetting;
-import io.jonuuh.core.lib.config.setting.types.DoubleListSetting;
-import io.jonuuh.core.lib.config.setting.types.DoubleSetting;
-import io.jonuuh.core.lib.config.setting.types.IntListSetting;
-import io.jonuuh.core.lib.config.setting.types.IntSetting;
-import io.jonuuh.core.lib.config.setting.types.StringListSetting;
-import io.jonuuh.core.lib.config.setting.types.StringSetting;
+import io.jonuuh.core.lib.config.setting.types.Setting;
+import io.jonuuh.core.lib.config.setting.types.array.BoolArrSetting;
+import io.jonuuh.core.lib.config.setting.types.array.DoubleArrSetting;
+import io.jonuuh.core.lib.config.setting.types.array.IntArrSetting;
+import io.jonuuh.core.lib.config.setting.types.array.StringArrSetting;
+import io.jonuuh.core.lib.config.setting.types.list.BoolListSetting;
+import io.jonuuh.core.lib.config.setting.types.list.DoubleListSetting;
+import io.jonuuh.core.lib.config.setting.types.list.IntListSetting;
+import io.jonuuh.core.lib.config.setting.types.list.StringListSetting;
+import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
+import io.jonuuh.core.lib.config.setting.types.single.DoubleSetting;
+import io.jonuuh.core.lib.config.setting.types.single.IntSetting;
+import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
 import io.jonuuh.core.lib.util.ChatLogger;
 import io.jonuuh.core.lib.util.Log4JLogger;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
@@ -107,7 +110,8 @@ public class Config
 
     /**
      * Saves the actual forge configuration <p> (writes configuration's properties to mod's .cfg file)
-     * @see net.minecraftforge.common.config.ConfigCategory#write(BufferedWriter, int)
+     *
+     * @see net.minecraftforge.common.config.ConfigCategory#write(java.io.BufferedWriter, int)
      */
     public void saveConfiguration()
     {
@@ -192,18 +196,32 @@ public class Config
                 ((StringSetting) setting).setValue(property.getString());
                 return;
 
+            case BOOLEAN_ARRAY:
+                ((BoolArrSetting) setting).setValue(property.getBooleanList());
+                return;
+            case DOUBLE_ARRAY:
+                ((DoubleArrSetting) setting).setValue(property.getDoubleList());
+                return;
+            case INTEGER_ARRAY:
+                ((IntArrSetting) setting).setValue(property.getIntList());
+                return;
+            case STRING_ARRAY:
+                ((StringArrSetting) setting).setValue(property.getStringList());
+                return;
+
             case BOOLEAN_LIST:
-                ((BoolListSetting) setting).setValue(property.getBooleanList());
+                ((BoolListSetting) setting).setValueFromArr(property.getBooleanList());
                 return;
             case DOUBLE_LIST:
-                ((DoubleListSetting) setting).setValue(property.getDoubleList());
+                ((DoubleListSetting) setting).setValueFromArr(property.getDoubleList());
                 return;
             case INTEGER_LIST:
-                ((IntListSetting) setting).setValue(property.getIntList());
+                ((IntListSetting) setting).setValueFromArr(property.getIntList());
                 return;
             case STRING_LIST:
-                ((StringListSetting) setting).setValue(property.getStringList());
+                ((StringListSetting) setting).setValueFromArr(property.getStringList());
                 return;
+
             default:
         }
     }
@@ -213,36 +231,39 @@ public class Config
      * <p>
      * Read from Setting -> Write into Configuration property
      */
-    private void saveSetting(Property property, Setting<?> setting)
+    private Property saveSetting(Property property, Setting<?> setting)
     {
         switch (setting.getType())
         {
             case BOOLEAN:
-                property.setValue(((BoolSetting) setting).getValue());
-                return;
+                return property.setValue(((BoolSetting) setting).getValue());
             case DOUBLE:
-                property.setValue(((DoubleSetting) setting).getValue());
-                return;
+                return property.setValue(((DoubleSetting) setting).getValue());
             case INTEGER:
-                property.setValue(((IntSetting) setting).getValue());
-                return;
+                return property.setValue(((IntSetting) setting).getValue());
             case STRING:
-                property.setValue(((StringSetting) setting).getValue());
-                return;
+                return property.setValue(((StringSetting) setting).getValue());
+
+            case BOOLEAN_ARRAY:
+                return property.setValues(((BoolArrSetting) setting).getValue());
+            case DOUBLE_ARRAY:
+                return property.setValues(((DoubleArrSetting) setting).getValue());
+            case INTEGER_ARRAY:
+                return property.setValues(((IntArrSetting) setting).getValue());
+            case STRING_ARRAY:
+                return property.setValues(((StringArrSetting) setting).getValue());
 
             case BOOLEAN_LIST:
-                property.setValues(((BoolListSetting) setting).getValue());
-                return;
+                return property.setValues(((BoolListSetting) setting).getValueAsArr());
             case DOUBLE_LIST:
-                property.setValues(((DoubleListSetting) setting).getValue());
-                return;
+                return property.setValues(((DoubleListSetting) setting).getValueAsArr());
             case INTEGER_LIST:
-                property.setValues(((IntListSetting) setting).getValue());
-                return;
+                return property.setValues(((IntListSetting) setting).getValueAsArr());
             case STRING_LIST:
-                property.setValues(((StringListSetting) setting).getValue());
-                return;
+                return property.setValues(((StringListSetting) setting).getValueAsArr());
+
             default:
+                return null;
         }
     }
 
@@ -271,14 +292,24 @@ public class Config
             case STRING:
                 return configuration.get(category, settingName, ((StringSetting) setting).getValue());
 
+            case BOOLEAN_ARRAY:
+                return configuration.get(category, settingName, ((BoolArrSetting) setting).getValue());
+            case DOUBLE_ARRAY:
+                return configuration.get(category, settingName, ((DoubleArrSetting) setting).getValue());
+            case INTEGER_ARRAY:
+                return configuration.get(category, settingName, ((IntArrSetting) setting).getValue());
+            case STRING_ARRAY:
+                return configuration.get(category, settingName, ((StringArrSetting) setting).getValue());
+
             case BOOLEAN_LIST:
-                return configuration.get(category, settingName, ((BoolListSetting) setting).getValue());
+                return configuration.get(category, settingName, ((BoolListSetting) setting).getValueAsArr());
             case DOUBLE_LIST:
-                return configuration.get(category, settingName, ((DoubleListSetting) setting).getValue());
+                return configuration.get(category, settingName, ((DoubleListSetting) setting).getValueAsArr());
             case INTEGER_LIST:
-                return configuration.get(category, settingName, ((IntListSetting) setting).getValue());
+                return configuration.get(category, settingName, ((IntListSetting) setting).getValueAsArr());
             case STRING_LIST:
-                return configuration.get(category, settingName, ((StringListSetting) setting).getValue());
+                return configuration.get(category, settingName, ((StringListSetting) setting).getValueAsArr());
+
             default:
                 return null;
         }

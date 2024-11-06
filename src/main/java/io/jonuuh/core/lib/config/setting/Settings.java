@@ -71,11 +71,11 @@ public class Settings extends HashMap<String, Setting<?>>
         Config.INSTANCE.saveSetting(configurationCategory, settingName);
     }
 
-    public <T extends Setting<?>> T getAsSettingType(String settingName, Class<T> type)
+    public <T extends Setting<?>> T get(String settingName, Class<T> type)
     {
         try
         {
-            return type.cast(get(settingName));
+            return type.cast(this.get(settingName));
         }
         catch (ClassCastException e)
         {
