@@ -2,8 +2,8 @@ package io.jonuuh.core.lib.update;
 
 import io.jonuuh.core.lib.config.Config;
 import io.jonuuh.core.lib.config.setting.Settings;
-import io.jonuuh.core.lib.config.setting.types.BoolSetting;
-import io.jonuuh.core.lib.config.setting.types.StringSetting;
+import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
+import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
 import io.jonuuh.core.lib.util.Log4JLogger;
 import io.jonuuh.core.lib.util.StaticFileUtils;
 

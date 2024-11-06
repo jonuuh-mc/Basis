@@ -41,8 +41,8 @@ publishing {
 
     publications {
         maven(MavenPublication) {
-            groupId "io.jonuuh"
-            artifactId "jonuuh-mc-core"
+            groupId "io.jonuuh-mc"
+            artifactId "core"
             version version
 //            exclude sourceSets.main.resources.srcDirs "a"
             from components.java
@@ -53,9 +53,9 @@ publishing {
 // Exclude when building or publishing
 sourceSets {
     main {
-//        java {
-//            exclude "io/jonuuh/core/local"
-//        }
+        java {
+            exclude "io/jonuuh/core/local"
+        }
 
         resources {
             exclude "assets/versions"

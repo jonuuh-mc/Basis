@@ -1,7 +1,8 @@
 package io.jonuuh.core.lib.update;
 
 import io.jonuuh.core.lib.config.setting.Settings;
-import io.jonuuh.core.lib.config.setting.types.StringSetting;
+import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
+import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
 import io.jonuuh.core.lib.util.Log4JLogger;
 import io.jonuuh.core.lib.util.StaticFileUtils;
 import net.minecraft.client.Minecraft;
@@ -52,7 +53,7 @@ class NotificationPoster
         Log4JLogger.INSTANCE.info("durationSinceLastNotif: " + Duration.between(lastNotifInstant, instantNow).toString());
         Log4JLogger.INSTANCE.info("daysSinceLastNotif: " + Duration.between(lastNotifInstant, instantNow).toDays());
 
-        if (Duration.between(lastNotifInstant, instantNow).toDays() >= 7 && !updateSettings.getBoolSetting("DISABLE_REMINDING_FOR_LATEST").getValue())
+        if (Duration.between(lastNotifInstant, instantNow).toDays() >= 7 && !updateSettings.get("DISABLE_REMINDING_FOR_LATEST", BoolSetting.class).getValue())
         {
             MinecraftForge.EVENT_BUS.register(this);
         }
@@ -60,14 +61,14 @@ class NotificationPoster
 
     private boolean isNewUpdateAvailable()
     {
-        Version lastRecordedLatestVersion = new Version(updateSettings.getStringSetting("LAST_LATEST_VERSION").getValue());
+        Version lastRecordedLatestVersion = new Version(updateSettings.get("LAST_LATEST_VERSION", StringSetting.class).getValue());
         Version trueLatestVersion = new Version(latestVersionStr);
 
         boolean isNewUpdateAvailable = lastRecordedLatestVersion.compareTo(trueLatestVersion) < 0;
 
         if (isNewUpdateAvailable)
         {
-            updateSettings.getStringSetting("LAST_LATEST_VERSION").setValue(latestVersionStr);
+            updateSettings.get("LAST_LATEST_VERSION", StringSetting.class).setValue(latestVersionStr);
         }
 
         return isNewUpdateAvailable;
@@ -83,7 +84,7 @@ class NotificationPoster
     {
         try
         {
-            return Instant.parse(updateSettings.getStringSetting("LAST_NOTIFICATION_INSTANT").getValue());
+            return Instant.parse(updateSettings.get("LAST_NOTIFICATION_INSTANT", StringSetting.class).getValue());
         }
         catch (DateTimeParseException e)
         {
@@ -103,7 +104,7 @@ class NotificationPoster
         IChatComponent notificationComponent = getNotificationComponent();
         Minecraft.getMinecraft().thePlayer.addChatMessage(notificationComponent);
 
-        updateSettings.getStringSetting("LAST_NOTIFICATION_INSTANT").setValue(instantNow.toString());
+        updateSettings.get("LAST_NOTIFICATION_INSTANT", StringSetting.class).setValue(instantNow.toString());
         updateSettings.save(); // save "LAST_NOTIFICATION_INSTANT" and if applicable, "LAST_LATEST_VERSION"
 
         MinecraftForge.EVENT_BUS.unregister(this);

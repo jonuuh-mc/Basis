@@ -3,11 +3,11 @@ package io.jonuuh.core.local;
 import io.jonuuh.core.lib.config.Config;
 import io.jonuuh.core.lib.config.command.CommandOpenSettingsGui;
 import io.jonuuh.core.lib.config.setting.Settings;
-import io.jonuuh.core.lib.config.setting.types.BoolSetting;
-import io.jonuuh.core.lib.config.setting.types.DoubleListSetting;
-import io.jonuuh.core.lib.config.setting.types.DoubleSetting;
-import io.jonuuh.core.lib.config.setting.types.IntListSetting;
-import io.jonuuh.core.lib.config.setting.types.StringSetting;
+import io.jonuuh.core.lib.config.setting.types.array.DoubleArrSetting;
+import io.jonuuh.core.lib.config.setting.types.array.IntArrSetting;
+import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
+import io.jonuuh.core.lib.config.setting.types.single.DoubleSetting;
+import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
 import io.jonuuh.core.lib.update.UpdateHandler;
 import io.jonuuh.core.lib.util.ChatLogger;
 import io.jonuuh.core.lib.util.Log4JLogger;
@@ -55,8 +55,8 @@ public class Main
         Settings settings = new Settings();
         settings.put("DRAW_BACKGROUND", new BoolSetting(true));
         settings.put("BACKGROUND_OPACITY", new DoubleSetting(66D));
-        settings.put("RENDER_RANGE", new IntListSetting(new int[]{1, 75}));
-        settings.put("FAT_SLIDER", new DoubleListSetting(new double[]{10D, 15D, 20D, 5D, 30D, 45D, 1000D}));
+        settings.put("RENDER_RANGE", new IntArrSetting(new int[]{1, 75}));
+        settings.put("FAT_SLIDER", new DoubleArrSetting(new double[]{10D, 15D, 20D, 5D, 30D, 45D, 1000D}));
         settings.put("BACKGROUND_COLOR", new StringSetting("BLUE"));
 
         return settings;
