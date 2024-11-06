@@ -1,19 +1,41 @@
-//package io.jonuuh.core.module.config.gui.elements.interactable.sliders;
+//package io.jonuuh.core.lib.config.gui.elements.interactable.sliders;
 //
-//import io.jonuuh.core.module.config.gui.ISettingsGui;
+//import io.jonuuh.core.lib.config.gui.elements.GuiContainer;
+//import io.jonuuh.core.lib.config.setting.types.Setting;
+//import io.jonuuh.core.lib.config.setting.types.single.DoubleSetting;
 //
-//import java.util.Collections;
-//
-//public class GuiSingleSlider extends GuiSlider
+//public class GuiSingleSlider extends AbstractGuiSlider/*<double[]>*/
 //{
-//    public GuiSingleSlider(ISettingsGui parent, int xPos, int yPos, int width, int height, double min, double max, double startValue)
+//    public GuiSingleSlider(GuiContainer parent, int xPos, int yPos, int width, int height, double min, double max, double[] startValues, boolean isVertical)
 //    {
-//        super(parent, xPos, yPos, width, height, min, max, Collections.singletonList(startValue));
+//        super(parent, xPos, yPos, width, height, min, max, startValues, isVertical);
 //    }
 //
-//    public GuiSingleSlider(ISettingsGui parent, int xPos, int yPos, double min, double max, double startValue)
+//    public GuiSingleSlider(GuiContainer parent, int xPos, int yPos, int width, int height, double min, double max, double startValue, boolean isVertical)
 //    {
-//        super(parent, xPos, yPos, min, max, Collections.singletonList(startValue));
+//        super(parent, xPos, yPos, width, height, min, max, startValue, isVertical);
+//    }
+//
+//    public GuiSingleSlider(GuiContainer parent, int xPos, int yPos, double min, double max, double[] startValues)
+//    {
+//        super(parent, xPos, yPos, min, max, startValues);
+//    }
+//
+//    public GuiSingleSlider(GuiContainer parent, int xPos, int yPos, double min, double max, double startValue)
+//    {
+//        super(parent, xPos, yPos, min, max, startValue);
+//    }
+//
+////    @Override
+////    public void associateSetting(Setting<String> associatedSetting)
+////    {
+////        this.associatedSetting = associatedSetting;
+////    }
+//
+//    @Override
+//    protected void sendChangeToSetting()
+//    {
+//        ((DoubleSetting) associatedSetting).setValue(0.0D);
 //    }
 //
 ////    public double getValue()

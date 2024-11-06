@@ -1,51 +1,40 @@
 package io.jonuuh.core.lib.config.gui.elements.interactable;
 
-import io.jonuuh.core.lib.config.gui.ISettingsGui;
+import io.jonuuh.core.lib.config.gui.elements.GuiContainer;
 import io.jonuuh.core.lib.util.RenderUtils;
-import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
 
 public class GuiButton extends GuiInteractableElement
 {
-    public GuiButton(ISettingsGui parent, int xPos, int yPos, int width, int height, String tooltipStr)
+    public GuiButton(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, String tooltipStr)
     {
-        super(parent, xPos, yPos, width, height, tooltipStr);
+        super(parent, elementName, xPos, yPos, width, height, tooltipStr);
     }
 
-    public GuiButton(ISettingsGui parent, int xPos, int yPos, int width, int height)
+    public GuiButton(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height)
     {
-        super(parent, xPos, yPos, width, height);
+        super(parent, elementName, xPos, yPos, width, height);
     }
 
-    public GuiButton(ISettingsGui parent, int xPos, int yPos)
+    public GuiButton(GuiContainer parent, String elementName, int xPos, int yPos)
     {
-        super(parent, xPos, yPos);
+        super(parent, elementName, xPos, yPos);
     }
 
     @Override
-    public void onScreenDraw(Minecraft mc, int mouseX, int mouseY)
+    protected void drawElement(int mouseX, int mouseY, float partialTicks)
     {
-        super.onScreenDraw(mc, mouseX, mouseY);
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos, yPos, width, height, 3, colorMap.get("BASE"), true);
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos, yPos, width, height, 3, baseColor, true);
 
-        String buttonText = "text";
-        int strWidth = mc.fontRendererObj.getStringWidth(buttonText);
-        int ellipsisWidth = mc.fontRendererObj.getStringWidth("...");
-        if (strWidth > this.width - 6 && strWidth > ellipsisWidth)
-        {
-            buttonText = mc.fontRendererObj.trimStringToWidth(buttonText, this.width - 6 - ellipsisWidth).trim() + "...";
-        }
-
-        mc.fontRendererObj.drawString(buttonText, xPos + width / 2, yPos + (height - 8) / 2, (int) colorMap.get("BASE").toDecimalARGB());
+        String buttonText = RenderUtils.trimStringToWidthWithEllipsis("text", this.width);
+        mc.fontRendererObj.drawString(buttonText, xPos + width / 2, yPos + (height - 8) / 2, (int) parent.getColorMap().get("ACCENT").toDecimalARGB());
     }
 
     @Override
     public void onMousePress(int mouseX, int mouseY)
     {
-       super.onMousePress(mouseX, mouseY);
-       yPos += 1; // affects hovered text color only?
-
-        sendChangeToParent();
+        super.onMousePress(mouseX, mouseY);
+        yPos += 1; // affects hovered text color only?
     }
 
     @Override
@@ -53,5 +42,11 @@ public class GuiButton extends GuiInteractableElement
     {
         super.onMouseRelease(mouseX, mouseY);
         yPos = yPosInit;
+    }
+
+    // TODO: scuffed design
+    @Override
+    protected void updateSetting()
+    {
     }
 }

@@ -1,8 +1,8 @@
 package io.jonuuh.core.lib.config.gui.elements.interactable.sliders;
 
 import io.jonuuh.core.lib.config.gui.elements.GuiContainer;
-import io.jonuuh.core.lib.config.setting.types.DoubleListSetting;
-import io.jonuuh.core.lib.config.setting.types.DoubleSetting;
+import io.jonuuh.core.lib.config.setting.types.array.DoubleArrSetting;
+import io.jonuuh.core.lib.config.setting.types.single.DoubleSetting;
 import io.jonuuh.core.lib.util.MathUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -10,24 +10,24 @@ import java.util.Arrays;
 
 public class GuiDoubleSlider extends AbstractGuiSlider<Double>
 {
-    public GuiDoubleSlider(GuiContainer parent, int xPos, int yPos, int width, int height, double min, double max, Double[] startValues, boolean isVertical)
+    public GuiDoubleSlider(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, double min, double max, Double[] startValues, boolean isVertical)
     {
-        super(parent, xPos, yPos, width, height, min, max, startValues, isVertical);
+        super(parent, elementName, xPos, yPos, width, height, min, max, startValues, isVertical);
     }
 
-    public GuiDoubleSlider(GuiContainer parent, int xPos, int yPos, double min, double max, Double[] startValues)
+    public GuiDoubleSlider(GuiContainer parent, String elementName, int xPos, int yPos, double min, double max, Double[] startValues)
     {
-        super(parent, xPos, yPos, min, max, startValues);
+        super(parent, elementName, xPos, yPos, min, max, startValues);
     }
 
-    public GuiDoubleSlider(GuiContainer parent, int xPos, int yPos, int width, int height, double min, double max, Double startValue, boolean isVertical)
+    public GuiDoubleSlider(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, double min, double max, Double startValue, boolean isVertical)
     {
-        this(parent, xPos, yPos, width, height, min, max, new Double[]{startValue}, isVertical);
+        this(parent, elementName, xPos, yPos, width, height, min, max, new Double[]{startValue}, isVertical);
     }
 
-    public GuiDoubleSlider(GuiContainer parent, int xPos, int yPos, double min, double max, Double startValue)
+    public GuiDoubleSlider(GuiContainer parent, String elementName, int xPos, int yPos, double min, double max, Double startValue)
     {
-        this(parent, xPos, yPos, min, max, new Double[]{startValue});
+        this(parent, elementName, xPos, yPos, min, max, new Double[]{startValue});
     }
 
     @Override
@@ -76,7 +76,7 @@ public class GuiDoubleSlider extends AbstractGuiSlider<Double>
         else
         {
             // TODO: bad design, dont know how to fix (generics cant be primitive, making the generic a primitive array makes getvalue/getvalues problematic)
-            ((DoubleListSetting) associatedSetting).setValue(ArrayUtils.toPrimitive(getValues()));
+            ((DoubleArrSetting) associatedSetting).setValue(ArrayUtils.toPrimitive(getValues()));
         }
     }
 }

@@ -1,39 +1,37 @@
 package io.jonuuh.core.lib.config.gui.elements.interactable;
 
+import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
-import io.jonuuh.core.lib.config.gui.ISettingsGui;
-import net.minecraft.client.Minecraft;
+import io.jonuuh.core.lib.config.gui.elements.GuiContainer;
 import org.lwjgl.opengl.GL11;
 
 public class GuiSwitch extends GuiInteractableElement
 {
     protected final float pointerSize;
-    //    protected final float radius;
     protected boolean switchState;
 
     // TODO: make vertical option? subclass?
-    public GuiSwitch(ISettingsGui parent, int xPos, int yPos, int width, int height, String tooltipStr, boolean switchState)
+    public GuiSwitch(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, String tooltipStr, boolean switchState)
     {
-        super(parent, xPos, yPos, Math.max(height, width), Math.min(Math.max(height, width), height), tooltipStr); // height should never be > width, width should never be < height
-//        this.radius = Math.min(radius, height / 2F); // radius should never be > half height
-        this.pointerSize = height - 2F; // assoc w/ <radius - 1> in pointer draw?
+        super(parent, elementName, xPos, yPos, Math.max(height, width), Math.min(Math.max(height, width), height), tooltipStr); // height should never be > width, width should never be < height
+        this.pointerSize = height - 2F;
         this.switchState = switchState;
     }
 
-    public GuiSwitch(ISettingsGui parent, int xPos, int yPos, String tooltipStr, boolean switchState)
+    public GuiSwitch(GuiContainer parent, String elementName, int xPos, int yPos, String tooltipStr, boolean switchState)
     {
-        this(parent, xPos, yPos, 32, 16, tooltipStr, switchState);
+        this(parent, elementName, xPos, yPos, 32, 16, tooltipStr, switchState);
     }
 
-    public GuiSwitch(ISettingsGui parent, int xPos, int yPos, boolean switchState)
+    public GuiSwitch(GuiContainer parent, String elementName, int xPos, int yPos, boolean switchState)
     {
-        this(parent, xPos, yPos, "", switchState);
+        this(parent, elementName, xPos, yPos, "", switchState);
     }
 
-    public GuiSwitch(ISettingsGui parent, int xPos, int yPos)
+    public GuiSwitch(GuiContainer parent, String elementName, int xPos, int yPos)
     {
-        this(parent, xPos, yPos, false);
+        this(parent, elementName, xPos, yPos, false);
     }
 
     public boolean getSwitchState()
@@ -46,25 +44,28 @@ public class GuiSwitch extends GuiInteractableElement
         this.switchState = switchState;
     }
 
+//    public <T> void associateSetting(Setting<T> setting)
+//    {
+//
+//    }
+
     public void flip()
     {
         setSwitchState(!switchState);
-        sendChangeToParent();
+        sendChangeToSetting();
     }
 
     @Override
-    public void onScreenDraw(Minecraft mc, int mouseX, int mouseY)
+    protected void drawElement(int mouseX, int mouseY, float partialTicks)
     {
-        super.onScreenDraw(mc, mouseX, mouseY);
-
         float padding = ((height - pointerSize) / 2F);
         float pointerX = switchState ? (xPos + width - pointerSize - padding) : xPos + padding;
-        Color trackColor = switchState ? colorMap.get("BASE") : colorMap.get("DISABLED");
+        Color trackColor = switchState ? baseColor : parent.getColorMap().get("DISABLED");
 
         // Track
         RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos, yPos, width, height, parent.getInnerRadius(), trackColor, true);
         // Pointer
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, pointerX, yPos + padding, pointerSize, pointerSize, parent.getInnerRadius() - 1, colorMap.get("ACCENT"), true);
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, pointerX, yPos + padding, pointerSize, pointerSize, parent.getInnerRadius() - 1, parent.getColorMap().get("ACCENT"), true);
     }
 
     @Override
@@ -72,6 +73,12 @@ public class GuiSwitch extends GuiInteractableElement
     {
         super.onMousePress(mouseX, mouseY);
         flip();
+    }
+
+    @Override
+    protected void updateSetting()
+    {
+        ((BoolSetting) associatedSetting).setValue(switchState);
     }
 }
 

@@ -1,7 +1,9 @@
 package io.jonuuh.core.lib.config.gui.elements.interactable;
 
+import io.jonuuh.core.lib.config.gui.elements.GuiContainer;
+import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
+import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
-import io.jonuuh.core.lib.config.gui.ISettingsGui;
 import io.jonuuh.core.lib.util.Color;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -21,22 +23,28 @@ public class GuiTextField extends GuiInteractableElement
     public boolean isTyping;
     public int selectionPos;
 
-    public GuiTextField(ISettingsGui parent, int xPos, int yPos, int width, int height, String text, String tooltipStr)
+    public GuiTextField(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, String text, String tooltipStr)
     {
-        super(parent, xPos, yPos, width, height, tooltipStr);
+        super(parent, elementName, xPos, yPos, width, height, tooltipStr);
         this.text = text;
     }
 
-    public GuiTextField(ISettingsGui parent, int xPos, int yPos, int width, int height, String text)
+    public GuiTextField(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, String text)
     {
-        super(parent, xPos, yPos, width, height);
+        super(parent, elementName, xPos, yPos, width, height);
         this.text = text;
     }
 
-    public GuiTextField(ISettingsGui parent, int xPos, int yPos, String text)
+    public GuiTextField(GuiContainer parent, String elementName, int xPos, int yPos, String text)
     {
-        super(parent, xPos, yPos);
+        super(parent, elementName, xPos, yPos);
         this.text = text;
+    }
+
+    @Override
+    protected void updateSetting()
+    {
+        ((StringSetting) associatedSetting).setValue(text);
     }
 
 //    public void setCursorPosition(int position)
@@ -48,12 +56,12 @@ public class GuiTextField extends GuiInteractableElement
 
     public void setSelectionPos(int selectionPos)
     {
-        this.selectionPos = (int) clamp(selectionPos, 0, text.length());
+        this.selectionPos = (int) MathUtils.clamp(selectionPos, 0, text.length());
     }
 
     public void setCursorPos(int cursorPos)
     {
-        this.cursorPos = (int) clamp(cursorPos, 0, text.length());
+        this.cursorPos = (int) MathUtils.clamp(cursorPos, 0, text.length());
     }
 
     public void moveCursorAndSelection(int amount)
@@ -136,11 +144,6 @@ public class GuiTextField extends GuiInteractableElement
         return selectionPos >/*=*/ cursorPos;
     }
 
-    protected double clamp(double value, double min, double max)
-    {
-        return Math.min((Math.max(value, min)), max);
-    }
-
     @Override
     public void onScreenTick()
     {
@@ -149,11 +152,34 @@ public class GuiTextField extends GuiInteractableElement
 
     // 12345678901234567890
 
-    @Override
-    public void onScreenDraw(Minecraft mc, int mouseX, int mouseY)
-    {
-        super.onScreenDraw(mc, mouseX, mouseY);
+//    @Override
+//    public void onScreenDraw(Minecraft mc, int mouseX, int mouseY)
+//    {
+//        super.onScreenDraw(mc, mouseX, mouseY);
+//
+//        if (mouseDown)
+//        {
+//            setSelectionPos(getTextBelowMouseX(mouseX).length());
+//        }
+//
+//        RenderUtils.drawRectangle(GL11.GL_POLYGON, xPos, yPos, width, height, new Color("#242424").setA(0.75F));
+//
+//        if (hasSelection())
+//        {
+//            drawSelectionHighlight();
+//        }
+//
+//        if (Display.isActive() && focused && (cursorFlashCounter % 20 < 10 || isTyping))
+//        {
+//            RenderUtils.drawRectangle(GL11.GL_POLYGON, getCursorScreenPos(), yPos - 2, 1, fontRenderer.FONT_HEIGHT + 2, new Color("#00ff00")/*.setA(0.5F)*/);
+//        }
+//
+//        fontRenderer.drawString(text, xPos, yPos, -1);
+//    }
 
+    @Override
+    protected void drawElement(int mouseX, int mouseY, float partialTicks)
+    {
         if (mouseDown)
         {
             setSelectionPos(getTextBelowMouseX(mouseX).length());
@@ -305,6 +331,8 @@ public class GuiTextField extends GuiInteractableElement
         }
 
         clearSelection();
+
+        sendChangeToSetting();
 
 //        String s = "";
 //        int start = getSelectionStart()/*Math.min(cursorPos, selectionPos)*/;

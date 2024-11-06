@@ -1,7 +1,6 @@
 package io.jonuuh.core.lib.config.gui.elements;
 
 import io.jonuuh.core.lib.util.RenderUtils;
-import io.jonuuh.core.lib.config.gui.elements.interactable.GuiInteractableElement;
 import io.jonuuh.core.lib.util.Color;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
@@ -10,7 +9,7 @@ public class GuiTooltip
 {
     private static GuiTooltip instance;
     private final Minecraft mc;
-    public GuiInteractableElement currentElement;
+    public GuiElement currentElement;
 
     public String str;
     public Color color;
@@ -41,7 +40,7 @@ public class GuiTooltip
         return instance;
     }
 
-    public static void claim(GuiInteractableElement currentElement)
+    public static void claim(GuiElement currentElement)
     {
         instance.claimForElement(currentElement);
     }
@@ -61,7 +60,7 @@ public class GuiTooltip
         this.mc = mc;
     }
 
-    private void claimForElement(GuiInteractableElement currentElement)
+    private void claimForElement(GuiElement currentElement)
     {
         if (/*isClaimed() && */ currentElement.getTooltipStr().isEmpty())
         {
@@ -86,7 +85,7 @@ public class GuiTooltip
         this.posX = currentElement.getXPos() - (strWidth / 2F) + (currentElement.getWidth() / 2F);
         this.posY = currentElement.getYPos() + padding - rectHeight - triHeight - 2; // -2 somewhat arbitrary
 
-        this.color = currentElement.getColorMap().get("BASE") /*Color.getRandom()*/;
+        this.color = currentElement.getBaseColor() /*Color.getRandom()*/;
 //        return true;
     }
 

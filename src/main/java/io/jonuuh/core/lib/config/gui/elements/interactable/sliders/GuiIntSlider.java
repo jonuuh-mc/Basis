@@ -1,8 +1,8 @@
 package io.jonuuh.core.lib.config.gui.elements.interactable.sliders;
 
 import io.jonuuh.core.lib.config.gui.elements.GuiContainer;
-import io.jonuuh.core.lib.config.setting.types.IntListSetting;
-import io.jonuuh.core.lib.config.setting.types.IntSetting;
+import io.jonuuh.core.lib.config.setting.types.array.IntArrSetting;
+import io.jonuuh.core.lib.config.setting.types.single.IntSetting;
 import io.jonuuh.core.lib.util.MathUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -10,24 +10,24 @@ import java.util.Arrays;
 
 public class GuiIntSlider extends AbstractGuiSlider<Integer>
 {
-    public GuiIntSlider(GuiContainer parent, int xPos, int yPos, int width, int height, double min, double max, Integer[] startValues, boolean isVertical)
+    public GuiIntSlider(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, double min, double max, Integer[] startValues, boolean isVertical)
     {
-        super(parent, xPos, yPos, width, height, min, max, startValues, isVertical);
+        super(parent, elementName, xPos, yPos, width, height, min, max, startValues, isVertical);
     }
 
-    public GuiIntSlider(GuiContainer parent, int xPos, int yPos, double min, double max, Integer[] startValues)
+    public GuiIntSlider(GuiContainer parent, String elementName, int xPos, int yPos, double min, double max, Integer[] startValues)
     {
-        super(parent, xPos, yPos, min, max, startValues);
+        super(parent, elementName, xPos, yPos, min, max, startValues);
     }
 
-    public GuiIntSlider(GuiContainer parent, int xPos, int yPos, int width, int height, double min, double max, Integer startValue, boolean isVertical)
+    public GuiIntSlider(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, double min, double max, Integer startValue, boolean isVertical)
     {
-        this(parent, xPos, yPos, width, height, min, max, new Integer[]{startValue}, isVertical);
+        this(parent, elementName, xPos, yPos, width, height, min, max, new Integer[]{startValue}, isVertical);
     }
 
-    public GuiIntSlider(GuiContainer parent, int xPos, int yPos, double min, double max, Integer startValue)
+    public GuiIntSlider(GuiContainer parent, String elementName, int xPos, int yPos, double min, double max, Integer startValue)
     {
-        this(parent, xPos, yPos, min, max, new Integer[]{startValue});
+        this(parent, elementName, xPos, yPos, min, max, new Integer[]{startValue});
     }
 
     @Override
@@ -93,7 +93,7 @@ public class GuiIntSlider extends AbstractGuiSlider<Integer>
         else
         {
             // TODO: bad design, dont know how to fix (generics cant be primitive, making the generic a primitive array makes getvalue/getvalues problematic)
-            ((IntListSetting) associatedSetting).setValue(ArrayUtils.toPrimitive(getValues()));
+            ((IntArrSetting) associatedSetting).setValue(ArrayUtils.toPrimitive(getValues()));
         }
     }
 }
