@@ -52,6 +52,11 @@ public class Color
 //        this.a = Integer.valueOf(Integer.toHexString(argbDecimal).substring(0, 2), 16) / 255F;
     }
 
+    public Color copy()
+    {
+        return new Color(this.r, this.g, this.b, this.a);
+    }
+
     public long toDecimalARGB()
     {
         String s = "";

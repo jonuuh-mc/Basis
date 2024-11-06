@@ -2,6 +2,7 @@ package io.jonuuh.core.lib.util;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
@@ -11,14 +12,16 @@ import org.lwjgl.opengl.GL11;
 
 public abstract class RenderUtils
 {
+    private static final Minecraft mc = Minecraft.getMinecraft();
+
     public static RenderManager getRenderManager()
     {
-        return Minecraft.getMinecraft().getRenderManager();
+        return mc.getRenderManager();
     }
 
     public static FontRenderer getFontRenderer()
     {
-        return Minecraft.getMinecraft().fontRendererObj;
+        return mc.fontRendererObj;
     }
 
     public static int getStringWidth(String str)
@@ -26,7 +29,20 @@ public abstract class RenderUtils
         return getFontRenderer().getStringWidth(str) - 1; // getStringWidth seems to always be over by 1 (for loop end condition mistake?)
     }
 
-    public static Vec3 getEntityPosForRender(Minecraft mc, EntityPlayer player, float partialTicks)
+    public static String trimStringToWidthWithEllipsis(String str, int width)
+    {
+        int strWidth = getFontRenderer().getStringWidth(str);
+        int ellipsisWidth = getFontRenderer().getStringWidth("...");
+
+        if (strWidth > width - 6 && strWidth > ellipsisWidth)
+        {
+            return getFontRenderer().trimStringToWidth(str, width - 6 - ellipsisWidth).trim() + "...";
+        }
+
+        return str;
+    }
+
+    public static Vec3 getEntityPosForRender(EntityPlayer player, float partialTicks)
     {
         RenderManager renderManager = mc.getRenderManager();
 
@@ -40,6 +56,14 @@ public abstract class RenderUtils
         double y = (player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks);
         double z = (player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks);
         return new Vec3(x, y, z);
+    }
+
+    public static void scissorFromTopLeft(int x, int y, int w, int h)
+    {
+        ScaledResolution sr = new ScaledResolution(mc);
+//        System.out.println(sr.getScaleFactor() + " " + x + " " + y + " " + w + " " + h);
+        GL11.glScissor(x * sr.getScaleFactor(), (sr.getScaledHeight() - y - h) * sr.getScaleFactor(),
+                w * sr.getScaleFactor(), h * sr.getScaleFactor());
     }
 
     public static void drawBox(AxisAlignedBB bb, int glMode, Color color)
@@ -70,7 +94,7 @@ public abstract class RenderUtils
 //        GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
 //        GL11.glPolygonOffset(1.0f, -1000000.0f);
 
-        Vec3 renderPos = getEntityPosForRender(Minecraft.getMinecraft(), Minecraft.getMinecraft().thePlayer, 0.0F);
+        Vec3 renderPos = getEntityPosForRender(mc.thePlayer, 0.0F);
         Vec3 finalPos = new Vec3(0, 4,0);
 
         GL11.glTranslated((finalPos.xCoord - renderPos.xCoord), (finalPos.yCoord - renderPos.yCoord), (finalPos.zCoord - renderPos.zCoord));
