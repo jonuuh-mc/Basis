@@ -4,90 +4,63 @@ import io.jonuuh.core.lib.config.gui.elements.interactable.GuiInteractableElemen
 import io.jonuuh.core.lib.util.Color;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public abstract class GuiContainer extends GuiElement
+public final class GuiRootContainer extends GuiContainer
 {
-    protected final Map<String, GuiElement> childrenMap;
-    protected final Map<String, GuiInteractableElement> interactableChildrenMap;
-    protected final Map<String, Color> colorMap;
-    protected float outerRadius;
-    protected float innerRadius;
-    protected GuiInteractableElement lastMouseDownElement;
-    protected GuiInteractableElement currentFocus; // TODO
-
-    public GuiContainer(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, Map<String, Color> colorMap, float outerRadius, float innerRadius, String tooltipStr)
+    public GuiRootContainer(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, Map<String, Color> colorMap, float outerRadius, float innerRadius, String tooltipStr)
     {
-        super(parent, elementName, xPos, yPos, width, height, true, tooltipStr);
-        this.childrenMap = new LinkedHashMap<>();
-        this.interactableChildrenMap = new LinkedHashMap<>();
-        this.colorMap = colorMap;
-        this.outerRadius = outerRadius;
-        this.innerRadius = innerRadius;
+        super(parent, elementName, xPos, yPos, width, height, colorMap, outerRadius, innerRadius, tooltipStr);
     }
 
-    public Map<String, GuiElement> getChildrenMap()
-    {
-        return childrenMap;
-    }
-
-    public Collection<GuiElement> getChildren()
-    {
-        return childrenMap.values();
-    }
-
-    public List<GuiElement> getNestedChildren()
-    {
-        List<GuiElement> elements = new ArrayList<>();
-//        elements.add(this);
-
-        for (GuiElement element : childrenMap.values())
-        {
-            if (element instanceof GuiContainer)
-            {
-                elements.add(element);
-                elements.addAll(((GuiContainer) element).getNestedChildren());
-            }
-            else
-            {
-                elements.add(element);
-            }
-        }
-
-        return elements;
-    }
-
-    public List<GuiContainer> getNestedContainers()
-    {
-        return getNestedChildren().stream()
-                .filter(guiElement -> guiElement instanceof GuiContainer)
-                .map(guiElement -> (GuiContainer) guiElement)
-                .collect(Collectors.toList());
-    }
-
-    public Map<String, Color> getColorMap()
-    {
-        return colorMap;
-    }
-
-    public float getOuterRadius()
-    {
-        return outerRadius;
-    }
-
-    public float getInnerRadius()
-    {
-        return innerRadius;
-    }
+//    public List<GuiElement> getNestedChildren()
+//    {
+//        List<GuiElement> elements = new ArrayList<>();
+////        elements.add(this);
+//
+//        for (GuiElement element : childrenMap.values())
+//        {
+//            if (element instanceof GuiContainer)
+//            {
+//                elements.add(element);
+//                elements.addAll(((GuiContainer) element).getNestedChildren());
+//            }
+//            else
+//            {
+//                elements.add(element);
+//            }
+//        }
+//
+//        return elements;
+//    }
+//
+//    public List<GuiContainer> getNestedContainers()
+//    {
+//        return getNestedChildren().stream()
+//                .filter(guiElement -> guiElement instanceof GuiContainer)
+//                .map(guiElement -> (GuiContainer) guiElement)
+//                .collect(Collectors.toList());
+//    }
+//
+//    public Map<String, Color> getColorMap()
+//    {
+//        return colorMap;
+//    }
+//
+//    public float getOuterRadius()
+//    {
+//        return outerRadius;
+//    }
+//
+//    public float getInnerRadius()
+//    {
+//        return innerRadius;
+//    }
 
     public void putChild(String elementName, GuiElement element)
     {
-        childrenMap.put(elementName, element);
-
         element.xPos += this.xPos;
         element.yPos += this.yPos;
         element.xPosInit += this.xPosInit;
@@ -95,6 +68,9 @@ public abstract class GuiContainer extends GuiElement
 
         element.zLevel = getNumParents();
         System.out.println(element.elementName + " zLevel: " + element.zLevel);
+
+        childrenMap.put(elementName, element);
+        // TODO: hold reference to root and always add to map in it?
 
         if (element instanceof GuiInteractableElement)
         {
@@ -218,7 +194,7 @@ public abstract class GuiContainer extends GuiElement
 
             if (element instanceof GuiContainer)
             {
-                elements.addAll(((GuiContainer) element).getMouseDownElements(mouseX, mouseY));
+//                elements.addAll(((GuiContainer) element).getMouseDownElements(mouseX, mouseY));
             }
             else if (element instanceof GuiInteractableElement)
             {
@@ -255,12 +231,32 @@ public abstract class GuiContainer extends GuiElement
     // TODO: fix awful recursive logic
     public void handleMouseDrag(int mouseX, int mouseY, int clickedMouseButton, long msHeld)
     {
-        for (GuiElement element : getNestedChildren())
+        for (GuiElement element : childrenMap.values())
         {
-            if (element instanceof GuiInteractableElement)
+            if (element instanceof GuiContainer)
+            {
+                ((GuiContainer) element).handleMouseDrag(mouseX, mouseY, clickedMouseButton, msHeld);
+            }
+            else if (element instanceof GuiInteractableElement)
             {
                 ((GuiInteractableElement) element).onMouseDrag(mouseX, mouseY, clickedMouseButton, msHeld);
             }
         }
+
+
+//        for (GuiElement element : getNestedChildren())
+//        {
+//            if (element instanceof GuiInteractableElement)
+//            {
+//                ((GuiInteractableElement) element).onMouseDrag(mouseX, mouseY, clickedMouseButton, msHeld);
+//            }
+//        }
+    }
+
+
+    @Override
+    protected void drawElement(int mouseX, int mouseY, float partialTicks)
+    {
+
     }
 }

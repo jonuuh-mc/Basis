@@ -13,7 +13,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
-public class GuiTextField extends GuiInteractableElement
+public class GuiTextField extends GuiSettingElement
 {
     public FontRenderer fontRenderer = Minecraft.getMinecraft().fontRendererObj;
     public String text = "";

@@ -2,7 +2,6 @@ package io.jonuuh.core.lib.config.gui.elements.interactable;
 
 import io.jonuuh.core.lib.config.gui.elements.GuiContainer;
 import io.jonuuh.core.lib.config.gui.elements.GuiElement;
-import io.jonuuh.core.lib.config.setting.types.Setting;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.util.ResourceLocation;
@@ -10,7 +9,6 @@ import net.minecraft.util.ResourceLocation;
 public abstract class GuiInteractableElement/*<T>*/ extends GuiElement
 {
     protected final ResourceLocation resourceClickSound;
-    protected Setting<?> associatedSetting;
 
     protected boolean enabled;
     protected boolean focused;
@@ -38,31 +36,6 @@ public abstract class GuiInteractableElement/*<T>*/ extends GuiElement
     {
         this(parent, elementName, xPos, yPos, 200, 20);
     }
-
-    public void associateSetting(Setting<?> associatedSetting)
-    {
-        this.associatedSetting = associatedSetting;
-    }
-
-    public void disassociateSetting()
-    {
-        associatedSetting = null;
-    }
-
-    public boolean hasSettingAssociation()
-    {
-        return associatedSetting != null;
-    }
-
-    protected void sendChangeToSetting()
-    {
-        if (hasSettingAssociation())
-        {
-            updateSetting();
-        }
-    }
-
-    protected abstract void updateSetting();
 
     public boolean isEnabled()
     {
@@ -116,6 +89,14 @@ public abstract class GuiInteractableElement/*<T>*/ extends GuiElement
     public void onMouseRelease(int mouseX, int mouseY)
     {
         mouseDown = false;
+    }
+
+    public void onMouseScroll(int wheelDelta)
+    {
+    }
+
+    public void onMouseDrag(int mouseX, int mouseY, int clickedMouseButton, long msHeld)
+    {
     }
 
     public void onKeyTyped(char typedChar, int keyCode)

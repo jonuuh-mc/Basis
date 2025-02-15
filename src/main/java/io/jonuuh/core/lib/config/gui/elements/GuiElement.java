@@ -53,7 +53,7 @@ public abstract class GuiElement
 
         this.drawBounds = true;
         this.tooltipStr = tooltipStr;
-        this.baseColor = new Color("#1450A0"); // TODO:
+        this.baseColor = new Color("#1450A0"); // TODO: move to guicontainer?
 
         // TODO: try moving to top of constructor
         if (hasParent() /*&& !elementName.contains("$")*/)
@@ -62,6 +62,7 @@ public abstract class GuiElement
         }
     }
 
+    // TODO: use class name?
     @Override
     public String toString()
     {
@@ -203,24 +204,28 @@ public abstract class GuiElement
         this.startHoverTime = startHoverTime;
     }
 
-    // TODO: zLevel
+    public int getNumParents()
+    {
+        return this.hasParent() ? this.parent.getNumParents() + 1 : 0;
+    }
+
     public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
-//        if (visible)
-//        {
-        // TODO: why is this not in if (visible) -> changed (anything broken?)
-        hovered = (mouseX >= xPos) && (mouseX < xPos + width)
-                && (mouseY >= yPos) && (mouseY < yPos + height);
-
-        if (drawBounds)
+        if (visible)
         {
-            RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, xPos, yPos, width, height, new Color("#ff55ff"));
-        }
+            // TODO: why is this not in if (visible) -> changed (anything broken?)
+            hovered = (mouseX >= xPos) && (mouseX < xPos + width)
+                    && (mouseY >= yPos) && (mouseY < yPos + height);
 
-        drawElement(mouseX, mouseY, partialTicks);
+            if (drawBounds)
+            {
+                RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, xPos, yPos, width, height, new Color("#ff55ff"));
+            }
+
+            drawElement(mouseX, mouseY, partialTicks);
 
 //            handleTooltip(mouseX, mouseY);
-//        }
+        }
     }
 
     protected abstract void drawElement(int mouseX, int mouseY, float partialTicks);

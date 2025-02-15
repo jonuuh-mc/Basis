@@ -50,20 +50,15 @@ publishing {
     }
 }
 
-// Exclude when building or publishing
-sourceSets {
-    main {
-        java {
-            exclude "io/jonuuh/core/local"
-        }
-
-        resources {
-            exclude "assets/versions"
-        }
-    }
-}
-
-//task runClientPatch() {
-//    outputs.upToDateWhen { false }
+//// Exclude when building or publishing
+//sourceSets {
+//    main {
+//        java {
+//            exclude "io/jonuuh/core/local"
+//        }
+//
+//        resources {
+//            exclude "assets/versions"
+//        }
+//    }
 //}
-//runClientPatch.finalizedBy runClient

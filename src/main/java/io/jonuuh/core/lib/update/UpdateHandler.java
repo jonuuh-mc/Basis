@@ -7,11 +7,13 @@ import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
 import io.jonuuh.core.lib.util.Log4JLogger;
 import io.jonuuh.core.lib.util.StaticFileUtils;
 
-public class UpdateHandler
+public class UpdateHandler extends Thread
 {
     public static UpdateHandler INSTANCE;
-    private final String latestVersionStr;
-    private final boolean isUpdateAvailable;
+    private final String modID;
+    private final String currentVersionStr;
+    private String latestVersionStr;
+    private boolean isUpdateAvailable;
 
     public static void createInstance(String modID, String currentVersionStr)
     {
@@ -29,6 +31,12 @@ public class UpdateHandler
     }
 
     private UpdateHandler(String modID, String currentVersionStr)
+    {
+        this.modID = modID;
+        this.currentVersionStr = currentVersionStr;
+    }
+
+    public void run()
     {
         Settings updateSettings = new Settings("update");
         updateSettings.put("LAST_NOTIFICATION_INSTANT", new StringSetting());

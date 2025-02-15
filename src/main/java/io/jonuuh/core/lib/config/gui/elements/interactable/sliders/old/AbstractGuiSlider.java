@@ -1,10 +1,9 @@
-package io.jonuuh.core.lib.config.gui.elements.interactable.sliders;
+package io.jonuuh.core.lib.config.gui.elements.interactable.sliders.old;
 
 import io.jonuuh.core.lib.config.gui.elements.GuiContainer;
+import io.jonuuh.core.lib.config.gui.elements.interactable.GuiSettingElement;
 import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
-import io.jonuuh.core.lib.config.gui.elements.interactable.GuiInteractableElement;
-import io.jonuuh.core.lib.config.gui.elements.GuiTooltip;
 import io.jonuuh.core.lib.util.Color;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
@@ -13,7 +12,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractGuiSlider<T extends Number> extends GuiInteractableElement/*<T>*/
+public abstract class AbstractGuiSlider<T extends Number> extends GuiSettingElement/*<T>*/
 {
     protected final double min;
     protected final double max;

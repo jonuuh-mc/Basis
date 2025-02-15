@@ -6,7 +6,7 @@ import io.jonuuh.core.lib.util.RenderUtils;
 import io.jonuuh.core.lib.config.gui.elements.GuiContainer;
 import org.lwjgl.opengl.GL11;
 
-public class GuiSwitch extends GuiInteractableElement
+public class GuiSwitch extends GuiSettingElement
 {
     protected final float pointerSize;
     protected boolean switchState;
@@ -43,11 +43,6 @@ public class GuiSwitch extends GuiInteractableElement
     {
         this.switchState = switchState;
     }
-
-//    public <T> void associateSetting(Setting<T> setting)
-//    {
-//
-//    }
 
     public void flip()
     {

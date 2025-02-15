@@ -1,5 +1,7 @@
 package io.jonuuh.core.lib.util;
 
+import net.minecraft.util.EnumChatFormatting;
+
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Color
@@ -17,14 +19,19 @@ public class Color
         this.a = a;
     }
 
+    public Color(float r, float g, float b)
+    {
+        this(r, g, b, 1.0F);
+    }
+
     public Color()
     {
         this(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    public Color(float rgb, float a)
+    public Color copy()
     {
-        this(rgb, rgb, rgb, a);
+        return new Color(this.r, this.g, this.b, this.a);
     }
 
     public Color(String hexColor)
@@ -47,14 +54,22 @@ public class Color
         this.g = c[1];
         this.b = c[2];
         this.a = Integer.valueOf(argbHex.substring(0, 2), 16) / 255F;
-
-//        this(Integer.toHexString(argbDecimal).substring(2));
-//        this.a = Integer.valueOf(Integer.toHexString(argbDecimal).substring(0, 2), 16) / 255F;
     }
 
-    public Color copy()
+    public Color(EnumChatFormatting chatFormatting)
     {
-        return new Color(this.r, this.g, this.b, this.a);
+        int packedColor = chatFormattingToPackedInt(chatFormatting);
+
+        // unpack
+        int r = (packedColor >> 16) & 0xFF;
+        int g = (packedColor >> 8) & 0xFF;
+        int b = packedColor & 0xFF;
+
+        // normalize
+        this.r = r / 255.0F;
+        this.g = g / 255.0F;
+        this.b = b / 255.0F;
+        this.a = 1.0F;
     }
 
     public long toDecimalARGB()
@@ -67,18 +82,6 @@ public class Color
         s = s + Integer.toHexString((int) (b * 255));
 
         return (int) Long.parseLong(s, 16);
-    }
-
-    public static Color getRandom(float a)
-    {
-        int randomHexInt = ThreadLocalRandom.current().nextInt(0xFFFFFF + 1);
-        Color color = new Color(Integer.toHexString(randomHexInt));
-        return a == 1.0F ? color : color.setA(a);
-    }
-
-    public static Color getRandom()
-    {
-        return getRandom(1.0F);
     }
 
     public float getR()
@@ -150,6 +153,60 @@ public class Color
     private float[] normalizeRGB(int[] rgb)
     {
         return new float[]{rgb[0] / 255.0F, rgb[1] / 255.0F, rgb[2] / 255.0F};
+    }
+
+    public static Color getRandom(float a)
+    {
+        int randomHexInt = ThreadLocalRandom.current().nextInt(0xFFFFFF + 1);
+        Color color = new Color(Integer.toHexString(randomHexInt));
+        return a == 1.0F ? color : color.setA(a);
+    }
+
+    public static Color getRandom()
+    {
+        return getRandom(1.0F);
+    }
+
+    public static int chatFormattingToPackedInt(EnumChatFormatting chatFormatting)
+    {
+        return colorCodes[Character.digit(chatFormatting.toString().charAt(1), 16)];
+    }
+
+    public int[] getChatFormattingColorCodes()
+    {
+        return colorCodes.clone();
+    }
+
+    /**
+     * Array of packed RGB triplet integers defining 16 standard chat colors <p>
+     * ex: 0xFF00AA -> FF (R), 00 (G), AA (B) -> packed as decimals from 0-255 into each section of 8 bits <p>
+     * 32 bit int -> [empty 8 bits][R 8 bits][G 8 bits][B 8 bits]
+     * <p>
+     * see FontRenderer constructor -> <p>
+     * net.minecraft.client.gui.FontRenderer#FontRenderer(net.minecraft.client.settings.GameSettings, net.minecraft.util.ResourceLocation, net.minecraft.client.renderer.texture.TextureManager, boolean)
+     */
+    private static final int[] colorCodes = new int[16];
+
+    // init color code packed integers for 16 default EnumChatFormatting colors
+    static
+    {
+        for (int i = 0; i < 16; ++i)
+        {
+            // magic
+            int oneThirdBrightness = (i >> 3 & 1) * 85;
+            int red = (i >> 2 & 1) * 170 + oneThirdBrightness;
+            int green = (i >> 1 & 1) * 170 + oneThirdBrightness;
+            int blue = (i & 1) * 170 + oneThirdBrightness;
+
+            // edge case for gold color
+            if (i == 6)
+            {
+                red += 85;
+            }
+
+            // combine RGB components
+            colorCodes[i] = (red & 255) << 16 | (green & 255) << 8 | (blue & 255);
+        }
     }
 
     @Override

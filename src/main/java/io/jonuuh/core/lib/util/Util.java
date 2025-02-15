@@ -78,14 +78,6 @@ public abstract class Util
         return 'f'; // default (white)
     }
 
-//    public static EnumChatFormatting getHealthColor(float healthPercent)
-//    {
-//        return healthPercent >= 75 ? EnumChatFormatting.DARK_GREEN
-//                : healthPercent >= 50 ? EnumChatFormatting.GREEN
-//                : healthPercent >= 25 ? EnumChatFormatting.RED
-//                : EnumChatFormatting.DARK_RED;
-//    }
-
 //    public static String getScoreboardHeader(Scoreboard sb)
 //    {
 //        if (sb == null || sb.getObjectiveInDisplaySlot(1) == null)

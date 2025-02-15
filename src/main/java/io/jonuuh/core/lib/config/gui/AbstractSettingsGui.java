@@ -4,14 +4,18 @@ import io.jonuuh.core.lib.config.gui.elements.GuiContainer;
 import io.jonuuh.core.lib.config.gui.elements.GuiElement;
 import io.jonuuh.core.lib.config.gui.elements.GuiTooltip;
 import io.jonuuh.core.lib.config.gui.elements.interactable.GuiInteractableElement;
+import io.jonuuh.core.lib.config.gui.elements.interactable.GuiSettingElement;
 import io.jonuuh.core.lib.config.gui.elements.interactable.GuiTextFieldVanilla;
 import io.jonuuh.core.lib.config.setting.types.Setting;
 import io.jonuuh.core.lib.config.setting.Settings;
+import io.jonuuh.core.lib.util.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +25,7 @@ public abstract class AbstractSettingsGui extends GuiScreen
     protected final GuiContainer rootContainer;
     //    protected final Map<GuiInteractableElement, String> inverseElementMap;
 //    protected GuiInteractableElement lastInteracted;
-    public GuiTextFieldVanilla textField;
+//    public GuiTextFieldVanilla textField;
 
     protected int[] center;
 
@@ -30,18 +34,17 @@ public abstract class AbstractSettingsGui extends GuiScreen
         this.settings = settings;
         this.rootContainer = initRootContainer();
 
-        // TODO: not recursive at all, only associates top level
-        for (Map.Entry<String, GuiElement> entry : rootContainer.getChildrenMap().entrySet())
+        rootContainer.getNestedChildren().forEach(System.out::println);
+
+        // TODO: make recursive instead of using getNestedChildren?
+        for (GuiElement element : rootContainer.getNestedChildren())
         {
-            String elementName = entry.getKey();
-            GuiElement element = entry.getValue();
+            Setting<?> setting = settings.get(element.elementName);
 
-            Setting<?> setting = settings.get(elementName);
-
-            if (setting != null)
+            if (setting != null && element instanceof GuiSettingElement)
             {
-                ((GuiInteractableElement) element).associateSetting(setting);
-                System.out.println("associated setting for: " + elementName);
+                ((GuiSettingElement) element).associateSetting(setting);
+                System.out.println("associated setting for: " + element.elementName);
             }
         }
 
@@ -70,7 +73,7 @@ public abstract class AbstractSettingsGui extends GuiScreen
 //            inverseElementMap.put(entry.getValue(), entry.getKey());
 //        }
 
-        GuiTooltip.createInstance(Minecraft.getMinecraft());
+//        GuiTooltip.createInstance(Minecraft.getMinecraft());
     }
 
     // TODO: some textfield logic: `this.doneBtn.enabled = this.commandTextField.getText().trim().length() > 0;`
@@ -87,17 +90,11 @@ public abstract class AbstractSettingsGui extends GuiScreen
     {
         center = new int[]{(this.width / 2), (this.height / 2)};
 
-        // TODO: labelList not cleared because it doesn't matter? their values don't change after gui is finalized?
-        // TODO: create labellist in constructor? check vanilla code
-//        labelList.clear(); // buttonList is cleared before init is called, but labelList isn't for some reason
-//        GuiLabel label = new GuiLabel(mc.fontRendererObj, 0, (width / 2), (height / 2), 0, 0, -1);
-//        label.func_175202_a("Label");
-//        labelList.add(label.setCentered());
-
-//        buttonList.addAll(elementSettingNameMap.keySet());
-
         Keyboard.enableRepeatEvents(true);
-        textField = new GuiTextFieldVanilla(this.fontRendererObj, this.width / 2 - 100/*- 75*/, 50, 200, 20);
+//        textField = new GuiTextFieldVanilla(this.fontRendererObj, this.width / 2 - 100/*- 75*/, 50, 200, 20);
+
+        rootContainer.setXPos((this.width / 2) - (rootContainer.getWidth() / 2));
+        rootContainer.setYPos((this.height / 2) - (rootContainer.getHeight() / 2));
 
 //        elementMap.put("TESTFIELD", new GuiTextField(this, -100, -100, "12345678901234567890"));
 //
@@ -125,8 +122,6 @@ public abstract class AbstractSettingsGui extends GuiScreen
         settings.save();
 
         // TODO: focused element should lose focus on gui close
-//        GL11.glDisable(GL11.GL_SCISSOR_TEST);
-//        GL11.glPopMatrix();
 
         System.out.println(settings);
     }
@@ -135,7 +130,7 @@ public abstract class AbstractSettingsGui extends GuiScreen
     public void updateScreen()
     {
         rootContainer.handleScreenTick();
-        textField.updateCursorCounter();
+//        textField.updateCursorCounter();
     }
 
     @Override
@@ -144,13 +139,13 @@ public abstract class AbstractSettingsGui extends GuiScreen
         super.keyTyped(typedChar, keyCode);
 
         rootContainer.handleKeyTyped(typedChar, keyCode);
-        textField.textboxKeyTyped(typedChar, keyCode);
+//        textField.textboxKeyTyped(typedChar, keyCode);
     }
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
-        textField.drawTextBox();
+//        textField.drawTextBox();
         rootContainer.onScreenDraw(mouseX, mouseY, partialTicks);
 
 //        attemptClaimDefaultTooltip(mouseX, mouseY);
@@ -203,15 +198,13 @@ public abstract class AbstractSettingsGui extends GuiScreen
     {
         super.handleMouseInput();
 
-//        int i = Mouse.getEventDWheel();
-//
-//        if (i != 0)
-//        {
-//            i = (int) MathUtils.clamp(i, -1, 1);
-////            i = !isShiftKeyDown() ? i * 7 : i;
-//
-////            this.mc.ingameGUI.getChatGUI().scroll(i);
-//        }
+        int wheelDelta = Mouse.getEventDWheel();
+
+        if (wheelDelta != 0)
+        {
+            wheelDelta = (int) MathUtils.clamp(wheelDelta, -1, 1);
+            rootContainer.handleMouseScroll(wheelDelta);
+        }
     }
 
     @Override
@@ -222,29 +215,9 @@ public abstract class AbstractSettingsGui extends GuiScreen
             return;
         }
 
-        textField.mouseClicked(mouseX, mouseY, mouseEventButton);
+//        textField.mouseClicked(mouseX, mouseY, mouseEventButton);
 
-        List<GuiInteractableElement> mouseDownElements = rootContainer.handleMouseDown(mouseX, mouseY);
-        System.out.println(mouseDownElements);
-
-        if (mouseDownElements.isEmpty())
-        {
-            return;
-        }
-
-        GuiInteractableElement highestZLevelElement = mouseDownElements.get(0);
-
-        for (GuiInteractableElement element : mouseDownElements)
-        {
-            if (element.getZLevel() > highestZLevelElement.getZLevel())
-            {
-                highestZLevelElement = element;
-            }
-        }
-
-        highestZLevelElement.playPressSound(this.mc.getSoundHandler());
-        highestZLevelElement.onMousePress(mouseX, mouseY);
-//        lastMouseDownElement = highestZLevelElement;
+        rootContainer.handleMouseDown(mouseX, mouseY);
     }
 
     @Override
@@ -258,9 +231,10 @@ public abstract class AbstractSettingsGui extends GuiScreen
         rootContainer.handleMouseRelease(mouseX, mouseY);
     }
 
-//    @Override
-//    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick)
-//    {
-//        System.out.println("mouseClickMove: " + mouseX + " " + mouseY + " " + clickedMouseButton + " " + timeSinceLastClick);
-//    }
+    @Override
+    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long msHeld)
+    {
+        rootContainer.handleMouseDrag(mouseX, mouseY, clickedMouseButton, msHeld);
+//        System.out.println("mouseClickMove: " + mouseX + " " + mouseY + " " + clickedMouseButton + " " + msHeld);
+    }
 }

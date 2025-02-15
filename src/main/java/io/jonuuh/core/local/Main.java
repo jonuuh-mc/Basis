@@ -7,6 +7,7 @@ import io.jonuuh.core.lib.config.setting.types.array.DoubleArrSetting;
 import io.jonuuh.core.lib.config.setting.types.array.IntArrSetting;
 import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.config.setting.types.single.DoubleSetting;
+import io.jonuuh.core.lib.config.setting.types.single.IntSetting;
 import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
 import io.jonuuh.core.lib.update.UpdateHandler;
 import io.jonuuh.core.lib.util.ChatLogger;
@@ -42,6 +43,7 @@ public class Main
     public void FMLInit(FMLInitializationEvent event)
     {
         UpdateHandler.createInstance(modID, version); // TODO: should be in FMLInit probably (has event listeners)
+        UpdateHandler.INSTANCE.start();
 
         KeyBinding keyBinding = new KeyBinding("<description>", Keyboard.KEY_NONE, modID);
         ClientRegistry.registerKeyBinding(keyBinding);
@@ -58,6 +60,7 @@ public class Main
         settings.put("RENDER_RANGE", new IntArrSetting(new int[]{1, 75}));
         settings.put("FAT_SLIDER", new DoubleArrSetting(new double[]{10D, 15D, 20D, 5D, 30D, 45D, 1000D}));
         settings.put("BACKGROUND_COLOR", new StringSetting("BLUE"));
+        settings.put("TEST2", new IntSetting(30));
 
         return settings;
     }

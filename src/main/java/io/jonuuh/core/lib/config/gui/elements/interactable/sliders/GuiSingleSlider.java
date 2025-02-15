@@ -1,170 +1,220 @@
-//package io.jonuuh.core.lib.config.gui.elements.interactable.sliders;
-//
-//import io.jonuuh.core.lib.config.gui.elements.GuiContainer;
-//import io.jonuuh.core.lib.config.setting.types.Setting;
-//import io.jonuuh.core.lib.config.setting.types.single.DoubleSetting;
-//
-//public class GuiSingleSlider extends AbstractGuiSlider/*<double[]>*/
-//{
-//    public GuiSingleSlider(GuiContainer parent, int xPos, int yPos, int width, int height, double min, double max, double[] startValues, boolean isVertical)
+package io.jonuuh.core.lib.config.gui.elements.interactable.sliders;
+
+import io.jonuuh.core.lib.config.gui.elements.GuiContainer;
+import io.jonuuh.core.lib.config.gui.elements.interactable.GuiSettingElement;
+import io.jonuuh.core.lib.util.MathUtils;
+import io.jonuuh.core.lib.util.RenderUtils;
+import org.lwjgl.opengl.GL11;
+
+import java.text.DecimalFormat;
+
+public class GuiSingleSlider extends GuiSettingElement
+{
+    protected final double min;
+    protected final double max;
+    protected final boolean isVertical;
+    protected double normalPointerValue;
+
+    protected DecimalFormat decimalFormat;
+    protected int pointerSize;
+
+    public GuiSingleSlider(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, double min, double max, double startValue, boolean isVertical)
+    {
+        super(parent, elementName, xPos, yPos, width, height);
+        this.min = min;
+        this.max = max;
+
+        this.isVertical = isVertical;
+        this.pointerSize = isVertical ? width : height;
+
+        this.decimalFormat = new DecimalFormat("#.###");
+
+        setValue(startValue);
+    }
+
+    public GuiSingleSlider(GuiContainer parent, String elementName, int xPos, int yPos, double min, double max, double startValue)
+    {
+        this(parent, elementName, xPos, yPos, 200, 16, min, max, startValue, false);
+    }
+
+    public double getValue()
+    {
+        return MathUtils.denormalize(getNormalizedValue(), min, max);
+    }
+
+    public void setValue(double value)
+    {
+        setNormalizedValue(MathUtils.normalize(value, min, max));
+    }
+
+    public double getNormalizedValue()
+    {
+        return normalPointerValue;
+    }
+
+    public void setNormalizedValue(double normalValue)
+    {
+        normalPointerValue = MathUtils.clamp(normalValue, 0, 1);
+    }
+
+    public DecimalFormat getDecimalFormat()
+    {
+        return decimalFormat;
+    }
+
+    public void setDecimalFormat(DecimalFormat decimalFormat)
+    {
+        this.decimalFormat = decimalFormat;
+    }
+
+    // mouse position on the slider
+    protected double getSliderValueAtMousePos(int mouseX, int mouseY)
+    {
+        return isVertical
+                ? (mouseY - yPos) / (double) height
+                : (mouseX - xPos) / (double) width;
+    }
+
+    // x/y screen position of the center of a pointer
+    protected float getPointerScreenPos()
+    {
+//        if (isVertical)
+//        {
+//            RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, xPos, center, 3, 3, new Color("#00ff00"));
+//        }
+//        else
+//        {
+//            RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, center, yPos, 3, 3, new Color("#00ff00"));
+//        }
+        return isVertical
+                ? (float) (yPos + (getNormalizedValue() * height))
+                : (float) (xPos + (getNormalizedValue() * width));
+    }
+
+    @Override
+    protected void updateSetting()
+    {
+
+    }
+
+    @Override
+    public void onMousePress(int mouseX, int mouseY)
+    {
+        super.onMousePress(mouseX, mouseY);
+    }
+
+    @Override
+    protected void drawElement(int mouseX, int mouseY, float partialTicks)
+    {
+        if (isVertical)
+        {
+//            drawVerticalSlider();
+        }
+        else
+        {
+            drawHorizontalSlider();
+        }
+
+        if (mouseDown)
+        {
+            setNormalizedValue(getSliderValueAtMousePos(mouseX, mouseY));
+
+            // TODO: don't check for pre-claim? assumes no slider overlap (drag two sliders once)
+//            claimTooltipForPointer(lastHeldPointer);
+
+            sendChangeToSetting();
+        }
+    }
+
+    protected void drawHorizontalSlider()
+    {
+        float trackHeight = (height / 3F);
+        float trackY = yPos + trackHeight;
+        float pointerScreenPos = getPointerScreenPos();
+
+        // left
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos, trackY, (pointerScreenPos - xPos), trackHeight, parent.getOuterRadius(), parent.getBaseColor(), true);
+        // right
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, pointerScreenPos, trackY, width - (pointerScreenPos - xPos), trackHeight, parent.getOuterRadius(), parent.getColorMap().get("ACCENT"), true);
+
+        drawPointer();
+    }
+
+//    protected void drawVerticalSlider()
 //    {
-//        super(parent, xPos, yPos, width, height, min, max, startValues, isVertical);
-//    }
+//        float trackWidth = (width / 3F);
 //
-//    public GuiSingleSlider(GuiContainer parent, int xPos, int yPos, int width, int height, double min, double max, double startValue, boolean isVertical)
+//        // Draw track(s)
+//        for (int i = 0; i < normalPointerValues.length; i++)
+//        {
+//            float currPointerCenter = getPointerScreenPos(i);
+//
+//            // Right side track for last pointer
+//            if (i == normalPointerValues.length - 1)
+//            {
+//                float y = currPointerCenter;
+//                float h = height - (currPointerCenter - yPos);
+//
+//                RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos + trackWidth, y, trackWidth, h, parent.getOuterRadius(), parent.getColorMap().get("ACCENT"), true);
+//            }
+//
+//            // Left side track for all but first pointer
+//            float y = (i == 0) ? yPos : getPointerScreenPos(i - 1);
+//            float h = (i == 0) ? (currPointerCenter - yPos) : (currPointerCenter - getPointerScreenPos(i - 1));
+//
+//            RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos + trackWidth, y, trackWidth, h, parent.getOuterRadius(), colors.get(i), true);
+//        }
+//
+//        drawPointer(true);
+//        drawPointer(false);
+//    }
+
+    protected void drawPointer()
+    {
+        float x = isVertical ? xPos : getPointerScreenPos() - (pointerSize / 2F);
+        float y = isVertical ? getPointerScreenPos() - (pointerSize / 2F) : yPos;
+
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, x, y, pointerSize, pointerSize, parent.getInnerRadius(), parent.getBaseColor().copy().setA(0.5F), true);
+    }
+
+//    protected void claimTooltipForPointer(boolean isLeftPointer)
 //    {
-//        super(parent, xPos, yPos, width, height, min, max, startValue, isVertical);
-//    }
+//        this.tooltipStr = decimalFormat.format(getValue(isLeftPointer));
+//        int strWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(tooltipStr) - 1;
 //
-//    public GuiSingleSlider(GuiContainer parent, int xPos, int yPos, double min, double max, double[] startValues)
-//    {
-//        super(parent, xPos, yPos, min, max, startValues);
-//    }
+//        if (isVertical)
+//        {
+//            this.tooltip.posX = xPos - 7 - strWidth;
+//            this.tooltip.posY = getPointerScreenPos(isLeftPointer) /*- (strWidth / 2F)*/;
+//        }
+//        else
+//        {
+//            this.tooltip.posX = getPointerScreenPos(isLeftPointer) - (strWidth / 2F);
+//        }
 //
-//    public GuiSingleSlider(GuiContainer parent, int xPos, int yPos, double min, double max, double startValue)
-//    {
-//        super(parent, xPos, yPos, min, max, startValue);
-//    }
+////        GuiTooltip.getInstance().color = colors.get(pointerIndex);
 //
-////    @Override
-////    public void associateSetting(Setting<String> associatedSetting)
-////    {
-////        this.associatedSetting = associatedSetting;
-////    }
-//
-//    @Override
-//    protected void sendChangeToSetting()
-//    {
-//        ((DoubleSetting) associatedSetting).setValue(0.0D);
-//    }
-//
-////    public double getValue()
-////    {
-////        return denormalize(getNormalizedValue());
-////    }
-////
-////    public void setValue(double value)
-////    {
-////        setNormalizedValue(normalize(value));
-////    }
-////
-////    public double getNormalizedValue()
-////    {
-////        return normalPointerValues[0];
-////    }
-////
-////    public void setNormalizedValue(double normalValue)
-////    {
-////        normalPointerValues[0] = clamp(normalValue);
-////    }
-//
-////    @Override
-////    public boolean onScreenDraw(Minecraft mc, int mouseX, int mouseY)
-////    {
-////        boolean wasDrawn = super.onScreenDraw(mc, mouseX, mouseY);
-////
-////        if (wasDrawn)
-////        {
-////            drawSlider();
-////
-////            if (mouseDown)
-////            {
-////                setNormalizedValue(getSliderValueAtMouseX(mouseX));
-////
-////                claimTooltip();
-////
-////                sendChangeToParent();
-////            }
-////        }
-////
-////        return wasDrawn;
-////    }
-//
-////    @Override
-////    public void onMousePress(int mouseX, int mouseY)
-////    {
-////        mouseDown = true;
-////        lastHeldPointer = getClosestPointerToMouse(mouseX);
-////    }
-//
-////    @Override
-////    public void onMouseRelease(int mouseX, int mouseY)
-////    {
-////        mouseDown = false;
-////    }
-//
-////    protected void drawSlider()
-////    {
-////        float trackHeight = (height / 3F);
-////        float pointerXCenter = getPointerXCenter(0);
-////
-////        // Left side track
-////        GuiUtils.drawRoundedRect(GL11.GL_POLYGON, xPos, yPos + trackHeight, pointerXCenter - xPos, trackHeight, parent.getOuterRadius(), colorMap.get("BASE"), true);
-////
-////        // Right side track
-////        GuiUtils.drawRoundedRect(GL11.GL_POLYGON, pointerXCenter, yPos + trackHeight, width - (pointerXCenter - xPos), trackHeight, parent.getOuterRadius(), colorMap.get("ACCENT"), true);
-////
-////        // Draw pointer
-////        GuiUtils.drawRoundedRect(GL11.GL_POLYGON, pointerXCenter - (pointerSize / 2F), yPos, pointerSize, pointerSize, parent.getInnerRadius(), colorMap.get("BASE"), true);
-////    }
-//
-////    public float getPointerXCenter()
-////    {
-////        float x = (float) (xPos + (getNormalizedValue() * width));
-////        GuiUtils.drawRectangle(GL11.GL_LINE_LOOP, x, yPos, 3, 3, new Color());
-////
-////        // prevents sliders from going half off the start/end of the track
-////        x = (float) clamp(x, xPos + (pointerSize / 2D), xPos + width - (pointerSize / 2D));
-////
-////        return x;
-////    }
-//
-////    public int getClosestPointerToMouse(int mouseX)
-////    {
-////        return 0;
-////    }
-//
-////    // mouse position on the slider
-////    protected double getSliderValueAtMouseX(int mouseX)
-////    {
-////        return (mouseX - xPos) / (double) width;
-////    }
-////
-////    protected double normalize(double value)
-////    {
-////        return (value - min) / (max - min);
-////    }
-////
-////    protected double denormalize(double normalizedValue)
-////    {
-////        return normalizedValue * (max - min) + min;
-////    }
-//
-////    protected double clamp(double value)
-////    {
-////        // Clamp value (0, 1)
-////        return clamp(value, 0.0, 1.0);
-////    }
-//
-////    protected double clamp(double value, double min, double max)
-////    {
-////        // Clamp value (min, max)
-////        return Math.min((Math.max(value, min)), max);
-////    }
-//
-////    protected void claimTooltip()
-////    {
-////        this.tooltipStr = decimalFormat.format(getValue());
-////
+////        this.tooltipStr = decimalFormat.format(getValue(pointerIndex));
 ////        GuiTooltip.claim(this);
 ////
 ////        int strWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(tooltipStr) - 1;
-////        GuiTooltip.getInstance().posX = getPointerXCenter() - (strWidth / 2F);
-////        GuiTooltip.getInstance().color = colorMap.get("BASE");
-////    }
 ////
-////    public void claimHoverTooltip(int mouseX, int mouseY)
-////    {
-////        claimTooltip();
-////    }
-//}
+////        if (isVertical)
+////        {
+////            GuiTooltip.getInstance().posX = xPos - 7 - strWidth;
+////            GuiTooltip.getInstance().posY = getPointerScreenPos(pointerIndex) /*- (strWidth / 2F)*/;
+////        }
+////        else
+////        {
+////            GuiTooltip.getInstance().posX = getPointerScreenPos(pointerIndex) - (strWidth / 2F);
+////        }
+////
+////        GuiTooltip.getInstance().color = colors.get(pointerIndex);
+//    }
+
+//    @Override
+//    public void claimHoverTooltip(int mouseX, int mouseY)
+//    {
+//        claimTooltipForPointer(getClosestPointerToMouse(mouseX, mouseY));
+//    }
+}

@@ -1,4 +1,4 @@
-package io.jonuuh.core.lib.config.gui.elements.interactable.sliders;
+package io.jonuuh.core.lib.config.gui.elements.interactable.sliders.old;
 
 import io.jonuuh.core.lib.config.gui.elements.GuiContainer;
 import io.jonuuh.core.lib.config.setting.types.array.DoubleArrSetting;

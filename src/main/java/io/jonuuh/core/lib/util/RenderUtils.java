@@ -202,21 +202,15 @@ public abstract class RenderUtils
     // Vertices MUST be in counterclockwise order (opengl triangle winding order)
     public static void drawVertices(int glMode, float[][] vertices, Color color)
     {
-        drawVertices(glMode, vertices, color, 0);
-    }
-
-    // Vertices MUST be in counterclockwise order (opengl triangle winding order)
-    public static void drawVertices(int glMode, float[][] vertices, Color color, float rotationAngle)
-    {
         GL11.glColor4f(color.getR(), color.getG(), color.getB(), color.getA());
         GL11.glPushMatrix();
 
-        if (rotationAngle != 0)
-        {
-            GL11.glTranslatef(vertices[0][0], vertices[0][1], 0.0F); // translate to object's origin
-            GL11.glRotatef(rotationAngle, 0.0F, 0.0F, 1.0F);
-            GL11.glTranslatef(-vertices[0][0], -vertices[0][1], 0.0F);
-        }
+//        if (rotationAngle != 0)
+//        {
+//            GL11.glTranslatef(vertices[0][0], vertices[0][1], 0.0F); // translate to object's origin
+//            GL11.glRotatef(rotationAngle, 0.0F, 0.0F, 1.0F);
+//            GL11.glTranslatef(-vertices[0][0], -vertices[0][1], 0.0F);
+//        }
 
         // Enable transparency
         GL11.glEnable(GL11.GL_BLEND);
@@ -231,10 +225,10 @@ public abstract class RenderUtils
         }
         GL11.glEnd();
 
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+
         // Disable transparency
         GL11.glDisable(GL11.GL_BLEND);
-
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
 
         GL11.glPopMatrix();
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -244,14 +238,26 @@ public abstract class RenderUtils
     {
         width = Math.max(width, 0);
         height = Math.max(height, 0);
+        float hWidth = width / 2F;
+        float hHeight = height / 2F;
+
+        GL11.glPushMatrix();
+
+//        if (rotationAngle != 0)
+//        {
+//            GL11.glTranslatef(x + hWidth, y + hHeight, 0.0F); // translate to object's origin
+//            GL11.glRotatef(rotationAngle, 0.0F, 0.0F, 1.0F);
+//            GL11.glTranslatef(-x - hWidth, -y - hHeight, 0.0F);
+//        }
 
         // Order: top left, bottom left, bottom right, top right
-        drawVertices(glMode, new float[][]{{x, y}, {x + (width / 2F), y + height}, {x + width, y}}, color, rotationAngle);
+        drawVertices(glMode, new float[][]{{x, y}, {x + (width / 2F), y + height}, {x + width, y}}, color);
+        GL11.glPopMatrix();
 
-        GL11.glEnable(GL11.GL_LINE_SMOOTH);
-        GL11.glLineWidth(1F);
-        drawVertices(GL11.GL_LINE_LOOP, new float[][]{{x, y}, {x + (width / 2F), y + height}, {x + width, y}}, color, rotationAngle);
-        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+//        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+//        GL11.glLineWidth(1F);
+//        drawVertices(GL11.GL_LINE_LOOP, new float[][]{{x, y}, {x + (width / 2F), y + height}, {x + width, y}}, color, rotationAngle);
+//        GL11.glDisable(GL11.GL_LINE_SMOOTH);
     }
 
     public static void drawRectangle(int glMode, float x, float y, float width, float height, Color color)
