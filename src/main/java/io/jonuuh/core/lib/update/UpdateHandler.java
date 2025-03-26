@@ -1,11 +1,16 @@
 package io.jonuuh.core.lib.update;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import io.jonuuh.core.lib.config.Config;
 import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
 import io.jonuuh.core.lib.util.Log4JLogger;
-import io.jonuuh.core.lib.util.StaticFileUtils;
+import io.jonuuh.core.lib.util.StaticAssetUtils;
+
+import java.lang.reflect.Type;
+import java.util.Map;
 
 public class UpdateHandler extends Thread
 {
@@ -17,12 +22,12 @@ public class UpdateHandler extends Thread
 
     public static void createInstance(String modID, String currentVersionStr)
     {
-        if (INSTANCE != null)
+        if (INSTANCE == null)
         {
-            Log4JLogger.INSTANCE.fatal("UpdateHandler instance has already been created");
-            throw new IllegalStateException();
+            INSTANCE = new UpdateHandler(modID, currentVersionStr);
+            return;
         }
-        INSTANCE = new UpdateHandler(modID, currentVersionStr);
+        Log4JLogger.INSTANCE.error("UpdateHandler instance has already been created");
     }
 
     public static boolean isCreated()
@@ -36,15 +41,20 @@ public class UpdateHandler extends Thread
         this.currentVersionStr = currentVersionStr;
     }
 
+    // TODO: move all this to constructor?
+    @Override
     public void run()
     {
         Settings updateSettings = new Settings("update");
-        updateSettings.put("LAST_NOTIFICATION_INSTANT", new StringSetting());
+//        updateSettings.put("LAST_NOTIFICATION_INSTANT", new StringSetting());
         updateSettings.put("LAST_LATEST_VERSION", new StringSetting(currentVersionStr));
-        updateSettings.put("DISABLE_REMINDING_FOR_LATEST", new BoolSetting());
+        updateSettings.put("NOTIFY_AGAIN_FOR_LATEST", new BoolSetting());
         Config.INSTANCE.putAndLoadSettings(updateSettings);
 
-        this.latestVersionStr = StaticFileUtils.getStaticHostedAsset("versioning/" + modID + "/latest-version.txt");
+        String versioningJson = StaticAssetUtils.getStaticHostedAsset("versioning/" + modID + "/" + modID + ".json");
+        Map<String, String> versioningMap = parseJson(versioningJson);
+
+        this.latestVersionStr = versioningMap.get("version");
         this.isUpdateAvailable = new Version(currentVersionStr).compareTo(new Version(latestVersionStr)) < 0;
 
         String message = "isUpdateAvailable = " + isUpdateAvailable + "; (current:" + currentVersionStr + ") " + (isUpdateAvailable ? "<" : ">=") + " (latest:" + latestVersionStr + ")";
@@ -52,12 +62,22 @@ public class UpdateHandler extends Thread
 
         if (true || isUpdateAvailable) // TODO:
         {
-            new NotificationPoster(modID, updateSettings, latestVersionStr);
+            new NotificationPoster(modID, updateSettings, versioningMap);
         }
         else
         {
+            // TODO: why are we resetting here
             updateSettings.reset();
         }
+
+//        MinecraftForge.EVENT_BUS.post(new ApiRequestFinishedEvent());
+    }
+
+    public Map<String, String> parseJson(String jsonStr)
+    {
+        Gson gson = new Gson();
+        Type type = new TypeToken<Map<String, String>>(){}.getType();
+        return gson.fromJson(jsonStr, type);
     }
 
     public String getLatestVersionStr()

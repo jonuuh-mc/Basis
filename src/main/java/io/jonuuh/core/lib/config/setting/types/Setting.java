@@ -50,6 +50,9 @@ public abstract class Setting<T>
         this.value = value;
     }
 
+    /**
+     * Set the current value back to the default value
+     */
     public void reset()
     {
         this.value = defaultValue;

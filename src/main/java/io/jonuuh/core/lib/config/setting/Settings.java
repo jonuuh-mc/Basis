@@ -2,6 +2,7 @@ package io.jonuuh.core.lib.config.setting;
 
 import io.jonuuh.core.lib.config.Config;
 import io.jonuuh.core.lib.config.setting.types.Setting;
+import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 
 import java.util.HashMap;
 
@@ -22,7 +23,7 @@ public class Settings extends HashMap<String, Setting<?>>
     /**
      * Deep copy these Settings into a new Settings
      * <p>
-     * This also copies the configuration category, which shouldn't be desirable at all (saving to file will overwrite)
+     * This also copies the configuration category, which probably isn't useful at all? (saving to file should overwrite)
      */
     public Settings deepCopy()
     {
@@ -71,10 +72,20 @@ public class Settings extends HashMap<String, Setting<?>>
         Config.INSTANCE.saveSetting(configurationCategory, settingName);
     }
 
+    /**
+     * Get a Setting given a settingName key
+     *
+     * @param settingName the key associated with the Setting when it was put into this Settings
+     * @param type the class type for the setting // TODO ?
+     * @return the typecast Setting associated with the given key if it exists in this Settings and is of the given type, otherwise null
+     * @param <T> // TODO ?
+     */
     public <T extends Setting<?>> T get(String settingName, Class<T> type)
     {
         try
         {
+//            BoolSetting.class.cast(this.get(settingName)); // TODO ?
+
             return type.cast(this.get(settingName));
         }
         catch (ClassCastException e)

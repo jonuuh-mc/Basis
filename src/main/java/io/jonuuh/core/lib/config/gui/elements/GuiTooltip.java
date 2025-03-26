@@ -1,5 +1,6 @@
 package io.jonuuh.core.lib.config.gui.elements;
 
+import io.jonuuh.core.lib.config.gui.GuiColorType;
 import io.jonuuh.core.lib.util.RenderUtils;
 import io.jonuuh.core.lib.util.Color;
 import net.minecraft.client.Minecraft;
@@ -85,7 +86,7 @@ public class GuiTooltip
         this.posX = currentElement.getXPos() - (strWidth / 2F) + (currentElement.getWidth() / 2F);
         this.posY = currentElement.getYPos() + padding - rectHeight - triHeight - 2; // -2 somewhat arbitrary
 
-        this.color = currentElement.getBaseColor() /*Color.getRandom()*/;
+        this.color = currentElement.getColor(GuiColorType.BASE) /*Color.getRandom()*/;
 //        return true;
     }
 

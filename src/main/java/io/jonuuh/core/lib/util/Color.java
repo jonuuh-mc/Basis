@@ -72,18 +72,6 @@ public class Color
         this.a = 1.0F;
     }
 
-    public long toDecimalARGB()
-    {
-        String s = "";
-
-        s = s + Integer.toHexString((int) (a * 255));
-        s = s + Integer.toHexString((int) (r * 255));
-        s = s + Integer.toHexString((int) (g * 255));
-        s = s + Integer.toHexString((int) (b * 255));
-
-        return (int) Long.parseLong(s, 16);
-    }
-
     public float getR()
     {
         return r;
@@ -126,6 +114,33 @@ public class Color
     {
         this.a = a;
         return this;
+    }
+
+    // definitely not the right way to do this (relative luminance?) but should be good enough
+    public Color adjustBrightness(float percentChange)
+    {
+        r = r + MathUtils.percentOf(r, percentChange);
+        g = g + MathUtils.percentOf(g, percentChange);
+        b = b + MathUtils.percentOf(b, percentChange);
+        return this;
+    }
+
+    public int toDecimalARGB()
+    {
+        String s = Integer.toHexString((int) (a * 255)) +
+                Integer.toHexString((int) (r * 255)) +
+                Integer.toHexString((int) (g * 255)) +
+                Integer.toHexString((int) (b * 255));
+
+        // TODO: why is this using parseLong instead of parseInt again?
+        return (int) Long.parseLong(s, 16);
+    }
+
+    public String toHex()
+    {
+        return Integer.toHexString((int) (r * 255)) +
+                Integer.toHexString((int) (g * 255)) +
+                Integer.toHexString((int) (b * 255));
     }
 
     private float[] hexToColor(String hexColor)
@@ -181,9 +196,8 @@ public class Color
      * Array of packed RGB triplet integers defining 16 standard chat colors <p>
      * ex: 0xFF00AA -> FF (R), 00 (G), AA (B) -> packed as decimals from 0-255 into each section of 8 bits <p>
      * 32 bit int -> [empty 8 bits][R 8 bits][G 8 bits][B 8 bits]
-     * <p>
-     * see FontRenderer constructor -> <p>
-     * net.minecraft.client.gui.FontRenderer#FontRenderer(net.minecraft.client.settings.GameSettings, net.minecraft.util.ResourceLocation, net.minecraft.client.renderer.texture.TextureManager, boolean)
+     *
+     * @see net.minecraft.client.gui.FontRenderer#FontRenderer(net.minecraft.client.settings.GameSettings, net.minecraft.util.ResourceLocation, net.minecraft.client.renderer.texture.TextureManager, boolean)
      */
     private static final int[] colorCodes = new int[16];
 
@@ -212,6 +226,12 @@ public class Color
     @Override
     public String toString()
     {
-        return "Color{" + "r=" + r + ", g=" + g + ", b=" + b + ", a=" + a + '}';
+        return "Color{" + toHex() + "}";
     }
+
+//    @Override
+//    public String toString()
+//    {
+//        return "Color{" + "r=" + r + ", g=" + g + ", b=" + b + ", a=" + a + '}';
+//    }
 }

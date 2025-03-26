@@ -274,6 +274,7 @@ public abstract class RenderUtils
 //        // TODO: ?
 //    }
 
+    // TODO: make this (draw from corner rather than center) the default
     public static void drawRoundedRect(int glMode, float x, float y, float width, float height, float radius, Color color, boolean offsetRadius)
     {
         float centerX = x + (width / 2F);

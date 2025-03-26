@@ -9,6 +9,11 @@ public abstract class MathUtils
         return Math.round(num * 2) / 2.0F; // round to nearest 0.5
     }
 
+    public static float percentOf(float f, float percent)
+    {
+        return (f / 100) * percent;
+    }
+
     public static Vec3 multiplyVec(Vec3 vec, double d)
     {
         return new Vec3(vec.xCoord * d, vec.yCoord * d, vec.zCoord * d);

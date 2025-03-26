@@ -164,7 +164,7 @@ public class HypixelPartyEventPoster
                 }
                 else
                 {
-                    throw new PartyEventException("Unknown problem matching pattern: `[MVP++] Player invited [VIP] PlayerName to the party! They have 60 seconds to accept.`");
+//                    throw new PartyEventException("Unknown problem matching pattern: `[MVP++] Player invited [VIP] PlayerName to the party! They have 60 seconds to accept.`");
                 }
             }
 

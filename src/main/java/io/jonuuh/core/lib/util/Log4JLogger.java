@@ -5,14 +5,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
+ * TODO: is this class really necessary? this is so overengineered and pointless
+ *
  * @see net.minecraft.util.LoggingPrintStream
  * @see net.minecraft.init.Bootstrap#redirectOutputToLog()
+ *
  */
 public class Log4JLogger
 {
     public static Log4JLogger INSTANCE;
-    public final Logger LOGGER;
-    public final String modID;
+    private final Logger LOGGER;
+    private final String modID;
 //    private final boolean isDevEnvironment;
 
     public static void createInstance(String modID)

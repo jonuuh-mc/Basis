@@ -10,7 +10,7 @@ class Version implements Comparable<Version>
     {
         if (versionStr == null || !versionStr.matches("^[0-9]+\\.[0-9]+\\.[0-9]+$"))
         {
-            Log4JLogger.INSTANCE.warn("Semver string '"+ versionStr + "' is invalid");
+            Log4JLogger.INSTANCE.error("Semver string '"+ versionStr + "' is invalid");
             parts = new int[]{-1, -1, -1};
             return;
         }
