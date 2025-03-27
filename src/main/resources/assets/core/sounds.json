@@ -1,0 +1,10 @@
+{
+  "click":{
+    "category": "neutral",
+    "sounds":[{"name":"core:click","stream":true}]
+  },
+  "tick":{
+    "category": "neutral",
+    "sounds":[{"name":"core:tick","stream":true}]
+  }
+}

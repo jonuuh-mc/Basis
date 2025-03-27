@@ -52,23 +52,23 @@ public class GuiSwitch extends GuiSettingElement
         trySendChangeToSetting();
     }
 
-    @Override
-    protected void onInitGui(int guiScreenWidth, int guiScreenHeight)
-    {
-        pointerSize = height - 2F;
-    }
+//    @Override
+//    protected void onInitGui(int guiScreenWidth, int guiScreenHeight)
+//    {
+//        pointerSize = height - 2F;
+//    }
 
     @Override
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
         float padding = ((height - pointerSize) / 2F);
-        float pointerX = switchState ? (xPos + width - pointerSize - padding) : xPos + padding;
+        float pointerX = switchState ? (worldXPos() + width - pointerSize - padding) : worldXPos() + padding;
         Color trackColor = switchState ? getColor(GuiColorType.BASE) : getColor(GuiColorType.ACCENT2);
 
         // Track
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos, yPos, width, height, parent.getInnerRadius(), trackColor, true);
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), width, height, parent.getInnerRadius(), trackColor, true);
         // Pointer
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, pointerX, yPos + padding, pointerSize, pointerSize, parent.getInnerRadius() - 1, getColor(GuiColorType.ACCENT1), true);
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, pointerX, worldYPos() + padding, pointerSize, pointerSize, parent.getInnerRadius() - 1, getColor(GuiColorType.ACCENT1), true);
     }
 
     @Override

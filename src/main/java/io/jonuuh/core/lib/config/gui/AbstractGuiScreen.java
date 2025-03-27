@@ -76,26 +76,15 @@ public abstract class AbstractGuiScreen extends GuiScreen
     @Override
     public void initGui()
     {
-//        center = new int[]{(this.width / 2), (this.height / 2)};
         Keyboard.enableRepeatEvents(true);
-//        textField = new GuiTextFieldVanilla(this.fontRendererObj, this.width / 2 - 100/*- 75*/, 50, 200, 20);
 
-//        rootContainer.setXPos((this.width / 2) - (rootContainer.getWidth() / 2));
-//        rootContainer.setYPos((this.height / 2) - (rootContainer.getHeight() / 2));
+//        rootContainer.setLocalXPos(Math.max((width / 2) - (rootContainer.getInitialWidth() / 2), 0));
+//        rootContainer.setLocalYPos(Math.max((height / 2) - (rootContainer.getInitialHeight() / 2), 0));
+//
+//        rootContainer.setWidth(Math.min(width - rootContainer.localXPos() /*- (width / 10)*/, rootContainer.getInitialWidth()));
+//        rootContainer.setHeight(Math.min(height - rootContainer.localYPos() /*- (height / 10)*/, rootContainer.getInitialHeight()));
 
         rootContainer.propagateEvent(new InitGuiEvent(width, height));
-
-//        elementMap.put("TESTFIELD", new GuiTextField(this, -100, -100, "12345678901234567890"));
-//
-//        for (GuiInteractableElement element : elementMap.values())
-//        {
-//            element.addXPos((width / 2) /*- (w / 2)*/);
-//            element.addYPos((height / 2) - (120 / 3));
-//        }
-//
-//        GL11.glPushMatrix();
-//        GL11.glEnable(GL11.GL_SCISSOR_TEST);
-//        RenderUtils.scissorFromTopLeft(100, 100, 250, 100);
     }
 
     @Override
@@ -159,7 +148,7 @@ public abstract class AbstractGuiScreen extends GuiScreen
             return;
         }
 
-        MouseDownEvent event = new MouseDownEvent(mouseX,  mouseY, mouseEventButton);
+        MouseDownEvent event = new MouseDownEvent(mouseX, mouseY, mouseEventButton);
         rootContainer.propagateEvent(event);
 
         if (!event.hasHits())

@@ -2,25 +2,32 @@ package io.jonuuh.core.lib.config.gui.elements;
 
 import io.jonuuh.core.lib.config.gui.GuiColorType;
 import io.jonuuh.core.lib.config.gui.elements.container.GuiContainer;
+import net.minecraft.client.gui.FontRenderer;
 
 public class GuiLabel extends GuiElement
 {
+    protected final FontRenderer fontRenderer;
     protected String text;
-    protected boolean centeredX;
-    protected boolean centeredY;
+    protected boolean centerStrInWidth;
+    protected boolean centerStrInHeight;
+    protected boolean fitWidthToStr;
+    protected boolean fitHeightToStr;
+    protected int textXPos;
+    protected int textYPos;
 
     public GuiLabel(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, String text)
     {
         super(parent, elementName, xPos, yPos, width, height);
+        this.fontRenderer = mc.fontRendererObj;
         this.text = text;
-        setCenteredX(true).setCenteredY(true);
+        centerStrInWidth = centerStrInHeight = true;
     }
 
     public GuiLabel(GuiContainer parent, String elementName, int xPos, int yPos, String text)
     {
         super(parent, elementName, xPos, yPos);
+        this.fontRenderer = mc.fontRendererObj;
         this.text = text;
-        setCenteredX(true).setCenteredY(true);
     }
 
     public String getText()
@@ -34,36 +41,33 @@ public class GuiLabel extends GuiElement
         return this;
     }
 
-    public boolean isCenteredX()
+    protected void onInitGui(int guiScreenWidth, int guiScreenHeight)
     {
-        return centeredX;
-    }
+        textXPos = worldXPos();
+        textYPos = worldYPos();
 
-    public GuiLabel setCenteredX(boolean centeredX)
-    {
-        this.centeredX = centeredX;
-        return this;
-    }
+        if (centerStrInWidth)
+        {
+            textXPos = worldXPos() + (width / 2) - (fontRenderer.getStringWidth(text) / 2);
+        }
+        else if (fitWidthToStr)
+        {
+            width = fontRenderer.getStringWidth(text);
+        }
 
-    public boolean isCenteredY()
-    {
-        return centeredY;
-    }
-
-    public GuiLabel setCenteredY(boolean centeredY)
-    {
-        this.centeredY = centeredY;
-        return this;
+        if (centerStrInHeight)
+        {
+            textYPos = worldYPos() + (height / 2) - ((fontRenderer.FONT_HEIGHT - 1) / 2);
+        }
+        else if (fitHeightToStr)
+        {
+            height = fontRenderer.FONT_HEIGHT - 1;
+        }
     }
 
     @Override
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
-        // TODO: need to account for str width/height which will be damn near impossible given scaling of text with gl11
-        //  drawing text is the sole reason i need to find a more mc idiomatic way to scale gui on resize
-//        float x = centeredX ? xPos + width / 2F : xPos;
-//        float y = centeredY ? yPos + height / 2F : xPos;
-
-        drawScaledString(text, xPos, yPos, getColor(GuiColorType.BASE).toDecimalARGB(), true);
+        fontRenderer.drawString(text, textXPos, textYPos, getColor(GuiColorType.BASE).toDecimalARGB(), true);
     }
 }

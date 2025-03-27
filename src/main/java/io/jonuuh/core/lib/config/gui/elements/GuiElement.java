@@ -14,12 +14,10 @@ import io.jonuuh.core.lib.config.gui.event.MouseScrollEvent;
 import io.jonuuh.core.lib.config.gui.event.ScreenDrawEvent;
 import io.jonuuh.core.lib.config.gui.event.ScreenTickEvent;
 import io.jonuuh.core.lib.util.Color;
-import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.audio.SoundHandler;
-import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
@@ -28,29 +26,45 @@ import java.util.Map;
 
 public abstract class GuiElement
 {
+    /** A reference to the static minecraft object */
     public final Minecraft mc;
+    /** This element's immediate ancestor: the container it's inside; Should only ever be null for the root container of the element tree */
     public final GuiContainer parent;
+    /** A readable name qualifying this element TODO: no enforcement of this being unique */
     public final String elementName;
 
+    /** A resource representing the default mouse down sound */
     protected final ResourceLocation resourceClickSound;
+    /** A map of colors that may be used by this element */
     protected Map<GuiColorType, Color> colorMap;
+    /**
+     * A map of custom event behavior lambdas which usually will have no entries;
+     * Allows for 'injecting' into and potentially overriding events dispatched by the GuiScreen when they are handled in this class
+     */
     protected Map<GuiEventType, GuiEventBehavior> eventBehaviors;
 
-    protected final int xPosInit;
-    protected final int yPosInit;
-    protected final int widthInit;
-    protected final int heightInit;
+    protected final int initialXPos;
+    protected final int initialYPos;
+    /** Initial constructed width of this element, used for element resizing */
+    protected final int initialWidth;
+    /** Initial constructed height of this element, used for element resizing */
+    protected final int initialHeight;
 
-    protected final int guiScreenWidthInit;
-    protected final int guiScreenHeightInit;
-    protected float currWidthScale;
-    protected float currHeightScale;
-
-    protected int xPos;
-    protected int yPos;
+    /** Local xPos, should almost never be used alone */
+    private int xPos;
+    /** Local yPos, should almost never be used alone */
+    private int yPos;
+    /** Logical width of this element */
     protected int width;
+    /** Logical height of this element */
     protected int height;
 
+    /** The sum of all xPos from this element's ancestors */
+    protected int inheritedXPos;
+    /** The sum of all yPos from this element's ancestors */
+    protected int inheritedYPos;
+
+    /** Which symbolic layer this element is on: equal to how many parents this element has */
     protected int zLevel;
 
     protected boolean visible;
@@ -61,11 +75,9 @@ public abstract class GuiElement
     protected boolean drawBounds;
 
     protected String tooltipStr;
-//    protected GuiTooltip tooltip;
 
     // TODO: use a ticker with onScreenTick instead for tooltips?
-    public int hoverTimeMs;
-    public long startHoverTime;
+    protected int hoverTimeCounter;
 
     protected GuiElement(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, String tooltipStr)
     {
@@ -73,20 +85,14 @@ public abstract class GuiElement
         this.parent = parent;
         this.elementName = elementName;
 
-        // assumes that parent xPos and xPosInit are the same? probably fine
-        this.xPosInit = this.xPos = xPos + (hasParent() ? parent.xPosInit : 0);
-        this.yPosInit = this.yPos = yPos + (hasParent() ? parent.yPosInit : 0);
+        this.initialXPos = this.xPos = xPos;
+        this.initialYPos = this.yPos = yPos;
 
-        this.widthInit = this.width = width;
-        this.heightInit = this.height = height;
+        this.initialWidth = this.width = width;
+        this.initialHeight = this.height = height;
 
-        // TODO: is this not stupid to be creating one of these for each element? assign just one of these to a
-        //  parent container somehow and then access it from children? would that even be more efficient?
-        //  this is dependent on the launch resolution which can probably be changed from launcher
-        //  currently gui element sizes are based upon arbitrary-ish default launch res
-        ScaledResolution sr = new ScaledResolution(mc);
-        this.guiScreenWidthInit = sr.getScaledWidth();
-        this.guiScreenHeightInit = sr.getScaledHeight();
+        this.inheritedXPos = hasParent() ? parent.worldXPos() : 0;
+        this.inheritedYPos = hasParent() ? parent.worldYPos() : 0;
 
         this.visible = true;
         this.enabled = true;
@@ -95,7 +101,7 @@ public abstract class GuiElement
         this.drawBounds = true; // TODO: debug
         this.tooltipStr = tooltipStr;
 
-        this.resourceClickSound = new ResourceLocation("core-config:click");
+        this.resourceClickSound = new ResourceLocation("core:click");
         this.eventBehaviors = new HashMap<>();
         this.colorMap = new HashMap<>();
 
@@ -152,35 +158,71 @@ public abstract class GuiElement
         return new Color();
     }
 
-    public int getXPos()
+    /**
+     * Element x position in world space (accounting for all x movement from ancestors)
+     */
+    public int worldXPos()
+    {
+        return xPos + inheritedXPos;
+    }
+
+    /**
+     * Element y position in world space (accounting for all y movement from ancestors)
+     */
+    public int worldYPos()
+    {
+        return yPos + inheritedYPos;
+    }
+
+    public int localXPos()
     {
         return xPos;
     }
 
-    public void setXPos(int xPos)
-    {
-        this.xPos = xPos;
-    }
-
-    public int getYPos()
+    public int localYPos()
     {
         return yPos;
     }
 
-    public void setYPos(int yPos)
+    public void setLocalXPos(int xPos)
+    {
+        this.xPos = xPos;
+    }
+
+    public void setLocalYPos(int yPos)
     {
         this.yPos = yPos;
     }
 
-//    public void setTempXPos(int xPos)
-//    {
-//        this.xPos = xPosInit + xPos;
-//    }
-//
-//    public void setTempYPos(int yPos)
-//    {
-//        this.yPos = yPosInit + yPos;
-//    }
+    public int getInitialXPos()
+    {
+        return initialXPos;
+    }
+
+    public int getInitialYPos()
+    {
+        return initialYPos;
+    }
+
+    public int getInheritedXPos()
+    {
+        return inheritedXPos;
+    }
+
+    public void setInheritedXPos(int inheritedXPos)
+    {
+        this.inheritedXPos = inheritedXPos;
+    }
+
+    public int getInheritedYPos()
+    {
+        return inheritedYPos;
+    }
+
+    public void setInheritedYPos(int inheritedYPos)
+    {
+        this.inheritedYPos = inheritedYPos;
+    }
 
     public int getWidth()
     {
@@ -200,6 +242,16 @@ public abstract class GuiElement
     public void setHeight(int height)
     {
         this.height = height;
+    }
+
+    public int getInitialWidth()
+    {
+        return initialWidth;
+    }
+
+    public int getInitialHeight()
+    {
+        return initialHeight;
     }
 
     public boolean isVisible()
@@ -250,26 +302,6 @@ public abstract class GuiElement
     public void setTooltipStr(String tooltipStr)
     {
         this.tooltipStr = tooltipStr;
-    }
-
-    public int getHoverTimeMs()
-    {
-        return hoverTimeMs;
-    }
-
-    public void setHoverTimeMs(int hoverTimeMs)
-    {
-        this.hoverTimeMs = hoverTimeMs;
-    }
-
-    public long getStartHoverTime()
-    {
-        return startHoverTime;
-    }
-
-    public void setStartHoverTime(long startHoverTime)
-    {
-        this.startHoverTime = startHoverTime;
     }
 
     public boolean isEnabled()
@@ -399,17 +431,20 @@ public abstract class GuiElement
 
         if (!overrideDefaultBehavior)
         {
+            // TODO: need to account for str width/height in drawing strings which will be damn near impossible given scaling of text with gl11
+            //  drawing text is the sole reason i need to find a more mc idiomatic way to scale gui on resize
+
             // TODO: make this eased or clamped? linear scaling makes for too small/large elements at smallest/biggest screen size
-            currWidthScale = (float) guiScreenWidth / guiScreenWidthInit;
-            currHeightScale = (float) guiScreenHeight / guiScreenHeightInit;
+//            currWidthScale = (float) guiScreenWidth / guiScreenWidthInit;
+//            currHeightScale = (float) guiScreenHeight / guiScreenHeightInit;
 
-            System.out.println(currWidthScale + " " + currHeightScale);
-
-            width = (int) (widthInit * currWidthScale);
-            height = (int) (heightInit * currHeightScale);
-
-            xPos = (int) (xPosInit * currWidthScale);
-            yPos = (int) (yPosInit * currHeightScale);
+//            System.out.println(currWidthScale + " " + currHeightScale);
+//
+//            width = (int) (widthInit * currWidthScale);
+//            height = (int) (heightInit * currHeightScale);
+//
+//            xPos = (int) (xPosInit * currWidthScale);
+//            yPos = (int) (yPosInit * currHeightScale);
         }
 
         onInitGui(guiScreenWidth, guiScreenHeight);
@@ -447,15 +482,16 @@ public abstract class GuiElement
         {
             if (visible)
             {
-                hovered = (mouseX >= xPos) && (mouseX < xPos + width)
-                        && (mouseY >= yPos) && (mouseY < yPos + height);
+                hovered = (mouseX >= worldXPos()) && (mouseX < worldXPos() + width)
+                        && (mouseY >= worldYPos()) && (mouseY < worldYPos() + height);
 
                 onScreenDraw(mouseX, mouseY, partialTicks);
 
                 if (drawBounds)
                 {
-                    RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, xPos, yPos, width, height, focused ? new Color("#00ff00") : new Color("#ff55ff"));
-                    drawScaledString(String.valueOf(zLevel), xPos + width - 6, yPos + height - 6, getColor(GuiColorType.ACCENT2).toDecimalARGB(), true);
+                    RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), width, height, focused ? new Color("#00ff00") : new Color("#ff55ff"));
+                    mc.fontRendererObj.drawString(String.valueOf(zLevel), worldXPos() + width - mc.fontRendererObj.getStringWidth(String.valueOf(zLevel)),
+                            worldYPos() + height - mc.fontRendererObj.FONT_HEIGHT, getColor(GuiColorType.ACCENT2).toDecimalARGB(), true);
                 }
             }
             return;
@@ -468,13 +504,22 @@ public abstract class GuiElement
 
     public final void dispatchScreenTickEvent()
     {
-        /*boolean overrideDefaultBehavior = */
-        tryApplyCustomEventBehavior(GuiEventType.SCREEN_TICK);
-//
-//        if (!overrideDefaultBehavior)
-//        {
-//            // default behaviors; none for now, should add tooltip handling here later?
-//        }
+        boolean overrideDefaultBehavior = tryApplyCustomEventBehavior(GuiEventType.SCREEN_TICK);
+
+        if (!overrideDefaultBehavior)
+        {
+            // default behaviors; none for now, should add tooltip handling here later?
+
+            // TODO: something like this?
+            if (hovered)
+            {
+                hoverTimeCounter = 20;
+            }
+            else if (hoverTimeCounter > 0)
+            {
+                hoverTimeCounter--;
+            }
+        }
 
         //  shouldn't be tied to fps, unlike screen drawing
         onScreenTick();
@@ -574,16 +619,6 @@ public abstract class GuiElement
 
     protected void onKeyTyped(char typedChar, int keyCode)
     {
-    }
-
-    protected void drawScaledString(String text, float x, float y, int color, boolean dropShadow)
-    {
-        GL11.glPushMatrix();
-        GL11.glTranslated(x, y, 0);
-        GL11.glScaled(MathUtils.clamp(currWidthScale - 0.5, 0.2, 1.0), MathUtils.clamp(currHeightScale - 0.5, 0.2, 1.0), 0);
-
-        mc.fontRendererObj.drawString(text, 0, 0, color, dropShadow);
-        GL11.glPopMatrix();
     }
 
     protected void playClickSound(SoundHandler soundHandler)

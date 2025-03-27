@@ -56,18 +56,18 @@ public class GuiCheckbox extends GuiSettingElement
     {
         if (!drawCheck)
         {
-            RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos, yPos, width, height, parent.getInnerRadius(), getColor(GuiColorType.ACCENT1), true);
+            RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), width, height, parent.getInnerRadius(), getColor(GuiColorType.ACCENT1), true);
 
             if (isChecked)
             {
                 float pad = width * 0.075F;
-                RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos + pad, yPos + pad, width - (pad * 2), height - (pad * 2), parent.getInnerRadius(), getColor(GuiColorType.BASE), true);
+                RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos() + pad, worldYPos() + pad, width - (pad * 2), height - (pad * 2), parent.getInnerRadius(), getColor(GuiColorType.BASE), true);
             }
         }
         else
         {
             Color boxColor = isChecked ? getColor(GuiColorType.BASE) : getColor(GuiColorType.ACCENT1);
-            RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos, yPos, width, height, parent.getInnerRadius(), boxColor, true);
+            RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), width, height, parent.getInnerRadius(), boxColor, true);
 
             if (isChecked)
             {
@@ -78,9 +78,9 @@ public class GuiCheckbox extends GuiSettingElement
                 float pad = 2F;
                 RenderUtils.drawVertices(GL11.GL_LINE_STRIP,
                         new float[][]{
-                                new float[]{xPos + width - pad, yPos + pad + 1},
-                                new float[]{xPos + (width * 0.333F), yPos + height - pad - 1},
-                                new float[]{xPos + pad, yPos + (width * 0.5F)}},
+                                new float[]{worldXPos() + width - pad, worldYPos() + pad + 1},
+                                new float[]{worldXPos() + (width * 0.333F), worldYPos() + height - pad - 1},
+                                new float[]{worldXPos() + pad, worldYPos() + (width * 0.5F)}},
                         getColor(GuiColorType.ACCENT1));
 
                 GL11.glLineWidth(1F);

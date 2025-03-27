@@ -22,6 +22,6 @@ public class GuiBaseContainer extends GuiContainer
     @Override
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos, yPos, width, height, innerRadius, getColor(GuiColorType.BACKGROUND), true);
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), width, height, innerRadius, getColor(GuiColorType.BACKGROUND), true);
     }
 }

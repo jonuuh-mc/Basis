@@ -24,11 +24,12 @@ public abstract class RenderUtils
         return mc.fontRendererObj;
     }
 
-    public static int getStringWidth(String str)
+    public static int getStringWidthMinusOne(String str)
     {
-        return getFontRenderer().getStringWidth(str) - 1; // getStringWidth seems to always be over by 1 (for loop end condition mistake?)
+        return getFontRenderer().getStringWidth(str) - 1; // getStringWidth is sometimes over by 1 depending on usage? (for loop end condition?)
     }
 
+    // yoinked from somewhere in mc src code, not sure where
     public static String trimStringToWidthWithEllipsis(String str, int width)
     {
         int strWidth = getFontRenderer().getStringWidth(str);

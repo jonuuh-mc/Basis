@@ -73,12 +73,12 @@ public class GuiTextField extends GuiSettingElement
 
     private int getCursorScreenPos()
     {
-        return xPos + fontRenderer.getStringWidth(getTextBeforeCursor()) - 1;
+        return worldXPos() + fontRenderer.getStringWidth(getTextBeforeCursor()) - 1;
     }
 
     private String getTextBelowMouseX(int mouseX)
     {
-        return fontRenderer.trimStringToWidth(text, mouseX - xPos + 1);
+        return fontRenderer.trimStringToWidth(text, mouseX - worldXPos() + 1);
     }
 
     public int getSelectionStart()
@@ -186,7 +186,7 @@ public class GuiTextField extends GuiSettingElement
             setSelectionPos(getTextBelowMouseX(mouseX).length());
         }
 
-        RenderUtils.drawRectangle(GL11.GL_POLYGON, xPos, yPos, width, height, new Color("#242424").setA(0.75F));
+        RenderUtils.drawRectangle(GL11.GL_POLYGON, worldXPos(), worldYPos(), width, height, new Color("#242424").setA(0.75F));
 
         if (hasSelection())
         {
@@ -195,10 +195,10 @@ public class GuiTextField extends GuiSettingElement
 
         if (Display.isActive() && focused && (cursorFlashCounter % 20 < 10 || isTyping))
         {
-            RenderUtils.drawRectangle(GL11.GL_POLYGON, getCursorScreenPos(), yPos - 2, 1, fontRenderer.FONT_HEIGHT + 2, new Color("#00ff00")/*.setA(0.5F)*/);
+            RenderUtils.drawRectangle(GL11.GL_POLYGON, getCursorScreenPos(), worldYPos() - 2, 1, fontRenderer.FONT_HEIGHT + 2, new Color("#00ff00")/*.setA(0.5F)*/);
         }
 
-        fontRenderer.drawString(text, xPos, yPos, -1);
+        fontRenderer.drawString(text, worldXPos(), worldYPos(), -1);
     }
 
     public void drawSelectionHighlight()
@@ -208,7 +208,7 @@ public class GuiTextField extends GuiSettingElement
         int rectX = isSelectionForward() ? cursorX + 1 : cursorX - rectWidth;
 //        System.out.println("cursorPos: " + cursorPos + ", selectionPos: " + selectionPos);
 
-        RenderUtils.drawRectangle(GL11.GL_POLYGON, rectX, yPos, rectWidth, fontRenderer.FONT_HEIGHT - 1, new Color("#009ac2").setA(0.75F)); // 3399FF
+        RenderUtils.drawRectangle(GL11.GL_POLYGON, rectX, worldYPos(), rectWidth, fontRenderer.FONT_HEIGHT - 1, new Color("#009ac2").setA(0.75F)); // 3399FF
     }
 
     public void onMouseDown(int mouseX, int mouseY)

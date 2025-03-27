@@ -109,8 +109,8 @@ public class GuiDualSlider extends GuiSettingElement
     protected double getSliderValueAtMousePos(int mouseX, int mouseY)
     {
         return isVertical
-                ? (mouseY - yPos) / (double) height
-                : (mouseX - xPos) / (double) width;
+                ? (mouseY - worldYPos()) / (double) height
+                : (mouseX - worldXPos()) / (double) width;
     }
 
     // x/y screen position of the center of a pointer
@@ -125,8 +125,8 @@ public class GuiDualSlider extends GuiSettingElement
 //            RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, center, yPos, 3, 3, new Color("#00ff00"));
 //        }
         return isVertical
-                ? (float) (yPos + (getNormalizedValue(isLeftPointer) * height))
-                : (float) (xPos + (getNormalizedValue(isLeftPointer) * width));
+                ? (float) (worldYPos() + (getNormalizedValue(isLeftPointer) * height))
+                : (float) (worldXPos() + (getNormalizedValue(isLeftPointer) * width));
     }
 
     @Override
@@ -134,11 +134,11 @@ public class GuiDualSlider extends GuiSettingElement
     {
     }
 
-    @Override
-    protected void onInitGui(int guiScreenWidth, int guiScreenHeight)
-    {
-        pointerSize = isVertical ? width : height;
-    }
+//    @Override
+//    protected void onInitGui(int guiScreenWidth, int guiScreenHeight)
+//    {
+//        pointerSize = isVertical ? width : height;
+//    }
 
     @Override
     public void onMouseDown(int mouseX, int mouseY)
@@ -190,13 +190,13 @@ public class GuiDualSlider extends GuiSettingElement
         float pOffset = pointerSize / 2F;
 
         // far left
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos, (yPos + trackHeight), (leftPointerScreenPos - xPos) /*- pOffset*/, trackHeight, parent.getOuterRadius(), getColor(GuiColorType.ACCENT1), true);
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), (worldYPos() + trackHeight), (leftPointerScreenPos - worldXPos()) /*- pOffset*/, trackHeight, parent.getOuterRadius(), getColor(GuiColorType.ACCENT1), true);
 
         // middle
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, leftPointerScreenPos /*- pOffset*/, (yPos + trackHeight), (rightPointerScreenPos - leftPointerScreenPos) /*+ (pOffset * 2)*/, trackHeight, parent.getOuterRadius(), getColor(GuiColorType.BASE), true);
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, leftPointerScreenPos /*- pOffset*/, (worldYPos() + trackHeight), (rightPointerScreenPos - leftPointerScreenPos) /*+ (pOffset * 2)*/, trackHeight, parent.getOuterRadius(), getColor(GuiColorType.BASE), true);
 
         // far right
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, rightPointerScreenPos /*+ pOffset*/, (yPos + trackHeight), width - (rightPointerScreenPos - xPos) /*- pOffset*/, trackHeight, parent.getOuterRadius(), getColor(GuiColorType.ACCENT1), true);
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, rightPointerScreenPos /*+ pOffset*/, (worldYPos() + trackHeight), width - (rightPointerScreenPos - worldXPos()) /*- pOffset*/, trackHeight, parent.getOuterRadius(), getColor(GuiColorType.ACCENT1), true);
 
 
 //        // Draw track(s)
@@ -255,8 +255,8 @@ public class GuiDualSlider extends GuiSettingElement
 
     protected void drawPointer(boolean isLeftPointer)
     {
-        float x = isVertical ? xPos : getPointerScreenPos(isLeftPointer) - (pointerSize / 2F);
-        float y = isVertical ? getPointerScreenPos(isLeftPointer) - (pointerSize / 2F) : yPos;
+        float x = isVertical ? worldXPos() : getPointerScreenPos(isLeftPointer) - (pointerSize / 2F);
+        float y = isVertical ? getPointerScreenPos(isLeftPointer) - (pointerSize / 2F) : worldYPos();
 
         if (isLeftPointer)
         {

@@ -8,6 +8,7 @@ import io.jonuuh.core.lib.config.gui.elements.container.GuiContainer;
 import io.jonuuh.core.lib.config.gui.elements.GuiElement;
 import io.jonuuh.core.lib.config.gui.elements.GuiLabel;
 import io.jonuuh.core.lib.config.gui.elements.GuiButton;
+import io.jonuuh.core.lib.config.gui.elements.container.GuiFlexContainer;
 import io.jonuuh.core.lib.config.gui.elements.sliders.GuiDualSlider;
 import io.jonuuh.core.lib.config.gui.elements.GuiSwitch;
 import io.jonuuh.core.lib.config.gui.elements.sliders.GuiSingleSlider;
@@ -66,17 +67,27 @@ public class SettingsGuiScreen extends AbstractGuiScreen
 
         // TODO: don't all these given widths and heights for elements depend on the this initial scaledRes?
         //  not literally but relatively, they were chosen with respect to this initial scaledRes, right?
-        ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
-        int hW = sr.getScaledWidth() / 2;
-        int hH = sr.getScaledHeight() / 2;
+//        ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
+//        int w = sr.getScaledWidth() / 2;
+//        int h = sr.getScaledHeight() / 2;
 
-        GuiBaseContainer rootContainer = new GuiBaseContainer(null, "CONTAINER",
-                hW - (hW / 2), hH - (hH / 2), hW, hH, 1, 3, colorMap);
+        GuiFlexContainer rootContainer = new GuiFlexContainer(null, "ROOT",
+                50, 50, 400, 300, 1, 3, colorMap);
+        rootContainer.setVertical(true);
 
-        new GuiLabel(rootContainer, "SWITCH_LABEL", 5, 5, 16, 8, "Draw background");
 
-        GuiSwitch aSwitch = new GuiSwitch(rootContainer, "DRAW_BACKGROUND", 50, 5, 16, 8, "Whether to draw background",
+        GuiFlexContainer flexContainer = new GuiFlexContainer(rootContainer, "LABEL_FLEX", 50, 10, 300, 40, 2, 2);
+
+        new GuiLabel(flexContainer, "SWITCH_LABEL", 5, 5, 80, 22, "LabelLabelLabel");
+
+
+        GuiFlexContainer container = new GuiFlexContainer(flexContainer, "SWITCH_FLEX", 150, 5, 60, 30, 4, 4);
+        container.setVertical(true);
+
+        new GuiSwitch(container, "DRAW_BACKGROUND", 20, 5, 20, 10, "Whether to draw background",
                 settings.get("DRAW_BACKGROUND", BoolSetting.class).getValue());
+
+        new GuiSwitch(container, "SWITCH", 10, 17, 20, 10, "", false);
 
 //        aSwitch.assignCustomEventBehavior(GuiEventType.MOUSE_DOWN, e -> onMouseDownSpecial(e));
 
@@ -95,17 +106,21 @@ public class SettingsGuiScreen extends AbstractGuiScreen
 //        new GuiDoubleSlider(container, "FAT_SLIDER", 0, 100, 0, 50,
 //                ArrayUtils.toObject(settings.get("FAT_SLIDER", DoubleArrSetting.class).getValue())); // TODO: fix toObject design?
 
-        new GuiDualSlider(rootContainer, "RENDER_RANGE", 10, 20, 100, 8, 0, 50, 20, 30, false);
+        GuiFlexContainer sliderContainer = new GuiFlexContainer(rootContainer, "SLIDER_FLEX", 20, 60, 300, 65, 2, 2);
+//        sliderContainer.setVertical(true);
 
-        new GuiSingleSlider(rootContainer, "BACKGROUND_OPACITY", 10, 35, 100, 8, 0, 100, 20, false);
+        new GuiDualSlider(sliderContainer, "RENDER_RANGE", 5, 5, 100, 16, 0, 50, 20, 30, false);
+
+        new GuiSingleSlider(sliderContainer, "BACKGROUND_OPACITY", 5, 40, 100, 16, 0, 100, 20, false);
 
         // // //
-        GuiContainer container2 = new GuiBaseContainer(rootContainer, "CONTAINER2", 60, 60, 75, 50,
+        GuiFlexContainer container2 = new GuiFlexContainer(rootContainer, "BUTTON_FLEX", 75, 120, 100, 75,
                 0, 0);
+        container2.setVertical(true);
 
-        new GuiSwitch(container2, "TEST", 5, 5, 16, 8, "", false);
+        new GuiSwitch(container2, "TEST", 5, 5, 32, 10, "", false);
 
-        new GuiButton(container2, "BUTTON_TEST", 10, 20, 20, 10, this::onMouseDownSpecial);
+        new GuiButton(container2, "BUTTON_TEST", 40, 25, 30, 40, this::onMouseDownSpecial);
         // //
 
 //        GuiContainer container3 = new GuiBaseContainer(container2, "CONTAINER3", 10, 30, 150, 75,

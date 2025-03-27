@@ -31,22 +31,24 @@ public class GuiButton extends GuiElement
     @Override
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos, yPos, width, height, 3, getColor(GuiColorType.BASE), true);
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), width, height, 3, getColor(GuiColorType.BASE), true);
 
         String buttonText = RenderUtils.trimStringToWidthWithEllipsis("text", this.width);
-        drawScaledString(buttonText, xPos + (float) width / 2, yPos + (float) (height - 8) / 2, getColor(GuiColorType.ACCENT1).toDecimalARGB(), true);
+
+        mc.fontRendererObj.drawString(buttonText, worldXPos() + ((float) width / 2) - ((float) mc.fontRendererObj.getStringWidth(buttonText) / 2),
+                worldYPos() + ((float) height / 2) - ((float) mc.fontRendererObj.FONT_HEIGHT / 2), getColor(GuiColorType.ACCENT1).toDecimalARGB(), true);
     }
 
     @Override
     public void onMouseDown(int mouseX, int mouseY)
     {
-        yPos += 1;
+        setLocalYPos(localYPos() + 1);
     }
 
     @Override
     public void onMouseUp(int mouseX, int mouseY)
     {
-        yPos -= 1;
+        setLocalYPos(localYPos() - 1);
     }
 
     @Override

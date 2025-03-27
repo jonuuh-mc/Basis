@@ -48,14 +48,11 @@ public abstract class GuiContainer extends GuiElement
 
         for (GuiElement element : children)
         {
+            elements.add(element);
+
             if (element instanceof GuiContainer)
             {
-                elements.add(element);
                 elements.addAll(((GuiContainer) element).getNestedChildren());
-            }
-            else
-            {
-                elements.add(element);
             }
         }
 
@@ -76,11 +73,9 @@ public abstract class GuiContainer extends GuiElement
     {
         children.add(element);
 
-//        element.xPos += this.xPos;
-//        element.yPos += this.yPos;
-//        element.xPosInit += this.xPosInit;
-//        element.yPosInit += this.yPosInit;
-//        element.zLevel = element.getNumParents();
+//        boolean southBounds = (element.localYPos())
+
+        // TODO: add handling for bounds of element being outside its parent? snap to relevant to inner parent edge?
     }
 
 //    public void addChildren(Collection<GuiElement> children)
@@ -91,28 +86,49 @@ public abstract class GuiContainer extends GuiElement
 //        }
 //    }
 
-    // TODO: temp commented out
-//    @Override
-//    public void setXPos(int xPos)
-//    {
-//        this.xPos = xPos;
-//
-//        for (GuiElement element : getNestedChildren())
-//        {
-//            element.setXPos(element.xPosInit + xPos - this.xPosInit);
-//        }
-//    }
-//
-//    @Override
-//    public void setYPos(int yPos)
-//    {
-//        this.yPos = yPos;
-//
-//        for (GuiElement element : getNestedChildren())
-//        {
-//            element.setYPos(element.yPosInit + yPos - this.yPosInit);
-//        }
-//    }
+    @Override
+    public void setLocalXPos(int xPos)
+    {
+        super.setLocalXPos(xPos);
+        updateChildrenInheritedXPos();
+//        System.out.println(elementName + " xPos: " + xPos + " initX: " + initialXPos + " inheritedX: " + inheritedXPos);
+    }
+
+    @Override
+    public void setLocalYPos(int yPos)
+    {
+        super.setLocalYPos(yPos);
+        updateChildrenInheritedYPos();
+//        System.out.println(elementName + " yPos: " + yPos + " initY " + initialYPos + " inheritedY: " + inheritedYPos);
+    }
+
+    protected void updateChildrenInheritedXPos()
+    {
+        for (GuiElement child : this.getChildren())
+        {
+            // TODO: whether this is before or after "recursive" call should be VERY critical (pos inheritance in wrong order?); check in debugger?
+            child.setInheritedXPos(this.worldXPos());
+
+            if (child instanceof GuiContainer)
+            {
+                ((GuiContainer) child).updateChildrenInheritedXPos();
+            }
+        }
+    }
+
+    protected void updateChildrenInheritedYPos()
+    {
+        for (GuiElement child : this.getChildren())
+        {
+            // TODO: whether this is before or after "recursive" call should be VERY critical (pos inheritance in wrong order?); check in debugger?
+            child.setInheritedYPos(this.worldYPos());
+
+            if (child instanceof GuiContainer)
+            {
+                ((GuiContainer) child).updateChildrenInheritedYPos();
+            }
+        }
+    }
 
 //    @Override
 //    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)

@@ -74,8 +74,8 @@ public class GuiSingleSlider extends GuiSettingElement
     protected double getSliderValueAtMousePos(int mouseX, int mouseY)
     {
         return isVertical
-                ? (mouseY - yPos) / (double) height
-                : (mouseX - xPos) / (double) width;
+                ? (mouseY - worldYPos()) / (double) height
+                : (mouseX - worldXPos()) / (double) width;
     }
 
     // x/y screen position of the center of a pointer
@@ -90,8 +90,8 @@ public class GuiSingleSlider extends GuiSettingElement
 //            RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, (float) (xPos + (getNormalizedValue() * width)), yPos, 3, 3, new Color("#00ff00"));
 //        }
         return isVertical
-                ? (float) (yPos + (getNormalizedValue() * height))
-                : (float) (xPos + (getNormalizedValue() * width));
+                ? (float) (worldYPos() + (getNormalizedValue() * height))
+                : (float) (worldXPos() + (getNormalizedValue() * width));
     }
 
     @Override
@@ -99,11 +99,11 @@ public class GuiSingleSlider extends GuiSettingElement
     {
     }
 
-    @Override
-    protected void onInitGui(int guiScreenWidth, int guiScreenHeight)
-    {
-        pointerSize = isVertical ? width : height;
-    }
+//    @Override
+//    protected void onInitGui(int guiScreenWidth, int guiScreenHeight)
+//    {
+//        pointerSize = isVertical ? width : height;
+//    }
 
     @Override
     protected void onScreenTick()
@@ -162,6 +162,7 @@ public class GuiSingleSlider extends GuiSettingElement
 
     protected void move(double newNormalValue)
     {
+//        mc.getSoundHandler().playSound(PositionedSoundRecord.create(new ResourceLocation("core:tick"), 1.0F));
         setNormalizedValue(newNormalValue);
 
         // TODO: don't check for pre-claim? assumes no slider overlap (drag two sliders once)
@@ -172,13 +173,13 @@ public class GuiSingleSlider extends GuiSettingElement
     protected void drawHorizontalSlider()
     {
         float trackHeight = (height / 3F);
-        float trackY = yPos + trackHeight;
+        float trackY = worldYPos() + trackHeight;
         float pointerScreenPos = getPointerScreenPos();
 
         // left
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos, trackY, (pointerScreenPos - xPos), trackHeight, parent.getOuterRadius(), getColor(GuiColorType.BASE), true);
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), trackY, (pointerScreenPos - worldXPos()), trackHeight, parent.getOuterRadius(), getColor(GuiColorType.BASE), true);
         // right
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, pointerScreenPos, trackY, width - (pointerScreenPos - xPos), trackHeight, parent.getOuterRadius(), getColor(GuiColorType.ACCENT1), true);
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, pointerScreenPos, trackY, width - (pointerScreenPos - worldXPos()), trackHeight, parent.getOuterRadius(), getColor(GuiColorType.ACCENT1), true);
 
         drawPointer();
     }
@@ -217,8 +218,8 @@ public class GuiSingleSlider extends GuiSettingElement
         float offset = pointerSize / 4F;
         float size = isMovingTimer > 0 ? pointerSize + offset : pointerSize;
 
-        float x = isVertical ? xPos : getPointerScreenPos() - (size / 2F);
-        float y = isVertical ? getPointerScreenPos() - (size / 2F) : (isMovingTimer > 0 ? yPos - (offset / 2F) : yPos);
+        float x = isVertical ? worldXPos() : getPointerScreenPos() - (size / 2F);
+        float y = isVertical ? getPointerScreenPos() - (size / 2F) : (isMovingTimer > 0 ? worldYPos() - (offset / 2F) : worldYPos());
 
         RenderUtils.drawRoundedRect(GL11.GL_POLYGON, x, y, size, size, parent.getInnerRadius(), getColor(GuiColorType.BASE).copy().setA(0.5F), true);
     }
