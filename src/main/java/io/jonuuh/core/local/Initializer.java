@@ -2,7 +2,7 @@ package io.jonuuh.core.local;
 
 import io.jonuuh.core.lib.config.Config;
 import io.jonuuh.core.lib.config.command.CommandOpenSettingsGui;
-import io.jonuuh.core.lib.config.gui.AbstractGuiScreen;
+import io.jonuuh.core.lib.gui.AbstractGuiScreen;
 import io.jonuuh.core.lib.update.UpdateHandler;
 import io.jonuuh.core.lib.util.StaticAssetRequestFinishedEvent;
 import io.jonuuh.core.lib.util.StaticAssetRequester;

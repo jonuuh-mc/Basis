@@ -1,6 +1,6 @@
 package io.jonuuh.core.lib.config.command;
 
-import io.jonuuh.core.lib.config.gui.AbstractGuiScreen;
+import io.jonuuh.core.lib.gui.AbstractGuiScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.command.CommandBase;

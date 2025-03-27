@@ -1,22 +1,19 @@
 package io.jonuuh.core.local;
 
 import com.google.common.collect.ImmutableMap;
-import io.jonuuh.core.lib.config.gui.AbstractGuiScreen;
-import io.jonuuh.core.lib.config.gui.GuiColorType;
-import io.jonuuh.core.lib.config.gui.elements.container.GuiBaseContainer;
-import io.jonuuh.core.lib.config.gui.elements.container.GuiContainer;
-import io.jonuuh.core.lib.config.gui.elements.GuiElement;
-import io.jonuuh.core.lib.config.gui.elements.GuiLabel;
-import io.jonuuh.core.lib.config.gui.elements.GuiButton;
-import io.jonuuh.core.lib.config.gui.elements.container.GuiFlexContainer;
-import io.jonuuh.core.lib.config.gui.elements.sliders.GuiDualSlider;
-import io.jonuuh.core.lib.config.gui.elements.GuiSwitch;
-import io.jonuuh.core.lib.config.gui.elements.sliders.GuiSingleSlider;
+import io.jonuuh.core.lib.gui.AbstractGuiScreen;
+import io.jonuuh.core.lib.gui.GuiColorType;
+import io.jonuuh.core.lib.gui.element.container.GuiContainer;
+import io.jonuuh.core.lib.gui.element.GuiElement;
+import io.jonuuh.core.lib.gui.element.GuiLabel;
+import io.jonuuh.core.lib.gui.element.GuiButton;
+import io.jonuuh.core.lib.gui.element.container.GuiFlexContainer;
+import io.jonuuh.core.lib.gui.element.sliders.GuiDualSlider;
+import io.jonuuh.core.lib.gui.element.GuiSwitch;
+import io.jonuuh.core.lib.gui.element.sliders.GuiSingleSlider;
 import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.util.Color;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ScaledResolution;
 
 import java.util.Map;
 
