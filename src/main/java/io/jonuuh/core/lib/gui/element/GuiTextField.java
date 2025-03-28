@@ -186,7 +186,7 @@ public class GuiTextField extends GuiSettingElement
             setSelectionPos(getTextBelowMouseX(mouseX).length());
         }
 
-        RenderUtils.drawRectangle(GL11.GL_POLYGON, worldXPos(), worldYPos(), width, height, new Color("#242424").setA(0.75F));
+        RenderUtils.drawRectangle(GL11.GL_POLYGON, worldXPos(), worldYPos(), width, height, new Color("#BF242424"));
 
         if (hasSelection())
         {
@@ -208,7 +208,7 @@ public class GuiTextField extends GuiSettingElement
         int rectX = isSelectionForward() ? cursorX + 1 : cursorX - rectWidth;
 //        System.out.println("cursorPos: " + cursorPos + ", selectionPos: " + selectionPos);
 
-        RenderUtils.drawRectangle(GL11.GL_POLYGON, rectX, worldYPos(), rectWidth, fontRenderer.FONT_HEIGHT - 1, new Color("#009ac2").setA(0.75F)); // 3399FF
+        RenderUtils.drawRectangle(GL11.GL_POLYGON, rectX, worldYPos(), rectWidth, fontRenderer.FONT_HEIGHT - 1, new Color("#BF009ac2")); // 3399FF
     }
 
     public void onMouseDown(int mouseX, int mouseY)

@@ -260,11 +260,11 @@ public class GuiDualSlider extends GuiSettingElement
 
         if (isLeftPointer)
         {
-            RenderUtils.drawTriangle(GL11.GL_POLYGON, x /*- (pointerSize / 2F)*/, y, pointerSize, pointerSize, getColor(GuiColorType.BASE).copy().setA(0.5F), -90);
+            RenderUtils.drawTriangle(GL11.GL_POLYGON, x /*- (pointerSize / 2F)*/, y, pointerSize, pointerSize, getColor(GuiColorType.BASE), -90);
         }
         else
         {
-            RenderUtils.drawTriangle(GL11.GL_POLYGON, x /*+ (pointerSize / 2F)*/, y, pointerSize, pointerSize, getColor(GuiColorType.BASE).copy().setA(0.5F), 90);
+            RenderUtils.drawTriangle(GL11.GL_POLYGON, x /*+ (pointerSize / 2F)*/, y, pointerSize, pointerSize, getColor(GuiColorType.BASE), 90);
         }
     }
 

@@ -60,7 +60,7 @@ public class SettingsGuiScreen extends AbstractGuiScreen
                 GuiColorType.ACCENT1, new Color(),
                 GuiColorType.ACCENT2, new Color("#484848"),
                 GuiColorType.BASE, new Color("#1450A0"),
-                GuiColorType.BACKGROUND, new Color("#242424").setA(0.8F));
+                GuiColorType.BACKGROUND, new Color("#BF242424"));
 
         // TODO: don't all these given widths and heights for elements depend on the this initial scaledRes?
         //  not literally but relatively, they were chosen with respect to this initial scaledRes, right?
@@ -69,11 +69,12 @@ public class SettingsGuiScreen extends AbstractGuiScreen
 //        int h = sr.getScaledHeight() / 2;
 
         GuiFlexContainer rootContainer = new GuiFlexContainer(null, "ROOT",
-                50, 50, 400, 300, 1, 3, colorMap);
+                50, 50, 600, 400, 1, 3, colorMap);
         rootContainer.setVertical(true);
 
 
-        GuiFlexContainer flexContainer = new GuiFlexContainer(rootContainer, "LABEL_FLEX", 50, 10, 300, 40, 2, 2);
+        GuiFlexContainer flexContainer = new GuiFlexContainer(rootContainer, "LABEL_FLEX", 50, 10, 450, 60, 2, 2);
+        flexContainer.putColor(GuiColorType.BACKGROUND, new Color("615a5a", 0.5F));
 
         new GuiLabel(flexContainer, "SWITCH_LABEL", 5, 5, 80, 22, "LabelLabelLabel");
 

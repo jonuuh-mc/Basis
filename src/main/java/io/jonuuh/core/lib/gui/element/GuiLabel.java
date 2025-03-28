@@ -68,6 +68,6 @@ public class GuiLabel extends GuiElement
     @Override
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
-        fontRenderer.drawString(text, textXPos, textYPos, getColor(GuiColorType.BASE).toDecimalARGB(), true);
+        fontRenderer.drawString(text, textXPos, textYPos, getColor(GuiColorType.BASE).toPackedARGB(), true);
     }
 }

@@ -491,7 +491,7 @@ public abstract class GuiElement
                 {
                     RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), width, height, focused ? new Color("#00ff00") : new Color("#ff55ff"));
                     mc.fontRendererObj.drawString(String.valueOf(zLevel), worldXPos() + width - mc.fontRendererObj.getStringWidth(String.valueOf(zLevel)),
-                            worldYPos() + height - mc.fontRendererObj.FONT_HEIGHT, getColor(GuiColorType.ACCENT2).toDecimalARGB(), true);
+                            worldYPos() + height - mc.fontRendererObj.FONT_HEIGHT, getColor(GuiColorType.ACCENT2).toPackedARGB(), true);
                 }
             }
             return;

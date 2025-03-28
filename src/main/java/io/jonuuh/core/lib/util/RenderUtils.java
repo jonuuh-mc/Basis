@@ -67,143 +67,10 @@ public abstract class RenderUtils
                 w * sr.getScaleFactor(), h * sr.getScaleFactor());
     }
 
-    public static void drawBox(AxisAlignedBB bb, int glMode, Color color)
-    {
-        if (glMode == GL11.GL_LINES)
-        {
-            drawOutlinedBox(bb, color);
-        }
-        else if (glMode == GL11.GL_QUADS)
-        {
-            drawSolidBox(bb, color);
-        }
-    }
-
-    public static void glHead(Color c)
-    {
-        // GL setup
-        GL11.glPushMatrix();
-        GL11.glDepthMask(false);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glEnable(GL11.GL_LINE_SMOOTH);
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glColor4f(c.getR(), c.getG(), c.getB(), c.getA());
-        GL11.glLineWidth(3F);
-//        GL11.glCullFace(GL11.GL_FRONT);
-
-//        GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
-//        GL11.glPolygonOffset(1.0f, -1000000.0f);
-
-        Vec3 renderPos = getEntityPosForRender(mc.thePlayer, 0.0F);
-        Vec3 finalPos = new Vec3(0, 4,0);
-
-        GL11.glTranslated((finalPos.xCoord - renderPos.xCoord), (finalPos.yCoord - renderPos.yCoord), (finalPos.zCoord - renderPos.zCoord));
-    }
-
-    public static void glTail()
-    {
-        GL11.glDepthMask(true);
-        GL11.glDisable(GL11.GL_BLEND);
-        GL11.glDisable(GL11.GL_LINE_SMOOTH);
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-//        GL11.glCullFace(GL11.GL_BACK);
-
-//        GL11.glPolygonOffset(1.0f, 1000000.0f);
-//        GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
-
-        GL11.glPopMatrix();
-    }
-
-    public static void drawSolidBox(AxisAlignedBB bb, Color color)
-    {
-        glHead(color);
-
-        GL11.glBegin(GL11.GL_QUADS);
-        GL11.glVertex3d(bb.minX, bb.minY, bb.minZ);
-        GL11.glVertex3d(bb.maxX, bb.minY, bb.minZ);
-        GL11.glVertex3d(bb.maxX, bb.minY, bb.maxZ);
-        GL11.glVertex3d(bb.minX, bb.minY, bb.maxZ);
-
-        GL11.glVertex3d(bb.minX, bb.maxY, bb.minZ);
-        GL11.glVertex3d(bb.minX, bb.maxY, bb.maxZ);
-        GL11.glVertex3d(bb.maxX, bb.maxY, bb.maxZ);
-        GL11.glVertex3d(bb.maxX, bb.maxY, bb.minZ);
-
-        GL11.glVertex3d(bb.minX, bb.minY, bb.minZ);
-        GL11.glVertex3d(bb.minX, bb.maxY, bb.minZ);
-        GL11.glVertex3d(bb.maxX, bb.maxY, bb.minZ);
-        GL11.glVertex3d(bb.maxX, bb.minY, bb.minZ);
-
-        GL11.glVertex3d(bb.maxX, bb.minY, bb.minZ);
-        GL11.glVertex3d(bb.maxX, bb.maxY, bb.minZ);
-        GL11.glVertex3d(bb.maxX, bb.maxY, bb.maxZ);
-        GL11.glVertex3d(bb.maxX, bb.minY, bb.maxZ);
-
-        GL11.glVertex3d(bb.minX, bb.minY, bb.maxZ);
-        GL11.glVertex3d(bb.maxX, bb.minY, bb.maxZ);
-        GL11.glVertex3d(bb.maxX, bb.maxY, bb.maxZ);
-        GL11.glVertex3d(bb.minX, bb.maxY, bb.maxZ);
-
-        GL11.glVertex3d(bb.minX, bb.minY, bb.minZ);
-        GL11.glVertex3d(bb.minX, bb.minY, bb.maxZ);
-        GL11.glVertex3d(bb.minX, bb.maxY, bb.maxZ);
-        GL11.glVertex3d(bb.minX, bb.maxY, bb.minZ);
-        GL11.glEnd();
-
-        glTail();
-    }
-
-    public static void drawOutlinedBox(AxisAlignedBB bb, Color color)
-    {
-        glHead(color);
-
-        GL11.glBegin(GL11.GL_LINES);
-        GL11.glVertex3d(bb.minX, bb.minY, bb.minZ);
-        GL11.glVertex3d(bb.maxX, bb.minY, bb.minZ);
-
-        GL11.glVertex3d(bb.maxX, bb.minY, bb.minZ);
-        GL11.glVertex3d(bb.maxX, bb.minY, bb.maxZ);
-
-        GL11.glVertex3d(bb.maxX, bb.minY, bb.maxZ);
-        GL11.glVertex3d(bb.minX, bb.minY, bb.maxZ);
-
-        GL11.glVertex3d(bb.minX, bb.minY, bb.maxZ);
-        GL11.glVertex3d(bb.minX, bb.minY, bb.minZ);
-        //////////
-        GL11.glVertex3d(bb.minX, bb.minY, bb.minZ);
-        GL11.glVertex3d(bb.minX, bb.maxY, bb.minZ);
-
-        GL11.glVertex3d(bb.maxX, bb.minY, bb.minZ);
-        GL11.glVertex3d(bb.maxX, bb.maxY, bb.minZ);
-
-        GL11.glVertex3d(bb.maxX, bb.minY, bb.maxZ);
-        GL11.glVertex3d(bb.maxX, bb.maxY, bb.maxZ);
-
-        GL11.glVertex3d(bb.minX, bb.minY, bb.maxZ);
-        GL11.glVertex3d(bb.minX, bb.maxY, bb.maxZ);
-        //////////
-        GL11.glVertex3d(bb.minX, bb.maxY, bb.minZ);
-        GL11.glVertex3d(bb.maxX, bb.maxY, bb.minZ);
-
-        GL11.glVertex3d(bb.maxX, bb.maxY, bb.minZ);
-        GL11.glVertex3d(bb.maxX, bb.maxY, bb.maxZ);
-
-        GL11.glVertex3d(bb.maxX, bb.maxY, bb.maxZ);
-        GL11.glVertex3d(bb.minX, bb.maxY, bb.maxZ);
-
-        GL11.glVertex3d(bb.minX, bb.maxY, bb.maxZ);
-        GL11.glVertex3d(bb.minX, bb.maxY, bb.minZ);
-        GL11.glEnd();
-
-        glTail();
-    }
-
     // Vertices MUST be in counterclockwise order (opengl triangle winding order)
     public static void drawVertices(int glMode, float[][] vertices, Color color)
     {
-        GL11.glColor4f(color.getR(), color.getG(), color.getB(), color.getA());
+        GL11.glColor4ub(color.r, color.g, color.b, color.a);
         GL11.glPushMatrix();
 
 //        if (rotationAngle != 0)
@@ -320,7 +187,7 @@ public abstract class RenderUtils
         // TODO:
 //        float[][] vertices;
 
-        GL11.glColor4f(color.getR(), color.getG(), color.getB(), color.getA());
+        GL11.glColor4ub(color.r, color.g, color.b, color.a);
         GL11.glPushMatrix();
 
         // Enable transparency
@@ -360,53 +227,4 @@ public abstract class RenderUtils
             GL11.glVertex2f(centerX - (radius * MathHelper.cos(angle)), centerY + (radius * MathHelper.sin(angle)));
         }
     }
-
-//    public static void drawRoundedRectBorder(int glMode, float centerX, float centerY, float width, float height, float innerRadius, float outerRadius, Color color)
-//    {
-//        float ninetyDegRad = (float) (Math.PI / 2);
-//
-//        width = Math.max(width, 0);
-//        height = Math.max(height, 0);
-//
-//        float xRight = centerX - (width / 2.0F);
-//        float xLeft = centerX + (width / 2.0F);
-//        float yUp = centerY + (height / 2.0F);
-//        float yDown = centerY - (height / 2.0F);
-//
-//        GL11.glColor4f(color.getR(), color.getG(), color.getB(), color.getA());
-//        GL11.glPushMatrix();
-//        GL11.glBegin(glMode);
-//
-//        addQuadrantVertices2(xRight, yUp, 0, outerRadius, innerRadius);
-//        addQuadrantVertices2(xLeft, yUp, ninetyDegRad, outerRadius, innerRadius);
-//        addQuadrantVertices2(xLeft, yDown, ninetyDegRad * 2, outerRadius, innerRadius);
-//        addQuadrantVertices2(xRight, yDown, ninetyDegRad * 3, outerRadius, innerRadius);
-//
-//        // Connect the two ends of the triangle strip (glMode should be tri strip)
-//        GL11.glVertex2f(xRight - (outerRadius * MathHelper.cos(ninetyDegRad / 32.0F)), yUp + (outerRadius * MathHelper.sin(ninetyDegRad / 32.0F)));
-//        GL11.glVertex2f(xRight - innerRadius, yUp);
-//
-//        GL11.glEnd();
-//        GL11.glPopMatrix();
-//        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-//    }
-//
-//    private static void addQuadrantVertices2(float centerX, float centerY, float startAngle, float innerRadius, float outerRadius)
-//    {
-//        if (innerRadius == 0)
-//        {
-//            GL11.glVertex2f(centerX, centerY);
-//            return;
-//        }
-//
-//        float ninetyDegRad = (float) (Math.PI / 2);
-//        int segments = 32;
-//        int vertex = 0;
-//
-//        for (float angle = startAngle; angle <= startAngle + ninetyDegRad; angle += ninetyDegRad / segments, vertex++)
-//        {
-//            float rad = ((startAngle <= ninetyDegRad ? vertex : vertex + 1) % 2 == 0) ? outerRadius : innerRadius;
-//            GL11.glVertex2f(centerX - (rad * MathHelper.cos(angle)), centerY + (rad * MathHelper.sin(angle)));
-//        }
-//    }
 }

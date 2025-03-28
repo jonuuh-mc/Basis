@@ -221,7 +221,7 @@ public class GuiSingleSlider extends GuiSettingElement
         float x = isVertical ? worldXPos() : getPointerScreenPos() - (size / 2F);
         float y = isVertical ? getPointerScreenPos() - (size / 2F) : (isMovingTimer > 0 ? worldYPos() - (offset / 2F) : worldYPos());
 
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, x, y, size, size, parent.getInnerRadius(), getColor(GuiColorType.BASE).copy().setA(0.5F), true);
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, x, y, size, size, parent.getInnerRadius(), getColor(GuiColorType.BASE), true);
     }
 
 //    protected void claimTooltipForPointer(boolean isLeftPointer)

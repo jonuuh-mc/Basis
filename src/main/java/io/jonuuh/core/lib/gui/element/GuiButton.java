@@ -36,7 +36,7 @@ public class GuiButton extends GuiElement
         String buttonText = RenderUtils.trimStringToWidthWithEllipsis("text", this.width);
 
         mc.fontRendererObj.drawString(buttonText, worldXPos() + ((float) width / 2) - ((float) mc.fontRendererObj.getStringWidth(buttonText) / 2),
-                worldYPos() + ((float) height / 2) - ((float) mc.fontRendererObj.FONT_HEIGHT / 2), getColor(GuiColorType.ACCENT1).toDecimalARGB(), true);
+                worldYPos() + ((float) height / 2) - ((float) mc.fontRendererObj.FONT_HEIGHT / 2), getColor(GuiColorType.ACCENT1).toPackedARGB(), true);
     }
 
     @Override
