@@ -12,12 +12,9 @@ import io.jonuuh.core.lib.config.setting.types.single.IntSetting;
 import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
 import io.jonuuh.core.lib.util.ChatLogger;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,7 +34,7 @@ public final class SettingsConfigurationAdapter
     /**
      * Initialize the SettingsConfigurationAdapter singleton with many Settings objects
      *
-     * @param file The file used for the Configuration, usually the {@link FMLPreInitializationEvent#getSuggestedConfigurationFile() suggested} file
+     * @param file The file used for the Configuration, usually the {@link net.minecraftforge.fml.common.event.FMLPreInitializationEvent#getSuggestedConfigurationFile() suggested} file
      * @param settingsList A list of settings to use
      */
     public static void createInstance(File file, List<Settings> settingsList)
@@ -52,7 +49,7 @@ public final class SettingsConfigurationAdapter
     /**
      * Initialize the SettingsConfigurationAdapter singleton with one Settings object
      *
-     * @param file     The file used for the Configuration, usually the {@link FMLPreInitializationEvent#getSuggestedConfigurationFile() suggested} file
+     * @param file The file used for the Configuration, usually the {@link net.minecraftforge.fml.common.event.FMLPreInitializationEvent#getSuggestedConfigurationFile() suggested} file
      * @param settings The settings to use
      */
     public static void createInstance(File file, Settings settings)
@@ -72,20 +69,25 @@ public final class SettingsConfigurationAdapter
 
         for (Settings settings : configCategorySettingsMap.values())
         {
-            loadSettingsDefaultValues(settings);
+            loadSettingsDefaultValues(settings); // TODO: don't load these by default?
             loadSettingsCurrentValues(settings);
         }
     }
 
+    public Settings getSettings(String category)
+    {
+        return configCategorySettingsMap.get(category);
+    }
+
     public Settings getDefaultCategorySettings()
     {
-        return configCategorySettingsMap.get(DEFAULT_CATEGORY);
+        return getSettings(DEFAULT_CATEGORY);
     }
 
     public void putAndLoadSettings(Settings settings)
     {
         configCategorySettingsMap.put(settings.configurationCategory, settings);
-        loadSettingsDefaultValues(settings);
+        loadSettingsDefaultValues(settings); // TODO: don't load these by default?
         loadSettingsCurrentValues(settings);
     }
 
@@ -94,7 +96,7 @@ public final class SettingsConfigurationAdapter
      * <p>
      * Writes each category of the Configuration and it's properties to the given file
      *
-     * @see ConfigCategory#write(BufferedWriter, int)
+     * @see net.minecraftforge.common.config.ConfigCategory#write(java.io.BufferedWriter, int)
      */
     public void saveConfiguration()
     {
@@ -123,7 +125,9 @@ public final class SettingsConfigurationAdapter
      * <p>
      * READ FROM: The default value field of a Setting
      * <p>
-     * WRITE INTO: A Configuration Property corresponding to the field
+     * WRITE INTO: A Configuration Property corresponding to the field, then write the properties to file
+     *
+     * @see SettingsConfigurationAdapter#saveConfiguration()
      */
     public void saveSettingsDefaultValues(Settings settings)
     {
@@ -148,7 +152,9 @@ public final class SettingsConfigurationAdapter
      * <p>
      * READ FROM: The current value field of a Setting
      * <p>
-     * WRITE INTO: A Configuration Property corresponding to the field
+     * WRITE INTO: A Configuration Property corresponding to the field, then write the properties to file
+     *
+     * @see SettingsConfigurationAdapter#saveConfiguration()
      */
     public void saveSettingsCurrentValues(Settings settings)
     {
@@ -162,13 +168,14 @@ public final class SettingsConfigurationAdapter
         {
             String settingName = settingEntry.getKey();
             Setting<?> setting = settingEntry.getValue();
-            Property property = getProperty(settings, settingName, (valueType.toString() + settingName));
+            Property property = getProperty(settings, settingName, (settingName + valueType.toString()));
             transferSetting(setting, property, valueType, transferType);
         }
     }
 
     // TODO: this function really needs to be shortened, it's hard to make anything generic though;
     //  ultimately there are 8*2*2=32 cases, each of which *must* have a unique function call
+
     /**
      * Transfer a Setting field to or from a forge Configuration Property
      * <p>
@@ -349,16 +356,16 @@ public final class SettingsConfigurationAdapter
      * <p>
      * The Property corresponds to a field of a Setting within the Settings.
      * <p>
-     * The Property key should have a prefix ({@link ValueType#DEFAULT} or {@link ValueType#CURRENT}
+     * The Property key should have a suffix ({@link ValueType#DEFAULT} or {@link ValueType#CURRENT}
      * denoting which of the two properties corresponding to the two fields of a Setting is returned.
      * <p>
      * If the Property DOES exist in the file: read and return it.
      * <p>
      * If the Property DOES NOT exist in the file: return a new Property with the current value of the field.
      *
-     * @param settings    The Settings whose category to search in
+     * @param settings The Settings whose category to search in
      * @param settingName The name of the Setting whose field is retrieved
-     * @param propKey     The Property's key in the Configuration category
+     * @param propKey The Property's key in the Configuration category
      * @see Configuration#get(String, String, String, String, Property.Type)
      */
     private Property getProperty(Settings settings, String settingName, String propKey)
@@ -406,9 +413,9 @@ public final class SettingsConfigurationAdapter
     /**
      * The fallback value to use for the value of a Property when trying to retrieve it from the Configuration.
      * <p>
-     * The property key should have a prefix denoting which of the two Setting fields is used as a fallback value.
+     * The property key should have a suffix denoting which of the two Setting fields is used as a fallback value.
      *
-     * @param <T>     The return type, which is the same as the internal type of the given Setting
+     * @param <T> The return type, which is the same as the internal type of the given Setting
      * @param propKey The key of the Property corresponding to the field of the Setting
      * @param setting The setting whose field to use as a fallback
      * @return The fallback value
@@ -420,24 +427,24 @@ public final class SettingsConfigurationAdapter
 
     private enum TransferType
     {
-        LOAD, SAVE;
+        LOAD, SAVE
     }
 
     private enum ValueType
     {
-        DEFAULT("default-"), CURRENT("current-");
+        DEFAULT("-default"), CURRENT("-current");
 
-        private final String keyPrefix;
+        private final String keySuffix;
 
-        ValueType(String keyPrefix)
+        ValueType(String keySuffix)
         {
-            this.keyPrefix = keyPrefix;
+            this.keySuffix = keySuffix;
         }
 
         @Override
         public String toString()
         {
-            return keyPrefix;
+            return keySuffix;
         }
     }
 }

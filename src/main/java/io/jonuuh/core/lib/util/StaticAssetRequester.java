@@ -14,7 +14,7 @@ public class StaticAssetRequester implements Runnable
     @Override
     public void run()
     {
-        String asset = StaticAssetUtils.getStaticHostedAsset(assetPath);
+        String asset = StaticAssetUtils.getStaticHostedRawAsset(assetPath);
         MinecraftForge.EVENT_BUS.post(new StaticAssetRequestFinishedEvent(asset));
     }
 }

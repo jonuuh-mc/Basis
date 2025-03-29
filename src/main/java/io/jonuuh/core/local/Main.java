@@ -1,6 +1,8 @@
 package io.jonuuh.core.local;
 
+import com.google.gson.JsonObject;
 import io.jonuuh.core.lib.config.SettingsConfigurationAdapter;
+import io.jonuuh.core.lib.config.command.CommandCore;
 import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.config.setting.types.array.IntArrSetting;
 import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
@@ -27,6 +29,12 @@ public class Main
 {
     public static final String modID = "core";
     public static final String version = "0.0.1";
+    public final String modName;
+
+    public Main()
+    {
+        modName = "Core";
+    }
 
     @Mod.EventHandler
     public void FMLPreInit(FMLPreInitializationEvent event)
@@ -35,7 +43,7 @@ public class Main
 
         EnumChatFormatting white = EnumChatFormatting.WHITE;
         EnumChatFormatting gold = EnumChatFormatting.GOLD;
-        ChatLogger.createInstance(white + "[" + gold + modID + white + "] ");
+        ChatLogger.createInstance(white + "[" + gold + modName + white + "] ");
 
         SettingsConfigurationAdapter.createInstance(event.getSuggestedConfigurationFile(), initMasterSettings());
     }
@@ -43,21 +51,18 @@ public class Main
     @Mod.EventHandler
     public void FMLInit(FMLInitializationEvent event)
     {
-        String asset = StaticAssetUtils.getStaticHostedAsset(modID + ".json");
-        System.out.println("asset req finished: " + asset);
+        JsonObject jsonObject = StaticAssetUtils.getStaticHostedAssetAsJsonObject(modID + ".json");
+        System.out.println("asset req finished: " + jsonObject.toString());
 
-        // TODO: pass asset in here
-        UpdateHandler.createInstance(modID, version);
-//        UpdateHandler.INSTANCE.start();
+        new UpdateHandler(modID, modName, version, jsonObject);
+        ClientCommandHandler.instance.registerCommand(new CommandCore(modID));
 
         // TODO: is it okay for all this to be in here, dependant on github api call finish?
         //  try registering a keybind on some other key press for example (arbitrary time) - does it show up in controls menu?
         //  same for something like creating the gui and command to open the gui?
-        KeyBinding keyBinding = new KeyBinding("<description>", Keyboard.KEY_NONE, modID);
+        KeyBinding keyBinding = new KeyBinding("", Keyboard.KEY_NONE, modName);
         ClientRegistry.registerKeyBinding(keyBinding);
         MinecraftForge.EVENT_BUS.register(new Events(keyBinding));
-
-//        System.out.println(Config.INSTANCE.getConfigCategorySettingsMap());
 
         AbstractGuiScreen guiScreen = new SettingsGuiScreen(SettingsConfigurationAdapter.INSTANCE.getDefaultCategorySettings());
         ClientCommandHandler.instance.registerCommand(new CommandOpenSettingsGui(modID, guiScreen));

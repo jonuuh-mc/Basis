@@ -41,25 +41,61 @@ public final class Settings extends HashMap<String, Setting<?>>
         }
     }
 
-    public void loadCurrentValues()
+    public void reset(String settingName)
     {
-        SettingsConfigurationAdapter.INSTANCE.loadSettingsCurrentValues(this);
+        for (String key : keySet())
+        {
+            if (key.equals(settingName))
+            {
+                get(settingName).reset();
+            }
+        }
     }
 
-    public void saveCurrentValues()
-    {
-        SettingsConfigurationAdapter.INSTANCE.saveSettingsCurrentValues(this);
-    }
-
+    /**
+     * @see SettingsConfigurationAdapter#loadSettingsDefaultValues(Settings)
+     */
     public void loadDefaultValues()
     {
         SettingsConfigurationAdapter.INSTANCE.loadSettingsDefaultValues(this);
     }
 
     // TODO: have a gui button to save a default per setting?
+
+    /**
+     * @see SettingsConfigurationAdapter#saveSettingsDefaultValues(Settings)
+     */
     public void saveDefaultValues()
     {
         SettingsConfigurationAdapter.INSTANCE.saveSettingsDefaultValues(this);
+    }
+
+    /**
+     * @see SettingsConfigurationAdapter#loadSettingsCurrentValues(Settings)
+     */
+    public void loadCurrentValues()
+    {
+        SettingsConfigurationAdapter.INSTANCE.loadSettingsCurrentValues(this);
+    }
+
+    /**
+     * @see SettingsConfigurationAdapter#saveSettingsCurrentValues(Settings)
+     */
+    public void saveCurrentValues()
+    {
+        SettingsConfigurationAdapter.INSTANCE.saveSettingsCurrentValues(this);
+    }
+
+    public <T extends Setting<R>, R> R getCurrentValue(String settingName, Class<T> type)
+    {
+        Setting<R> setting = get(settingName, type);
+        return setting != null ? setting.getCurrentValue() : null;
+    }
+
+    public <T extends Setting<R>, R> R getDefaultValue(String settingName, Class<T> type)
+    {
+        Setting<R> setting = get(settingName, type);
+        return setting != null ? setting.getDefaultValue() : null;
     }
 
     /**
@@ -71,12 +107,20 @@ public final class Settings extends HashMap<String, Setting<?>>
      */
     public <T extends Setting<?>> T get(String settingName, Class<T> type)
     {
+//        Setting<?> setting = get(settingName);
+//        return setting;
+
         try
         {
-            return type.cast(this.get(settingName));
+            return type.cast(get(settingName));
         }
         catch (ClassCastException e)
         {
+//            if (setting instanceof BoolSetting)
+//            {
+//                return new BoolSetting();
+//            }
+
             return null;
         }
     }

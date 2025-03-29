@@ -1,9 +1,13 @@
 package io.jonuuh.core.lib.update;
 
+import com.google.gson.JsonObject;
 import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
+import io.jonuuh.core.lib.util.ChatLogger;
+import io.jonuuh.core.lib.util.StaticAssetUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
@@ -13,33 +17,38 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import java.time.format.DateTimeParseException;
 import java.util.Base64;
-import java.util.Map;
 
-class NotificationPoster
+final class NotificationPoster
 {
     private final String modID;
+    private final String modName;
     private final Settings updateSettings;
-    private final Map<String, String> versioningMap;
-    private final String latestVersionStr;
+    private final JsonObject jsonObject;
+    private final String trueLatestVersionStr;
+    private final StringSetting lastLatestVersionSetting;
+    private final BoolSetting repeatNotifySetting;
 
-    NotificationPoster(String modID, Settings updateSettings, Map<String, String> versioningMap)
+    NotificationPoster(String modID, String modName, Settings updateSettings, JsonObject jsonObject, String latestVersionStr)
     {
         this.modID = modID;
+        this.modName = modName;
         this.updateSettings = updateSettings;
-        this.versioningMap = versioningMap;
-        this.latestVersionStr = versioningMap.get("version");
+        this.jsonObject = jsonObject;
+        this.trueLatestVersionStr = latestVersionStr;
 
-        // if last recorded latest version (written to file via updateSettings) is less than the true latest version,
-        // a new update was released so the notif should be posted regardless of time since last post
+        this.lastLatestVersionSetting = (StringSetting) updateSettings.get(UpdateSettingsData.LAST_LATEST_VERSION.name());
+        this.repeatNotifySetting = (BoolSetting) updateSettings.get(UpdateSettingsData.REPEAT_NOTIFY.name());
+
+        // If last recorded latest version (written to file via updateSettings) is less than the true latest version,
+        // a new update was released so a notification should always be posted and repeat notifying should be reset for this version
         if (isNewUpdateAvailable())
         {
             MinecraftForge.EVENT_BUS.register(this);
             return;
         }
 
-        if (updateSettings.get("NOTIFY_AGAIN_FOR_LATEST", BoolSetting.class).getCurrentValue())
+        if (repeatNotifySetting.getCurrentValue())
         {
             MinecraftForge.EVENT_BUS.register(this);
         }
@@ -47,16 +56,21 @@ class NotificationPoster
 
     private boolean isNewUpdateAvailable()
     {
-        Version lastRecordedLatestVersion = new Version(updateSettings.get("LAST_LATEST_VERSION", StringSetting.class).getCurrentValue());
-        Version trueLatestVersion = new Version(latestVersionStr);
-
-        boolean isNewUpdateAvailable = lastRecordedLatestVersion.compareTo(trueLatestVersion) < 0;
+        String lastRecordedLatestVersion = lastLatestVersionSetting.getCurrentValue();
+        boolean isNewUpdateAvailable = new Version(trueLatestVersionStr).compareTo(new Version(lastRecordedLatestVersion)) > 0;
 
         if (isNewUpdateAvailable)
         {
-            updateSettings.get("LAST_LATEST_VERSION", StringSetting.class).setCurrentValue(latestVersionStr);
+            // Update the last recorded latest version setting, reset repeat notifying to the default (true), then save to file
+            // Note: repeat notifying default could be changed by editing the config file directly but if someone knew to do that more power to em
+            // This could be fixed by only loading current values for updateSettings to force defaults to always be the true hard coded defaults
+            lastLatestVersionSetting.setCurrentValue(trueLatestVersionStr);
+            // TODO: default vers has no meaning, just making them equal to prevent them from being out of date in cfg file
+            // TODO: make more fine grained control over writing default values to file
+            lastLatestVersionSetting.setDefaultValue(trueLatestVersionStr);
+            repeatNotifySetting.reset();
+            updateSettings.saveCurrentValues();
         }
-
         return isNewUpdateAvailable;
     }
 
@@ -68,27 +82,37 @@ class NotificationPoster
             return;
         }
 
-        IChatComponent notificationComponent = getNotificationComponent();
-        Minecraft.getMinecraft().thePlayer.addChatMessage(notificationComponent);
-
-        // TODO:
-//        updateSettings.get("LAST_NOTIFICATION_INSTANT", StringSetting.class).setValue(instantNow.toString());
-        updateSettings.saveCurrentValues(); // save "LAST_NOTIFICATION_INSTANT" and if applicable, "LAST_LATEST_VERSION"
-
+        ChatLogger.INSTANCE.addLog(getNotificationComponent());
         MinecraftForge.EVENT_BUS.unregister(this);
     }
 
     private IChatComponent getNotificationComponent()
     {
-        byte[] decodedBytes = Base64.getDecoder().decode(versioningMap.get("changelog"));
-        String changelogStr = new String(decodedBytes);
+        IChatComponent mainComp = new ChatComponentText("Version " + trueLatestVersionStr + " is available");
 
-        IChatComponent hoverComponent = new ChatComponentText("[Changelog]");
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(changelogStr));
-        ChatStyle chatStyle = new ChatStyle().setChatHoverEvent(hoverEvent).setColor(EnumChatFormatting.BLUE);
-        hoverComponent.setChatStyle(chatStyle);
+        IChatComponent latestReleaseComp = new ChatComponentText(" [Latest release]");
+        ClickEvent openUrlEvent = new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/jonuuh-mc/" + modName + "/releases/latest");
+        ChatStyle openUrlStyle = new ChatStyle().setChatClickEvent(openUrlEvent).setColor(EnumChatFormatting.BLUE);
+        latestReleaseComp.setChatStyle(openUrlStyle);
 
-        return new ChatComponentText("First world join of session ").appendSibling(hoverComponent);
+        IChatComponent changelogComp = new ChatComponentText(" [Changelog]");
+        HoverEvent hoverChangelogEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText(getChangelogStr()));
+        ChatStyle hoverChangelogStyle = new ChatStyle().setChatHoverEvent(hoverChangelogEvent).setColor(EnumChatFormatting.AQUA);
+        changelogComp.setChatStyle(hoverChangelogStyle);
+
+        IChatComponent suggestCommandComp = new ChatComponentText(" [Don't remind me again]");
+        String command = "/" + modID + "$core " + UpdateSettingsData.REPEAT_NOTIFY.toString() + " false";
+        ClickEvent suggestCommandEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
+        ChatStyle suggestCommandStyle = new ChatStyle().setChatClickEvent(suggestCommandEvent).setColor(EnumChatFormatting.DARK_GRAY);
+        suggestCommandComp.setChatStyle(suggestCommandStyle);
+
+        return mainComp.appendSibling(latestReleaseComp).appendSibling(changelogComp).appendSibling(suggestCommandComp);
+    }
+
+    private String getChangelogStr()
+    {
+        String encodedChangelog = StaticAssetUtils.parseMemberAsString(jsonObject, "changelog");
+        return (encodedChangelog != null) ? new String(Base64.getDecoder().decode(encodedChangelog)) : "";
     }
 }
 
