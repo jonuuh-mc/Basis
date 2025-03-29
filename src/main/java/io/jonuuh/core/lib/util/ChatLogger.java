@@ -10,7 +10,7 @@ import net.minecraft.util.IChatComponent;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class ChatLogger
+public final class ChatLogger
 {
     public static ChatLogger INSTANCE;
     private final Minecraft mc;

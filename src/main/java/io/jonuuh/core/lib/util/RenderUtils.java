@@ -5,13 +5,17 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
 
-public abstract class RenderUtils
+public final class RenderUtils
 {
+    /** Prevents instantiation */
+    private RenderUtils()
+    {
+    }
+
     private static final Minecraft mc = Minecraft.getMinecraft();
 
     public static RenderManager getRenderManager()

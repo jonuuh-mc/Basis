@@ -2,8 +2,13 @@ package io.jonuuh.core.lib.util;
 
 import net.minecraft.util.Vec3;
 
-public abstract class MathUtils
+public final class MathUtils
 {
+    /** Prevents instantiation */
+    private MathUtils()
+    {
+    }
+
     public static float halfRound(float num)
     {
         return Math.round(num * 2) / 2.0F; // round to nearest 0.5

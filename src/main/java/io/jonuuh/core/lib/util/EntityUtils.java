@@ -1,5 +1,9 @@
 package io.jonuuh.core.lib.util;
 
-public abstract class EntityUtils
+public final class EntityUtils
 {
+    /** Prevents instantiation */
+    private EntityUtils()
+    {
+    }
 }

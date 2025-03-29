@@ -5,8 +5,13 @@ import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumChatFormatting;
 
-public abstract class Util
+public final class Util
 {
+    /** Prevents instantiation */
+    private Util()
+    {
+    }
+
     public static NetworkPlayerInfo getPlayerInfo(EntityPlayer player)
     {
         return Minecraft.getMinecraft().getNetHandler().getPlayerInfo(player.getUniqueID());
