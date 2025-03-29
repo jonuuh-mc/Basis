@@ -9,23 +9,32 @@ buildscript {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
     }
 }
-apply plugin: 'net.minecraftforge.gradle.forge'
-apply plugin: 'java'
 
-version = "0.0.0"
-group = "io.jonuuh.core"
-archivesBaseName = "Core-1.8.9"
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'maven-publish'
 
 sourceCompatibility = targetCompatibility = 1.8
+version = "0.0.1"
+group = "io.jonuuh.core"
+archivesBaseName = "core-1.8.9"
 
 minecraft {
     version = "1.8.9-11.15.1.2318-1.8.9"
     runDir = "run"
     mappings = "stable_22"
-    makeObfSourceJar = false
+    makeObfSourceJar = false // TODO: what does this do again
 }
 
-apply plugin: 'maven-publish'
+// Define task for source jar
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+// Ensure source jar is built
+artifacts {
+    archives sourcesJar
+}
 
 publishing {
     repositories {
@@ -33,32 +42,32 @@ publishing {
             name = "GitHubPackages"
             url = "https://maven.pkg.github.com/jonuuh-mc/Core"
             credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_PACKAGES_TOKEN")
+                username = GH_ACTOR
+                password = GHP_TOKEN
             }
         }
     }
 
     publications {
         maven(MavenPublication) {
-            groupId "io.jonuuh-mc"
-            artifactId "core"
-            version version
-//            exclude sourceSets.main.resources.srcDirs "a"
-            from components.java
+            groupId = project.GH_ACTOR
+            artifactId "core-1.8.9"
+            version project.version
+
+            // Include main jar
+            artifact file("${buildDir}/libs/${archivesBaseName}-${version}.jar")
+
+            // Include sources and Javadoc
+            artifact sourcesJar
         }
     }
 }
 
-//// Exclude when building or publishing
+//// Use this when building or publishing
 //sourceSets {
 //    main {
 //        java {
 //            exclude "io/jonuuh/core/local"
-//        }
-//
-//        resources {
-//            exclude "assets/versions"
 //        }
 //    }
 //}
