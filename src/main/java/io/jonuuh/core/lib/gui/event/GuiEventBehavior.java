@@ -4,8 +4,8 @@ import io.jonuuh.core.lib.gui.element.GuiElement;
 
 /**
  * Represents a custom behavior for a gui event
- *
- * <p>This is a functional interface ({@link java.util.function})
+ * <p>
+ * This is a {@link java.util.function functional interface}
  * whose functional method is {@link #apply(GuiElement)}
  *
  * @see java.util.function.Function

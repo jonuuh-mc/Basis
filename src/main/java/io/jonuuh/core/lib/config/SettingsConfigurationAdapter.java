@@ -168,24 +168,21 @@ public final class SettingsConfigurationAdapter
         {
             String settingName = settingEntry.getKey();
             Setting<?> setting = settingEntry.getValue();
-            Property property = getProperty(settings, settingName, (settingName + valueType.toString()));
+            Property property = getProperty(settings, settingName, valueType);
             transferSetting(setting, property, valueType, transferType);
         }
     }
 
-    // TODO: this function really needs to be shortened, it's hard to make anything generic though;
-    //  ultimately there are 8*2*2=32 cases, each of which *must* have a unique function call
-
     /**
      * Transfer a Setting field to or from a forge Configuration Property
      * <p>
-     * {@link TransferType#LOAD}: Read from Property -> Write into Setting
+     * {@link ValueType#DEFAULT DEFAULT}: Operate on the Setting's defaultValue field
      * <p>
-     * {@link TransferType#SAVE}: Read from Setting -> Write into Property
+     * {@link ValueType#CURRENT CURRENT}: Operate on the Setting's currentValue field
      * <p>
-     * {@link ValueType#DEFAULT}: Operate on the Setting's defaultValue field
+     * {@link TransferType#LOAD LOAD}: Read from Property -> Write into Setting
      * <p>
-     * {@link ValueType#CURRENT}: Operate on the Setting's currentValue field
+     * {@link TransferType#SAVE SAVE}: Read from Setting -> Write into Property
      */
     private void transferSetting(Setting<?> setting, Property property, ValueType valueType, TransferType transferType)
     {
@@ -194,158 +191,70 @@ public final class SettingsConfigurationAdapter
             case LOAD:
                 if (setting instanceof BoolSetting)
                 {
-                    BoolSetting boolSetting = (BoolSetting) setting;
-                    boolean prop = property.getBoolean();
-
-                    if (valueType == ValueType.DEFAULT)
-                    {
-                        boolSetting.setDefaultValue(prop);
-                    }
-                    else
-                    {
-                        boolSetting.setCurrentValue(prop);
-                    }
+                    setSettingValue((BoolSetting) setting, property.getBoolean(), valueType);
                 }
                 else if (setting instanceof DoubleSetting)
                 {
-                    DoubleSetting doubleSetting = (DoubleSetting) setting;
-                    double prop = property.getDouble();
-
-                    if (valueType == ValueType.DEFAULT)
-                    {
-                        doubleSetting.setDefaultValue(prop);
-                    }
-                    else
-                    {
-                        doubleSetting.setCurrentValue(prop);
-                    }
+                    setSettingValue((DoubleSetting) setting, property.getDouble(), valueType);
                 }
                 else if (setting instanceof IntSetting)
                 {
-                    IntSetting intSetting = (IntSetting) setting;
-                    int prop = property.getInt();
-
-                    if (valueType == ValueType.DEFAULT)
-                    {
-                        intSetting.setDefaultValue(prop);
-                    }
-                    else
-                    {
-                        intSetting.setCurrentValue(prop);
-                    }
+                    setSettingValue((IntSetting) setting, property.getInt(), valueType);
                 }
                 else if (setting instanceof StringSetting)
                 {
-                    StringSetting stringSetting = (StringSetting) setting;
-                    String prop = property.getString();
-
-                    if (valueType == ValueType.DEFAULT)
-                    {
-                        stringSetting.setDefaultValue(prop);
-                    }
-                    else
-                    {
-                        stringSetting.setCurrentValue(prop);
-                    }
+                    setSettingValue((StringSetting) setting, property.getString(), valueType);
                 }
                 else if (setting instanceof BoolArrSetting)
                 {
-                    BoolArrSetting boolArrSetting = ((BoolArrSetting) setting);
-                    boolean[] prop = property.getBooleanList();
-
-                    if (valueType == ValueType.DEFAULT)
-                    {
-                        boolArrSetting.setDefaultValue(prop);
-                    }
-                    else
-                    {
-                        boolArrSetting.setCurrentValue(prop);
-                    }
+                    setSettingValue((BoolArrSetting) setting, property.getBooleanList(), valueType);
                 }
                 else if (setting instanceof DoubleArrSetting)
                 {
-                    DoubleArrSetting doubleArrSetting = ((DoubleArrSetting) setting);
-                    double[] prop = property.getDoubleList();
-
-                    if (valueType == ValueType.DEFAULT)
-                    {
-                        doubleArrSetting.setDefaultValue(prop);
-                    }
-                    else
-                    {
-                        doubleArrSetting.setCurrentValue(prop);
-                    }
+                    setSettingValue((DoubleArrSetting) setting, property.getDoubleList(), valueType);
                 }
                 else if (setting instanceof IntArrSetting)
                 {
-                    IntArrSetting intArrSetting = ((IntArrSetting) setting);
-                    int[] prop = property.getIntList();
-
-                    if (valueType == ValueType.DEFAULT)
-                    {
-                        intArrSetting.setDefaultValue(prop);
-                    }
-                    else
-                    {
-                        intArrSetting.setCurrentValue(prop);
-                    }
+                    setSettingValue((IntArrSetting) setting, property.getIntList(), valueType);
                 }
                 else if (setting instanceof StringArrSetting)
                 {
-                    StringArrSetting stringArrSetting = ((StringArrSetting) setting);
-                    String[] prop = property.getStringList();
-
-                    if (valueType == ValueType.DEFAULT)
-                    {
-                        stringArrSetting.setDefaultValue(prop);
-                    }
-                    else
-                    {
-                        stringArrSetting.setCurrentValue(prop);
-                    }
+                    setSettingValue((StringArrSetting) setting, property.getStringList(), valueType);
                 }
                 break;
 
             case SAVE:
                 if (setting instanceof BoolSetting)
                 {
-                    BoolSetting boolSetting = (BoolSetting) setting;
-                    property.setValue((valueType == ValueType.DEFAULT) ? boolSetting.getDefaultValue() : boolSetting.getCurrentValue());
+                    property.setValue(getSettingValue((BoolSetting) setting, valueType));
                 }
                 else if (setting instanceof DoubleSetting)
                 {
-                    DoubleSetting doubleSetting = (DoubleSetting) setting;
-                    property.setValue((valueType == ValueType.DEFAULT) ? doubleSetting.getDefaultValue() : doubleSetting.getCurrentValue());
+                    property.setValue(getSettingValue((DoubleSetting) setting, valueType));
                 }
                 else if (setting instanceof IntSetting)
                 {
-                    IntSetting intSetting = (IntSetting) setting;
-                    property.setValue((valueType == ValueType.DEFAULT) ? intSetting.getDefaultValue() : intSetting.getCurrentValue());
+                    property.setValue(getSettingValue((IntSetting) setting, valueType));
                 }
                 else if (setting instanceof StringSetting)
                 {
-                    StringSetting stringSetting = (StringSetting) setting;
-                    property.setValue((valueType == ValueType.DEFAULT) ? stringSetting.getDefaultValue() : stringSetting.getCurrentValue());
+                    property.setValue(getSettingValue((StringSetting) setting, valueType));
                 }
                 else if (setting instanceof BoolArrSetting)
                 {
-                    BoolArrSetting boolArrSetting = (BoolArrSetting) setting;
-                    property.setValues((valueType == ValueType.DEFAULT) ? boolArrSetting.getDefaultValue() : boolArrSetting.getCurrentValue());
+                    property.setValues(getSettingValue((BoolArrSetting) setting, valueType));
                 }
                 else if (setting instanceof DoubleArrSetting)
                 {
-                    DoubleArrSetting doubleArrSetting = (DoubleArrSetting) setting;
-                    property.setValues((valueType == ValueType.DEFAULT) ? doubleArrSetting.getDefaultValue() : doubleArrSetting.getCurrentValue());
+                    property.setValues(getSettingValue((DoubleArrSetting) setting, valueType));
                 }
                 else if (setting instanceof IntArrSetting)
                 {
-                    IntArrSetting intArrSetting = (IntArrSetting) setting;
-                    property.setValues((valueType == ValueType.DEFAULT) ? intArrSetting.getDefaultValue() : intArrSetting.getCurrentValue());
+                    property.setValues(getSettingValue((IntArrSetting) setting, valueType));
                 }
                 else if (setting instanceof StringArrSetting)
                 {
-                    StringArrSetting stringArrSetting = (StringArrSetting) setting;
-                    property.setValues((valueType == ValueType.DEFAULT) ? stringArrSetting.getDefaultValue() : stringArrSetting.getCurrentValue());
+                    property.setValues(getSettingValue((StringArrSetting) setting, valueType));
                 }
                 break;
         }
@@ -356,73 +265,99 @@ public final class SettingsConfigurationAdapter
      * <p>
      * The Property corresponds to a field of a Setting within the Settings.
      * <p>
-     * The Property key should have a suffix ({@link ValueType#DEFAULT} or {@link ValueType#CURRENT}
-     * denoting which of the two properties corresponding to the two fields of a Setting is returned.
-     * <p>
      * If the Property DOES exist in the file: read and return it.
      * <p>
      * If the Property DOES NOT exist in the file: return a new Property with the current value of the field.
      *
      * @param settings The Settings whose category to search in
      * @param settingName The name of the Setting whose field is retrieved
-     * @param propKey The Property's key in the Configuration category
+     * @param valueType Denotes which of the two properties corresponding to the two fields of a Setting is returned.
      * @see Configuration#get(String, String, String, String, Property.Type)
      */
-    private Property getProperty(Settings settings, String settingName, String propKey)
+    private Property getProperty(Settings settings, String settingName, ValueType valueType)
     {
         String category = settings.configurationCategory;
+        String propKey = getPropKey(settingName, valueType);
         Setting<?> setting = settings.get(settingName);
 
         if (setting instanceof BoolSetting)
         {
-            return configuration.get(category, propKey, getFallbackValue(propKey, (BoolSetting) setting));
+            return configuration.get(category, propKey, getSettingValue((BoolSetting) setting, valueType));
         }
         else if (setting instanceof DoubleSetting)
         {
-            return configuration.get(category, propKey, getFallbackValue(propKey, (DoubleSetting) setting));
+            return configuration.get(category, propKey, getSettingValue((DoubleSetting) setting, valueType));
         }
         else if (setting instanceof IntSetting)
         {
-            return configuration.get(category, propKey, getFallbackValue(propKey, (IntSetting) setting));
+            return configuration.get(category, propKey, getSettingValue((IntSetting) setting, valueType));
         }
         else if (setting instanceof StringSetting)
         {
-            return configuration.get(category, propKey, getFallbackValue(propKey, (StringSetting) setting));
+            return configuration.get(category, propKey, getSettingValue((StringSetting) setting, valueType));
         }
 
         else if (setting instanceof BoolArrSetting)
         {
-            return configuration.get(category, propKey, getFallbackValue(propKey, (BoolArrSetting) setting));
+            return configuration.get(category, propKey, getSettingValue((BoolArrSetting) setting, valueType));
         }
         else if (setting instanceof DoubleArrSetting)
         {
-            return configuration.get(category, propKey, getFallbackValue(propKey, (DoubleArrSetting) setting));
+            return configuration.get(category, propKey, getSettingValue((DoubleArrSetting) setting, valueType));
         }
         else if (setting instanceof IntArrSetting)
         {
-            return configuration.get(category, propKey, getFallbackValue(propKey, (IntArrSetting) setting));
+            return configuration.get(category, propKey, getSettingValue((IntArrSetting) setting, valueType));
         }
         else if (setting instanceof StringArrSetting)
         {
-            return configuration.get(category, propKey, getFallbackValue(propKey, (StringArrSetting) setting));
+            return configuration.get(category, propKey, getSettingValue((StringArrSetting) setting, valueType));
         }
 
         return null;
     }
 
     /**
-     * The fallback value to use for the value of a Property when trying to retrieve it from the Configuration.
+     * Set the value of a setting using a ValueType.
+     *
+     * @param <T> The literal value type, which is the same as the internal type of the given Setting
+     * @param setting The setting whose value to set
+     * @param value A value that is set
+     * @param valueType The ValueType corresponding to one of the two fields of the Setting
+     */
+    private <T> void setSettingValue(Setting<T> setting, T value, ValueType valueType)
+    {
+        if (valueType == ValueType.DEFAULT)
+        {
+            setting.setDefaultValue(value);
+        }
+        else
+        {
+            setting.setCurrentValue(value);
+        }
+    }
+
+    /**
+     * Retrieve the value of a setting using a ValueType.
      * <p>
-     * The property key should have a suffix denoting which of the two Setting fields is used as a fallback value.
+     * The ValueType denotes which of the two Setting fields is returned.
      *
      * @param <T> The return type, which is the same as the internal type of the given Setting
-     * @param propKey The key of the Property corresponding to the field of the Setting
-     * @param setting The setting whose field to use as a fallback
-     * @return The fallback value
+     * @param valueType The ValueType corresponding to one of the two fields of the Setting
+     * @param setting The setting whose field to return
+     * @return A setting value
      */
-    private <T> T getFallbackValue(String propKey, Setting<T> setting)
+    private <T> T getSettingValue(Setting<T> setting, ValueType valueType)
     {
-        return propKey.startsWith(ValueType.CURRENT.toString()) ? setting.getCurrentValue() : setting.getDefaultValue();
+        return valueType == ValueType.DEFAULT ? setting.getDefaultValue() : setting.getCurrentValue();
+    }
+
+    /**
+     * Constructs a property key string as the settingName with a ValueType suffix
+     */
+    private String getPropKey(String settingName, ValueType valueType)
+    {
+        return settingName + valueType.toString();
     }
 
     private enum TransferType

@@ -10,5 +10,5 @@ public enum GuiEventType
     MOUSE_DOWN,
     MOUSE_UP,
     MOUSE_DRAG,
-    MOUSE_SCROLL;
+    MOUSE_SCROLL
 }

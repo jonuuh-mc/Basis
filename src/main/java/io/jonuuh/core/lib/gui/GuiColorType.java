@@ -7,5 +7,5 @@ public enum GuiColorType
     ACCENT2,
     BACKGROUND,
     BASE_HOVER,
-    ACCENT_HOVER;
+    ACCENT_HOVER
 }
