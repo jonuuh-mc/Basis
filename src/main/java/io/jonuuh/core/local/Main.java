@@ -1,19 +1,26 @@
 package io.jonuuh.core.local;
 
-import io.jonuuh.core.lib.config.Config;
+import io.jonuuh.core.lib.config.SettingsConfigurationAdapter;
 import io.jonuuh.core.lib.config.setting.Settings;
-import io.jonuuh.core.lib.config.setting.types.array.DoubleArrSetting;
 import io.jonuuh.core.lib.config.setting.types.array.IntArrSetting;
 import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.config.setting.types.single.DoubleSetting;
 import io.jonuuh.core.lib.config.setting.types.single.IntSetting;
 import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
+import io.jonuuh.core.lib.gui.AbstractGuiScreen;
+import io.jonuuh.core.lib.update.UpdateHandler;
 import io.jonuuh.core.lib.util.ChatLogger;
 import io.jonuuh.core.lib.util.Log4JLogger;
+import io.jonuuh.core.lib.util.StaticAssetUtils;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import org.lwjgl.input.Keyboard;
 
 @Mod(modid = Main.modID, version = Main.version, acceptedMinecraftVersions = "[1.8.9]")
 public class Main
@@ -36,9 +43,24 @@ public class Main
     @Mod.EventHandler
     public void FMLInit(FMLInitializationEvent event)
     {
-        Initializer initializer = new Initializer(modID, version);
-        MinecraftForge.EVENT_BUS.register(initializer);
-        initializer.start();
+        String asset = StaticAssetUtils.getStaticHostedAsset(modID + ".json");
+        System.out.println("asset req finished: " + asset);
+
+        // TODO: pass asset in here
+        UpdateHandler.createInstance(modID, version);
+//        UpdateHandler.INSTANCE.start();
+
+        // TODO: is it okay for all this to be in here, dependant on github api call finish?
+        //  try registering a keybind on some other key press for example (arbitrary time) - does it show up in controls menu?
+        //  same for something like creating the gui and command to open the gui?
+        KeyBinding keyBinding = new KeyBinding("<description>", Keyboard.KEY_NONE, modID);
+        ClientRegistry.registerKeyBinding(keyBinding);
+        MinecraftForge.EVENT_BUS.register(new Events(keyBinding));
+
+//        System.out.println(Config.INSTANCE.getConfigCategorySettingsMap());
+
+        AbstractGuiScreen guiScreen = new SettingsGuiScreen(SettingsConfigurationAdapter.INSTANCE.getDefaultCategorySettings());
+        ClientCommandHandler.instance.registerCommand(new CommandOpenSettingsGui(modID, guiScreen));
     }
 
     private Settings initMasterSettings()

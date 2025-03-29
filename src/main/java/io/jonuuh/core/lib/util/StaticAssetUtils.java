@@ -10,7 +10,7 @@ public abstract class StaticAssetUtils
 {
     public static String getStaticHostedAsset(String assetPath)
     {
-        String asset = getGithubRepoAssetViaRawApi("jonuuh-mc", "StaticFileStorage", assetPath);
+        String asset = getGithubRepoAssetViaRawApi("jonuuh-mc", "StaticAssetStorage", assetPath);
 
         if (asset == null)
         {

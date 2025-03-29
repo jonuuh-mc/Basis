@@ -33,7 +33,7 @@ public class Initializer
         if (!started)
         {
             System.out.println("starting asset req");
-            new Thread(new StaticAssetRequester("versioning/" + modID + "/" + modID + ".json")).start();
+            new Thread(new StaticAssetRequester(modID + ".json")).start();
             started = true;
         }
     }

@@ -1,4 +1,4 @@
-package io.jonuuh.core.lib.config.command;
+package io.jonuuh.core.local;
 
 import io.jonuuh.core.lib.gui.AbstractGuiScreen;
 import net.minecraft.client.Minecraft;
