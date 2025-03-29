@@ -1,18 +1,17 @@
 package io.jonuuh.core.lib.config.setting.types.single;
 
 import io.jonuuh.core.lib.config.setting.types.Setting;
-import io.jonuuh.core.lib.config.setting.types.SettingType;
 
-public class BoolSetting extends Setting<Boolean>
+public final class BoolSetting extends Setting<Boolean>
 {
-    public BoolSetting(boolean defaultValue, boolean value)
+    public BoolSetting(boolean defaultValue, boolean currentValue)
     {
-        super(SettingType.BOOLEAN, defaultValue, value);
+        super(defaultValue, currentValue);
     }
 
     public BoolSetting(boolean defaultValue)
     {
-        super(SettingType.BOOLEAN, defaultValue);
+        super(defaultValue);
     }
 
     public BoolSetting(BoolSetting setting)

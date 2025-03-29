@@ -1,12 +1,11 @@
 package io.jonuuh.core.lib.config.setting;
 
-import io.jonuuh.core.lib.config.Config;
+import io.jonuuh.core.lib.config.SettingsConfigurationAdapter;
 import io.jonuuh.core.lib.config.setting.types.Setting;
-import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 
 import java.util.HashMap;
 
-public class Settings extends HashMap<String, Setting<?>>
+public final class Settings extends HashMap<String, Setting<?>>
 {
     public final String configurationCategory;
 
@@ -17,18 +16,7 @@ public class Settings extends HashMap<String, Setting<?>>
 
     public Settings()
     {
-        this("master");
-    }
-
-    /**
-     * Deep copy these Settings into a new Settings
-     * <p>
-     * This also copies the configuration category, which probably isn't useful at all? (saving to file should overwrite)
-     */
-    public Settings deepCopy()
-    {
-        Settings settings = new Settings(this.configurationCategory);
-        return deepCopyInto(settings);
+        this(SettingsConfigurationAdapter.DEFAULT_CATEGORY);
     }
 
     /**
@@ -43,7 +31,8 @@ public class Settings extends HashMap<String, Setting<?>>
         return settings;
     }
 
-    // TODO: won't reset ui elements
+    // TODO: won't reset gui elements
+    //  bad idea: just reconstruct the guiscreen?
     public void reset()
     {
         for (Setting<?> setting : values())
@@ -52,40 +41,38 @@ public class Settings extends HashMap<String, Setting<?>>
         }
     }
 
-    public void load()
+    public void loadCurrentValues()
     {
-        Config.INSTANCE.loadSettings(configurationCategory);
+        SettingsConfigurationAdapter.INSTANCE.loadSettingsCurrentValues(this);
     }
 
-    public void save()
+    public void saveCurrentValues()
     {
-        Config.INSTANCE.saveSettings(configurationCategory);
+        SettingsConfigurationAdapter.INSTANCE.saveSettingsCurrentValues(this);
     }
 
-    public void load(String settingName)
+    public void loadDefaultValues()
     {
-        Config.INSTANCE.loadSetting(configurationCategory, settingName);
+        SettingsConfigurationAdapter.INSTANCE.loadSettingsDefaultValues(this);
     }
 
-    public void save(String settingName)
+    // TODO: have a gui button to save a default per setting?
+    public void saveDefaultValues()
     {
-        Config.INSTANCE.saveSetting(configurationCategory, settingName);
+        SettingsConfigurationAdapter.INSTANCE.saveSettingsDefaultValues(this);
     }
 
     /**
      * Get a Setting given a settingName key
      *
-     * @param settingName the key associated with the Setting when it was put into this Settings
-     * @param type the class type for the setting // TODO ?
-     * @return the typecast Setting associated with the given key if it exists in this Settings and is of the given type, otherwise null
-     * @param <T> // TODO ?
+     * @param settingName The key associated with the Setting
+     * @param type The class type which the returned Setting will be cast to
+     * @return The cast Setting associated with the given key if it exists in this Settings and is of the given type, else null
      */
     public <T extends Setting<?>> T get(String settingName, Class<T> type)
     {
         try
         {
-//            BoolSetting.class.cast(this.get(settingName)); // TODO ?
-
             return type.cast(this.get(settingName));
         }
         catch (ClassCastException e)
@@ -99,82 +86,4 @@ public class Settings extends HashMap<String, Setting<?>>
     {
         return configurationCategory + "=" + super.toString();
     }
-
-//    //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////
-//
-//    public BoolSetting getBoolSetting(String settingName)
-//    {
-//        Setting<?> setting = get(settingName);
-//        return (setting instanceof BoolSetting) ? ((BoolSetting) setting) : null;
-//    }
-//
-//    public IntSetting getIntSetting(String settingName)
-//    {
-//        Setting<?> setting = get(settingName);
-//        return (setting instanceof IntSetting) ? ((IntSetting) setting) : null;
-//    }
-//
-//    public DoubleSetting getDoubleSetting(String settingName)
-//    {
-//        Setting<?> setting = get(settingName);
-//        return (setting instanceof DoubleSetting) ? ((DoubleSetting) setting) : null;
-//    }
-//
-//    public StringSetting getStringSetting(String settingName)
-//    {
-//        Setting<?> setting = get(settingName);
-//        return (setting instanceof StringSetting) ? ((StringSetting) setting) : null;
-//    }
-//
-//    //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////
-//
-//    public BoolArrSetting getBoolArrSetting(String settingName)
-//    {
-//        Setting<?> setting = get(settingName);
-//        return (setting instanceof BoolArrSetting) ? ((BoolArrSetting) setting) : null;
-//    }
-//
-//    public IntArrSetting getIntArrSetting(String settingName)
-//    {
-//        Setting<?> setting = get(settingName);
-//        return (setting instanceof IntArrSetting) ? ((IntArrSetting) setting) : null;
-//    }
-//
-//    public DoubleArrSetting getDoubleArrSetting(String settingName)
-//    {
-//        Setting<?> setting = get(settingName);
-//        return (setting instanceof DoubleArrSetting) ? ((DoubleArrSetting) setting) : null;
-//    }
-//
-//    public StringArrSetting getStringArrSetting(String settingName)
-//    {
-//        Setting<?> setting = get(settingName);
-//        return (setting instanceof StringArrSetting) ? ((StringArrSetting) setting) : null;
-//    }
-//
-//    //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////
-//
-//    public BoolListSetting getBoolListSetting(String settingName)
-//    {
-//        Setting<?> setting = get(settingName);
-//        return (setting instanceof BoolListSetting) ? ((BoolListSetting) setting) : null;
-//    }
-//
-//    public IntListSetting getIntListSetting(String settingName)
-//    {
-//        Setting<?> setting = get(settingName);
-//        return (setting instanceof IntListSetting) ? ((IntListSetting) setting) : null;
-//    }
-//
-//    public DoubleListSetting getDoubleListSetting(String settingName)
-//    {
-//        Setting<?> setting = get(settingName);
-//        return (setting instanceof DoubleListSetting) ? ((DoubleListSetting) setting) : null;
-//    }
-//
-//    public StringListSetting getStringListSetting(String settingName)
-//    {
-//        Setting<?> setting = get(settingName);
-//        return (setting instanceof StringListSetting) ? ((StringListSetting) setting) : null;
-//    }
 }

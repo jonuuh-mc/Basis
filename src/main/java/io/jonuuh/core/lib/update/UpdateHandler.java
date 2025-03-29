@@ -2,7 +2,7 @@ package io.jonuuh.core.lib.update;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.jonuuh.core.lib.config.Config;
+import io.jonuuh.core.lib.config.SettingsConfigurationAdapter;
 import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
@@ -49,7 +49,7 @@ public class UpdateHandler extends Thread
 //        updateSettings.put("LAST_NOTIFICATION_INSTANT", new StringSetting());
         updateSettings.put("LAST_LATEST_VERSION", new StringSetting(currentVersionStr));
         updateSettings.put("NOTIFY_AGAIN_FOR_LATEST", new BoolSetting());
-        Config.INSTANCE.putAndLoadSettings(updateSettings);
+        SettingsConfigurationAdapter.INSTANCE.putAndLoadSettings(updateSettings);
 
         String versioningJson = StaticAssetUtils.getStaticHostedAsset("versioning/" + modID + "/" + modID + ".json");
         Map<String, String> versioningMap = parseJson(versioningJson);

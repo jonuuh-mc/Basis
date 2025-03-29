@@ -2,33 +2,26 @@ package io.jonuuh.core.lib.config.setting.types;
 
 public abstract class Setting<T>
 {
-    protected final SettingType type;
     protected T defaultValue;
-    protected T value;
+    protected T currentValue;
 
-    protected Setting(SettingType type, T defaultValue, T value)
+    protected Setting(T defaultValue, T currentValue)
     {
-        this.type = type;
         this.defaultValue = defaultValue;
-        this.value = value;
+        this.currentValue = currentValue;
     }
 
-    protected Setting(SettingType type, T defaultValue)
+    protected Setting(T defaultValue)
     {
-        this(type, defaultValue, defaultValue);
+        this(defaultValue, defaultValue);
     }
 
     protected Setting(Setting<T> setting)
     {
-        this(setting.type, setting.defaultValue, setting.value);
+        this(setting.defaultValue, setting.currentValue);
     }
 
     public abstract Setting<T> copy();
-
-    public SettingType getType()
-    {
-        return type;
-    }
 
     public T getDefaultValue()
     {
@@ -40,14 +33,14 @@ public abstract class Setting<T>
         this.defaultValue = defaultValue;
     }
 
-    public T getValue()
+    public T getCurrentValue()
     {
-        return value;
+        return currentValue;
     }
 
-    public void setValue(T value)
+    public void setCurrentValue(T currentValue)
     {
-        this.value = value;
+        this.currentValue = currentValue;
     }
 
     /**
@@ -55,12 +48,12 @@ public abstract class Setting<T>
      */
     public void reset()
     {
-        this.value = defaultValue;
+        this.currentValue = defaultValue;
     }
 
     @Override
     public String toString()
     {
-        return this.getClass().getSimpleName() + "{" + "value=" + value + '}';
+        return this.getClass().getSimpleName() + "{" + "currentValue=" + currentValue + '}';
     }
 }

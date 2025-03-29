@@ -19,15 +19,18 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 public class Main
 {
     public static final String modID = "core";
-    public static final String version = "0.0.0";
+    public static final String version = "0.0.1";
 
     @Mod.EventHandler
     public void FMLPreInit(FMLPreInitializationEvent event)
     {
         Log4JLogger.createInstance(modID);
-        ChatLogger.createInstance("\u00a7f[\u00a76" + modID + "\u00a7f] ");
 
-        Config.createInstance(event.getSuggestedConfigurationFile(), initMasterSettings());
+        EnumChatFormatting white = EnumChatFormatting.WHITE;
+        EnumChatFormatting gold = EnumChatFormatting.GOLD;
+        ChatLogger.createInstance(white + "[" + gold + modID + white + "] ");
+
+        SettingsConfigurationAdapter.createInstance(event.getSuggestedConfigurationFile(), initMasterSettings());
     }
 
     @Mod.EventHandler

@@ -1,18 +1,17 @@
 package io.jonuuh.core.lib.config.setting.types.single;
 
 import io.jonuuh.core.lib.config.setting.types.Setting;
-import io.jonuuh.core.lib.config.setting.types.SettingType;
 
-public class IntSetting extends Setting<Integer>
+public final class IntSetting extends Setting<Integer>
 {
-    public IntSetting(int defaultValue, int value)
+    public IntSetting(int defaultValue, int currentValue)
     {
-        super(SettingType.INTEGER, defaultValue, value);
+        super(defaultValue, currentValue);
     }
 
     public IntSetting(int defaultValue)
     {
-        super(SettingType.INTEGER, defaultValue);
+        super(defaultValue);
     }
 
     public IntSetting(IntSetting setting)

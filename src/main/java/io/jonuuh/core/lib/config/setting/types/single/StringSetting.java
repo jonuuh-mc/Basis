@@ -1,18 +1,17 @@
 package io.jonuuh.core.lib.config.setting.types.single;
 
 import io.jonuuh.core.lib.config.setting.types.Setting;
-import io.jonuuh.core.lib.config.setting.types.SettingType;
 
-public class StringSetting extends Setting<String>
+public final class StringSetting extends Setting<String>
 {
-    public StringSetting(String defaultValue, String value)
+    public StringSetting(String defaultValue, String currentValue)
     {
-        super(SettingType.STRING, defaultValue, value);
+        super(defaultValue, currentValue);
     }
 
     public StringSetting(String defaultValue)
     {
-        super(SettingType.STRING, defaultValue);
+        super(defaultValue);
     }
 
     public StringSetting(StringSetting setting)

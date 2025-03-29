@@ -101,7 +101,7 @@ public class GuiCheckbox extends GuiSettingElement
     {
         if (associatedSetting instanceof BoolSetting)
         {
-            ((BoolSetting) associatedSetting).setValue(isChecked);
+            ((BoolSetting) associatedSetting).setCurrentValue(isChecked);
         }
     }
 }

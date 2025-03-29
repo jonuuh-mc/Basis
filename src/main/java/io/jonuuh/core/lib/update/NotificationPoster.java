@@ -40,7 +40,7 @@ class NotificationPoster
             return;
         }
 
-        if (updateSettings.get("NOTIFY_AGAIN_FOR_LATEST", BoolSetting.class).getValue())
+        if (updateSettings.get("NOTIFY_AGAIN_FOR_LATEST", BoolSetting.class).getCurrentValue())
         {
             MinecraftForge.EVENT_BUS.register(this);
         }
@@ -48,14 +48,14 @@ class NotificationPoster
 
     private boolean isNewUpdateAvailable()
     {
-        Version lastRecordedLatestVersion = new Version(updateSettings.get("LAST_LATEST_VERSION", StringSetting.class).getValue());
+        Version lastRecordedLatestVersion = new Version(updateSettings.get("LAST_LATEST_VERSION", StringSetting.class).getCurrentValue());
         Version trueLatestVersion = new Version(latestVersionStr);
 
         boolean isNewUpdateAvailable = lastRecordedLatestVersion.compareTo(trueLatestVersion) < 0;
 
         if (isNewUpdateAvailable)
         {
-            updateSettings.get("LAST_LATEST_VERSION", StringSetting.class).setValue(latestVersionStr);
+            updateSettings.get("LAST_LATEST_VERSION", StringSetting.class).setCurrentValue(latestVersionStr);
         }
 
         return isNewUpdateAvailable;
@@ -74,7 +74,7 @@ class NotificationPoster
 
         // TODO:
 //        updateSettings.get("LAST_NOTIFICATION_INSTANT", StringSetting.class).setValue(instantNow.toString());
-        updateSettings.save(); // save "LAST_NOTIFICATION_INSTANT" and if applicable, "LAST_LATEST_VERSION"
+        updateSettings.saveCurrentValues(); // save "LAST_NOTIFICATION_INSTANT" and if applicable, "LAST_LATEST_VERSION"
 
         MinecraftForge.EVENT_BUS.unregister(this);
     }

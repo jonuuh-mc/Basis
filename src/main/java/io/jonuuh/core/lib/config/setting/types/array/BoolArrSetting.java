@@ -1,20 +1,19 @@
 package io.jonuuh.core.lib.config.setting.types.array;
 
 import io.jonuuh.core.lib.config.setting.types.Setting;
-import io.jonuuh.core.lib.config.setting.types.SettingType;
 
 import java.util.Arrays;
 
-public class BoolArrSetting extends Setting<boolean[]>
+public final class BoolArrSetting extends Setting<boolean[]>
 {
-    public BoolArrSetting(boolean[] defaultValue, boolean[] value)
+    public BoolArrSetting(boolean[] defaultValue, boolean[] currentValue)
     {
-        super(SettingType.BOOLEAN_ARRAY, defaultValue, value);
+        super(defaultValue, currentValue);
     }
 
     public BoolArrSetting(boolean[] defaultValue)
     {
-        super(SettingType.BOOLEAN_ARRAY, defaultValue);
+        super(defaultValue);
     }
 
     public BoolArrSetting(BoolArrSetting setting)
@@ -36,6 +35,6 @@ public class BoolArrSetting extends Setting<boolean[]>
     @Override
     public String toString()
     {
-        return this.getClass().getSimpleName() + "{" + "value=" + Arrays.toString(value) + '}';
+        return this.getClass().getSimpleName() + "{" + "currentValue=" + Arrays.toString(currentValue) + '}';
     }
 }

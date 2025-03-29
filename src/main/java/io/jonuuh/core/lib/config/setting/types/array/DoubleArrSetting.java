@@ -1,20 +1,19 @@
 package io.jonuuh.core.lib.config.setting.types.array;
 
 import io.jonuuh.core.lib.config.setting.types.Setting;
-import io.jonuuh.core.lib.config.setting.types.SettingType;
 
 import java.util.Arrays;
 
-public class DoubleArrSetting extends Setting<double[]>
+public final class DoubleArrSetting extends Setting<double[]>
 {
-    public DoubleArrSetting(double[] defaultValue, double[] value)
+    public DoubleArrSetting(double[] defaultValue, double[] currentValue)
     {
-        super(SettingType.DOUBLE_ARRAY, defaultValue, value);
+        super(defaultValue, currentValue);
     }
 
     public DoubleArrSetting(double[] defaultValue)
     {
-        super(SettingType.DOUBLE_ARRAY, defaultValue);
+        super(defaultValue);
     }
 
     public DoubleArrSetting(DoubleArrSetting setting)
@@ -36,6 +35,6 @@ public class DoubleArrSetting extends Setting<double[]>
     @Override
     public String toString()
     {
-        return this.getClass().getSimpleName() + "{" + "value=" + Arrays.toString(value) + '}';
+        return this.getClass().getSimpleName() + "{" + "currentValue=" + Arrays.toString(currentValue) + '}';
     }
 }

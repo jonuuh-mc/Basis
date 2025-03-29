@@ -1,7 +1,6 @@
 package io.jonuuh.core.local;
 
-import io.jonuuh.core.lib.config.Config;
-import io.jonuuh.core.lib.config.command.CommandOpenSettingsGui;
+import io.jonuuh.core.lib.config.SettingsConfigurationAdapter;
 import io.jonuuh.core.lib.gui.AbstractGuiScreen;
 import io.jonuuh.core.lib.update.UpdateHandler;
 import io.jonuuh.core.lib.util.StaticAssetRequestFinishedEvent;
@@ -56,7 +55,7 @@ public class Initializer
         ClientRegistry.registerKeyBinding(keyBinding);
         MinecraftForge.EVENT_BUS.register(new Events(keyBinding));
 
-        AbstractGuiScreen guiScreen = new SettingsGuiScreen(Config.INSTANCE.getSettings("master"));
+        AbstractGuiScreen guiScreen = new SettingsGuiScreen(SettingsConfigurationAdapter.INSTANCE.getDefaultCategorySettings());
         ClientCommandHandler.instance.registerCommand(new CommandOpenSettingsGui(modID, guiScreen));
     }
 }

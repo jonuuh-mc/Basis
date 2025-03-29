@@ -1,18 +1,17 @@
 package io.jonuuh.core.lib.config.setting.types.single;
 
 import io.jonuuh.core.lib.config.setting.types.Setting;
-import io.jonuuh.core.lib.config.setting.types.SettingType;
 
-public class DoubleSetting extends Setting<Double>
+public final class DoubleSetting extends Setting<Double>
 {
-    public DoubleSetting(double defaultValue, double value)
+    public DoubleSetting(double defaultValue, double currentValue)
     {
-        super(SettingType.DOUBLE, defaultValue, value);
+        super(defaultValue, currentValue);
     }
 
     public DoubleSetting(double defaultValue)
     {
-        super(SettingType.DOUBLE, defaultValue);
+        super(defaultValue);
     }
 
     public DoubleSetting(DoubleSetting setting)

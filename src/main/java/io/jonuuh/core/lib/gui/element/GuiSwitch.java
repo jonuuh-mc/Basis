@@ -90,7 +90,7 @@ public class GuiSwitch extends GuiSettingElement
     @Override
     protected void updateSetting()
     {
-        ((BoolSetting) associatedSetting).setValue(switchState);
+        ((BoolSetting) associatedSetting).setCurrentValue(switchState);
     }
 }
 

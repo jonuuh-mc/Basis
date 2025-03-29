@@ -40,7 +40,7 @@ public class SettingsGuiScreen extends AbstractGuiScreen
     public void onGuiClosed()
     {
         super.onGuiClosed();
-        settings.save();
+        settings.saveCurrentValues();
         //        System.out.println(settings);
     }
 
@@ -83,7 +83,7 @@ public class SettingsGuiScreen extends AbstractGuiScreen
         container.setVertical(true);
 
         new GuiSwitch(container, "DRAW_BACKGROUND", 20, 5, 20, 10, "Whether to draw background",
-                settings.get("DRAW_BACKGROUND", BoolSetting.class).getValue());
+                settings.get("DRAW_BACKGROUND", BoolSetting.class).getCurrentValue());
 
         new GuiSwitch(container, "SWITCH", 10, 17, 20, 10, "", false);
 

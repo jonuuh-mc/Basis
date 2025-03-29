@@ -45,7 +45,7 @@ public class GuiTextField extends GuiSettingElement
     @Override
     protected void updateSetting()
     {
-        ((StringSetting) associatedSetting).setValue(text);
+        ((StringSetting) associatedSetting).setCurrentValue(text);
     }
 
 //    public void setCursorPosition(int position)

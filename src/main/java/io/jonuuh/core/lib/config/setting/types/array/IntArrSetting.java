@@ -1,20 +1,19 @@
 package io.jonuuh.core.lib.config.setting.types.array;
 
 import io.jonuuh.core.lib.config.setting.types.Setting;
-import io.jonuuh.core.lib.config.setting.types.SettingType;
 
 import java.util.Arrays;
 
-public class IntArrSetting extends Setting<int[]>
+public final class IntArrSetting extends Setting<int[]>
 {
-    public IntArrSetting(int[] defaultValue, int[] value)
+    public IntArrSetting(int[] defaultValue, int[] currentValue)
     {
-        super(SettingType.INTEGER_ARRAY, defaultValue, value);
+        super(defaultValue, currentValue);
     }
 
     public IntArrSetting(int[] defaultValue)
     {
-        super(SettingType.INTEGER_ARRAY, defaultValue);
+        super(defaultValue);
     }
 
     public IntArrSetting(IntArrSetting setting)
@@ -36,6 +35,6 @@ public class IntArrSetting extends Setting<int[]>
     @Override
     public String toString()
     {
-        return this.getClass().getSimpleName() + "{" + "value=" + Arrays.toString(value) + '}';
+        return this.getClass().getSimpleName() + "{" + "currentValue=" + Arrays.toString(currentValue) + '}';
     }
 }
