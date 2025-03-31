@@ -71,11 +71,14 @@ public class Main
     private Settings initMasterSettings()
     {
         Settings settings = new Settings();
-        settings.put("DRAW_BACKGROUND", new BoolSetting(true));
-        settings.put("BACKGROUND_OPACITY", new DoubleSetting(66D));
-        settings.put("RENDER_RANGE", new IntArrSetting(new int[]{1, 75}));
-        settings.put("BACKGROUND_COLOR", new StringSetting("BLUE"));
-        settings.put("TEST2", new IntSetting(30));
+        settings.put(LocalSettingKey.FLEX_DIRECTION_MAIN, new BoolSetting());
+        settings.put(LocalSettingKey.FLEX_DIRECTION_REVERSE, new BoolSetting());
+        settings.put(LocalSettingKey.FLEX_BASIS, new IntSetting(75));
+//        settings.put(LocalSettingKey.DRAW_BACKGROUND, new BoolSetting());
+//        settings.put(LocalSettingKey.BORDER_OPACITY, new DoubleSetting(75.0));
+//        settings.put(LocalSettingKey.RENDER_RANGE, new IntArrSetting(new int[]{5,50}));
+//        settings.put(LocalSettingKey.BACKGROUND_COLOR, new StringSetting("#FFAA00"));
+//        settings.put(LocalSettingKey.MAX_DETECTION_ANGLE, new IntSetting(45));
         return settings;
     }
 }

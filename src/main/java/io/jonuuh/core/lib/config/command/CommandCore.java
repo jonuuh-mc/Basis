@@ -3,7 +3,8 @@ package io.jonuuh.core.lib.config.command;
 import io.jonuuh.core.lib.config.SettingsConfigurationAdapter;
 import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
-import io.jonuuh.core.lib.update.UpdateSettingsData;
+import io.jonuuh.core.lib.update.UpdateHandler;
+import io.jonuuh.core.lib.update.UpdateSettingKey;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
@@ -16,7 +17,7 @@ public final class CommandCore extends CommandBase
     public CommandCore(String modID)
     {
         this.commandName = modID + "$core";
-        this.updateSettings = SettingsConfigurationAdapter.INSTANCE.getSettings(UpdateSettingsData.CATEGORY.toString());
+        this.updateSettings = SettingsConfigurationAdapter.INSTANCE.getSettings(UpdateHandler.configurationCategory);
     }
 
     @Override
@@ -45,9 +46,9 @@ public final class CommandCore extends CommandBase
             return;
         }
 
-        if (updateSettings != null && args.length == 2 && args[0].equals(UpdateSettingsData.REPEAT_NOTIFY.toString()))
+        if (updateSettings != null && args.length == 2 && args[0].equals(UpdateSettingKey.REPEAT_NOTIFY.toString()))
         {
-            BoolSetting boolSetting = (BoolSetting) updateSettings.get(UpdateSettingsData.REPEAT_NOTIFY.name());
+            BoolSetting boolSetting = (BoolSetting) updateSettings.get(UpdateSettingKey.REPEAT_NOTIFY);
 
             if (boolSetting == null || (!args[1].equals("true") && !args[1].equals("false")))
             {

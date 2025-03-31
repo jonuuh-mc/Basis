@@ -22,17 +22,32 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A bridge between Settings objects and a forge Configuration object, which is itself a bridge to a mod's literal external config file.
+ * A bridge between {@link Settings} objects and a Forge {@link Configuration}.
+ * <p>
+ * This singleton manages the transferral pipeline to and from {@link Setting} fields (current or default),
+ * {@link Property properties}, {@link net.minecraftforge.common.config.ConfigCategory categories},
+ * a {@link Configuration}, and an external config file.
+ *
+ * <ul>
+ *   <li>A {@link Configuration} directly reads and writes to an external config file</li>
+ *   <li>Each {@link Settings} is associated 1 to 1 with a {@link net.minecraftforge.common.config.ConfigCategory ConfigCategory}</li>
+ * </ul>
+ *
+ * @see Configuration
+ * @see Settings
+ * @see Setting
  */
 public final class SettingsConfigurationAdapter
 {
     public static final String DEFAULT_CATEGORY = "master";
     public static SettingsConfigurationAdapter INSTANCE;
-    public final Configuration configuration;
-    public final Map<String, Settings> configCategorySettingsMap;
+    private final Configuration configuration;
+    private final Map<String, Settings> configCategorySettingsMap;
+
+    // TODO: allow for multiple cfg files for one instance
 
     /**
-     * Initialize the SettingsConfigurationAdapter singleton with many Settings objects
+     * Initialize the SettingsConfigurationAdapter with many Settings objects
      *
      * @param file The file used for the Configuration, usually the {@link net.minecraftforge.fml.common.event.FMLPreInitializationEvent#getSuggestedConfigurationFile() suggested} file
      * @param settingsList A list of settings to use
@@ -47,7 +62,7 @@ public final class SettingsConfigurationAdapter
     }
 
     /**
-     * Initialize the SettingsConfigurationAdapter singleton with one Settings object
+     * Initialize the SettingsConfigurationAdapter with one Settings object
      *
      * @param file The file used for the Configuration, usually the {@link net.minecraftforge.fml.common.event.FMLPreInitializationEvent#getSuggestedConfigurationFile() suggested} file
      * @param settings The settings to use
@@ -69,11 +84,23 @@ public final class SettingsConfigurationAdapter
 
         for (Settings settings : configCategorySettingsMap.values())
         {
-            loadSettingsDefaultValues(settings); // TODO: don't load these by default?
+            /**
+             * TODO: don't always load defaults? should avoid writing them to file if they're unused.
+             *  look into passing null as the configuration's default value for configuration.get()?
+             * {@link SettingsConfigurationAdapter#loadSettingsValues(Settings, ValueType)}
+             */
+            loadSettingsDefaultValues(settings);
             loadSettingsCurrentValues(settings);
         }
     }
 
+
+    /**
+     * Retrieve the Settings associated with a given configuration category
+     *
+     * @param category The category key
+     * @return The associated settings
+     */
     public Settings getSettings(String category)
     {
         return configCategorySettingsMap.get(category);
@@ -84,10 +111,15 @@ public final class SettingsConfigurationAdapter
         return getSettings(DEFAULT_CATEGORY);
     }
 
-    public void putAndLoadSettings(Settings settings)
+    public void putSettings(Settings settings)
     {
         configCategorySettingsMap.put(settings.configurationCategory, settings);
-        loadSettingsDefaultValues(settings); // TODO: don't load these by default?
+    }
+
+    public void putAndLoadSettings(Settings settings)
+    {
+        putSettings(settings);
+        loadSettingsDefaultValues(settings);
         loadSettingsCurrentValues(settings);
     }
 
@@ -104,72 +136,112 @@ public final class SettingsConfigurationAdapter
 
         if (ChatLogger.INSTANCE != null)
         {
-            ChatLogger.INSTANCE.addLog("CONFIG SAVED: " + configuration.getConfigFile().getName(), EnumChatFormatting.GREEN);
+            String log = String.format("Config file '%s' saved", configuration.getConfigFile().getName());
+            ChatLogger.INSTANCE.addLog(log, EnumChatFormatting.GREEN);
         }
     }
 
     /**
      * Load the default value field for each Setting in the given Settings.
-     * <p>
-     * READ FROM: A Configuration Property corresponding to the field
-     * <p>
-     * WRITE INTO: The default value field of a Setting
+     *
+     * @see SettingsConfigurationAdapter#loadSettingsValues(Settings, ValueType)
      */
     public void loadSettingsDefaultValues(Settings settings)
     {
-        transferSettingsValues(settings, ValueType.DEFAULT, TransferType.LOAD);
-    }
-
-    /**
-     * Save the default value field for each Setting in the given Settings.
-     * <p>
-     * READ FROM: The default value field of a Setting
-     * <p>
-     * WRITE INTO: A Configuration Property corresponding to the field, then write the properties to file
-     *
-     * @see SettingsConfigurationAdapter#saveConfiguration()
-     */
-    public void saveSettingsDefaultValues(Settings settings)
-    {
-        transferSettingsValues(settings, ValueType.DEFAULT, TransferType.SAVE);
-        saveConfiguration();
+        loadSettingsValues(settings, ValueType.DEFAULT);
     }
 
     /**
      * Load the current value field for each Setting in the given Settings.
-     * <p>
-     * READ FROM: A Configuration Property corresponding to the field
-     * <p>
-     * WRITE INTO: The current value field of a Setting
+     *
+     * @see SettingsConfigurationAdapter#loadSettingsValues(Settings, ValueType)
      */
     public void loadSettingsCurrentValues(Settings settings)
     {
-        transferSettingsValues(settings, ValueType.CURRENT, TransferType.LOAD);
+        loadSettingsValues(settings, ValueType.CURRENT);
     }
 
     /**
-     * Save the current value field for each Setting in the given Settings.
-     * <p>
-     * READ FROM: The current value field of a Setting
-     * <p>
-     * WRITE INTO: A Configuration Property corresponding to the field, then write the properties to file
+     * Save the default value field for each Setting in the given Settings, then write to file.
      *
+     * @see SettingsConfigurationAdapter#saveSettingsValues(Settings, ValueType)
+     * @see SettingsConfigurationAdapter#saveConfiguration()
+     */
+    public void saveSettingsDefaultValues(Settings settings)
+    {
+        saveSettingsValues(settings, ValueType.DEFAULT);
+        saveConfiguration();
+    }
+
+    /**
+     * Save the current value field for each Setting in the given Settings, then write to file.
+     *
+     * @see SettingsConfigurationAdapter#saveSettingsValues(Settings, ValueType)
      * @see SettingsConfigurationAdapter#saveConfiguration()
      */
     public void saveSettingsCurrentValues(Settings settings)
     {
-        transferSettingsValues(settings, ValueType.CURRENT, TransferType.SAVE);
+        saveSettingsValues(settings, ValueType.CURRENT);
         saveConfiguration();
+    }
+
+    /**
+     * Save the default value field for each Setting in the given Settings.
+     *
+     * @see SettingsConfigurationAdapter#saveSettingsValues(Settings, ValueType)
+     */
+    public void saveSettingsDefaultValuesWithoutFileWrite(Settings settings)
+    {
+        saveSettingsValues(settings, ValueType.DEFAULT);
+    }
+
+    /**
+     * Save the current value field for each Setting in the given Settings.
+     *
+     * @see SettingsConfigurationAdapter#saveSettingsValues(Settings, ValueType)
+     */
+    public void saveSettingsCurrentValuesWithoutFileWrite(Settings settings)
+    {
+        saveSettingsValues(settings, ValueType.CURRENT);
+    }
+
+
+    /**
+     * Load a value field for each Setting in the given Settings.
+     * <p>
+     * IMPORTANT: This can create {@link Configuration#get(String, String, String, String, Property.Type) new properties}
+     * in the Configuration if they didn't already exist, which can cause unexpected writing to file on
+     * {@link SettingsConfigurationAdapter#saveConfiguration() save}. For example attempting to load one list of
+     * settings from file that didn't exist in file, then saving some other list of settings that did exist in
+     * file will cause both sets of settings to be written to file.
+     * <p>
+     * READ FROM: A Configuration Property corresponding to the field
+     * <p>
+     * WRITE INTO: The value field of a Setting denoted by the valueType
+     */
+    private void loadSettingsValues(Settings settings, ValueType valueType)
+    {
+        transferSettingsValues(settings, valueType, TransferType.LOAD);
+    }
+
+    /**
+     * Save a value field for each Setting in the given Settings.
+     * <p>
+     * READ FROM: The value field of a Setting denoted by the valueType
+     * <p>
+     * WRITE INTO: A Configuration Property corresponding to the field
+     */
+    private void saveSettingsValues(Settings settings, ValueType valueType)
+    {
+        transferSettingsValues(settings, valueType, TransferType.SAVE);
     }
 
     private void transferSettingsValues(Settings settings, ValueType valueType, TransferType transferType)
     {
-        for (Map.Entry<String, Setting<?>> settingEntry : settings.entrySet())
+        for (Map.Entry<String, Setting<?>> settingEntry : settings.getEntrySet())
         {
-            String settingName = settingEntry.getKey();
-            Setting<?> setting = settingEntry.getValue();
-            Property property = getProperty(settings, settingName, valueType);
-            transferSetting(setting, property, valueType, transferType);
+            Property property = getProperty(settings, settingEntry, valueType);
+            transferSetting(settingEntry.getValue(), property, valueType, transferType);
         }
     }
 
@@ -267,18 +339,19 @@ public final class SettingsConfigurationAdapter
      * <p>
      * If the Property DOES exist in the file: read and return it.
      * <p>
-     * If the Property DOES NOT exist in the file: return a new Property with the current value of the field.
+     * If the Property DOES NOT exist in the file AND the current value of the field is not null:
+     * create a new Property with the current value of the field, add it to the Configuration, and return it
      *
      * @param settings The Settings whose category to search in
-     * @param settingName The name of the Setting whose field is retrieved
+     * @param settingEntry TODO:
      * @param valueType Denotes which of the two properties corresponding to the two fields of a Setting is returned.
      * @see Configuration#get(String, String, String, String, Property.Type)
      */
-    private Property getProperty(Settings settings, String settingName, ValueType valueType)
+    private Property getProperty(Settings settings, Map.Entry<String, Setting<?>> settingEntry, ValueType valueType)
     {
         String category = settings.configurationCategory;
-        String propKey = getPropKey(settingName, valueType);
-        Setting<?> setting = settings.get(settingName);
+        String propKey = getPropKey(settingEntry.getKey(), valueType);
+        Setting<?> setting = settingEntry.getValue();
 
         if (setting instanceof BoolSetting)
         {
@@ -353,11 +426,11 @@ public final class SettingsConfigurationAdapter
     }
 
     /**
-     * Constructs a property key string as the settingName with a ValueType suffix
+     * Constructs a property key string as the setting key with a ValueType suffix
      */
-    private String getPropKey(String settingName, ValueType valueType)
+    private String getPropKey(String settingKey, ValueType valueType)
     {
-        return settingName + valueType.toString();
+        return settingKey + valueType.toString();
     }
 
     private enum TransferType

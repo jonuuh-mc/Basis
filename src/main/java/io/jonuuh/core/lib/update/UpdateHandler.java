@@ -10,6 +10,7 @@ import io.jonuuh.core.lib.util.StaticAssetUtils;
 
 public final class UpdateHandler
 {
+    public static final String configurationCategory = "update";
     public final String latestVersionStr;
     public final boolean isUpdateAvailable;
 
@@ -30,11 +31,11 @@ public final class UpdateHandler
                 (isUpdateAvailable ? "<" : ">=") + " (latest:" + latestVersionStr + ")";
         Log4JLogger.INSTANCE.info(s);
 
-        if (isUpdateAvailable) // TODO:
+        if (true || isUpdateAvailable) // TODO:
         {
-            Settings updateSettings = new Settings(UpdateSettingsData.CATEGORY.toString());
-            updateSettings.put(UpdateSettingsData.LAST_LATEST_VERSION.name(), new StringSetting(currentVersionStr));
-            updateSettings.put(UpdateSettingsData.REPEAT_NOTIFY.name(), new BoolSetting(true));
+            Settings updateSettings = new Settings(configurationCategory);
+            updateSettings.put(UpdateSettingKey.LAST_LATEST_VERSION, new StringSetting(currentVersionStr));
+            updateSettings.put(UpdateSettingKey.REPEAT_NOTIFY, new BoolSetting(true));
             SettingsConfigurationAdapter.INSTANCE.putAndLoadSettings(updateSettings);
 
             new NotificationPoster(modID, modName, updateSettings, jsonObject, latestVersionStr);

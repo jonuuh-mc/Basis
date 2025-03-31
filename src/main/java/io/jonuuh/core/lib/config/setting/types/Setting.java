@@ -1,5 +1,8 @@
 package io.jonuuh.core.lib.config.setting.types;
 
+import io.jonuuh.core.lib.config.setting.SettingEvent;
+import net.minecraftforge.common.MinecraftForge;
+
 public abstract class Setting<T>
 {
     protected T defaultValue;
@@ -31,6 +34,7 @@ public abstract class Setting<T>
     public void setDefaultValue(T defaultValue)
     {
         this.defaultValue = defaultValue;
+        MinecraftForge.EVENT_BUS.post(new SettingEvent<>(this, SettingEvent.Type.SET_DEFAULT, this.defaultValue, defaultValue));
     }
 
     public T getCurrentValue()
@@ -41,6 +45,7 @@ public abstract class Setting<T>
     public void setCurrentValue(T currentValue)
     {
         this.currentValue = currentValue;
+        MinecraftForge.EVENT_BUS.post(new SettingEvent<>(this, SettingEvent.Type.SET_CURRENT, this.currentValue, currentValue));
     }
 
     /**

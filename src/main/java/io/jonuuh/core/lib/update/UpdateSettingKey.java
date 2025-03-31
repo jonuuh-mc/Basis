@@ -1,18 +1,17 @@
 package io.jonuuh.core.lib.update;
 
-public enum UpdateSettingsData
+public enum UpdateSettingKey
 {
-    CATEGORY("update"),
-    LAST_LATEST_VERSION,
+    LAST_LATEST_VERSION(),
     REPEAT_NOTIFY("repeatNotify");
 
     private String friendlyName;
 
-    UpdateSettingsData()
+    UpdateSettingKey()
     {
     }
 
-    UpdateSettingsData(String friendlyName)
+    UpdateSettingKey(String friendlyName)
     {
         this.friendlyName = friendlyName;
     }

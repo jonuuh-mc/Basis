@@ -5,6 +5,7 @@ import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
 import io.jonuuh.core.lib.util.ChatLogger;
+import io.jonuuh.core.lib.util.Log4JLogger;
 import io.jonuuh.core.lib.util.StaticAssetUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.event.ClickEvent;
@@ -17,7 +18,9 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 final class NotificationPoster
 {
@@ -37,8 +40,11 @@ final class NotificationPoster
         this.jsonObject = jsonObject;
         this.trueLatestVersionStr = latestVersionStr;
 
-        this.lastLatestVersionSetting = (StringSetting) updateSettings.get(UpdateSettingsData.LAST_LATEST_VERSION.name());
-        this.repeatNotifySetting = (BoolSetting) updateSettings.get(UpdateSettingsData.REPEAT_NOTIFY.name());
+        this.lastLatestVersionSetting = updateSettings.getStringSetting(UpdateSettingKey.LAST_LATEST_VERSION);
+        this.repeatNotifySetting = updateSettings.getBoolSetting(UpdateSettingKey.REPEAT_NOTIFY);
+
+        // TODO: reimplement last instant since notif post, add command to click "remind me later",
+        //  default could be reminding again next session if repeatNotify is true. "remind me later" should override repeatNotify
 
         // If last recorded latest version (written to file via updateSettings) is less than the true latest version,
         // a new update was released so a notification should always be posted and repeat notifying should be reset for this version
@@ -82,11 +88,11 @@ final class NotificationPoster
             return;
         }
 
-        ChatLogger.INSTANCE.addLog(getNotificationComponent());
+        ChatLogger.INSTANCE.addFancyLogsBox(createNotificationContent(), modName);
         MinecraftForge.EVENT_BUS.unregister(this);
     }
 
-    private IChatComponent getNotificationComponent()
+    private List<IChatComponent> createNotificationContent()
     {
         IChatComponent mainComp = new ChatComponentText("Version " + trueLatestVersionStr + " is available");
 
@@ -101,18 +107,36 @@ final class NotificationPoster
         changelogComp.setChatStyle(hoverChangelogStyle);
 
         IChatComponent suggestCommandComp = new ChatComponentText(" [Don't remind me again]");
-        String command = "/" + modID + "$core " + UpdateSettingsData.REPEAT_NOTIFY.toString() + " false";
+        String command = "/" + modID + "$core " + UpdateSettingKey.REPEAT_NOTIFY.toString() + " false";
         ClickEvent suggestCommandEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
         ChatStyle suggestCommandStyle = new ChatStyle().setChatClickEvent(suggestCommandEvent).setColor(EnumChatFormatting.DARK_GRAY);
         suggestCommandComp.setChatStyle(suggestCommandStyle);
 
-        return mainComp.appendSibling(latestReleaseComp).appendSibling(changelogComp).appendSibling(suggestCommandComp);
+        List<IChatComponent> content = new ArrayList<>();
+        content.add(mainComp);
+        content.add(latestReleaseComp.appendSibling(changelogComp));
+        content.add(suggestCommandComp);
+        return content;
     }
 
     private String getChangelogStr()
     {
         String encodedChangelog = StaticAssetUtils.parseMemberAsString(jsonObject, "changelog");
-        return (encodedChangelog != null) ? new String(Base64.getDecoder().decode(encodedChangelog)) : "";
+
+        if (encodedChangelog == null)
+        {
+            return "";
+        }
+
+        try
+        {
+            return new String(Base64.getDecoder().decode(encodedChangelog));
+        }
+        catch (IllegalArgumentException e)
+        {
+            Log4JLogger.INSTANCE.error("Update changelog is not valid base64");
+            return encodedChangelog;
+        }
     }
 }
 
