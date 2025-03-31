@@ -139,9 +139,7 @@ public class Color
      */
     public Color(String hexStr)
     {
-        // Trim '#' or "0x" hex string prefixes, if they exist
-        hexStr = hexStr.charAt(0) == '#' ? hexStr.substring(1)
-                : hexStr.startsWith("0x") ? hexStr.substring(2) : hexStr;
+        hexStr = trimPrefixes(hexStr);
 
         // Prepend a default char until expected length
         StringBuilder sb = new StringBuilder(hexStr);
@@ -173,7 +171,7 @@ public class Color
      */
     public Color(String rgbHexStr, float a)
     {
-        this(Integer.toHexString((int) (MAX_COMPONENT_INT * a)) + rgbHexStr);
+        this(Integer.toHexString((int) (MAX_COMPONENT_INT * a)) + trimPrefixes(rgbHexStr));
     }
 
     /**
@@ -285,6 +283,17 @@ public class Color
         return Byte.toUnsignedInt(colorComponentByte);
     }
 
+    // TODO: no reason for this to be static, just so it can be called within a this() constructor call
+
+    /**
+     * Trim '#' or "0x" hex string prefixes, if they exist
+     */
+    private static String trimPrefixes(String hexStr)
+    {
+        return hexStr.charAt(0) == '#' ? hexStr.substring(1)
+                : hexStr.startsWith("0x") ? hexStr.substring(2) : hexStr;
+    }
+
     /**
      * Create and return a new color whose RGB values are copied from this color and scaled by a given percentage
      *
@@ -294,9 +303,9 @@ public class Color
     {
         float factor = 1 + (percentChange / 100);
 
-        int scaledR = (int) MathUtils.clamp(getRAsInt() * factor, 0, 255);;
-        int scaledG = (int) MathUtils.clamp(getGAsInt() * factor, 0, 255);;
-        int scaledB = (int) MathUtils.clamp(getBAsInt() * factor, 0, 255);;
+        int scaledR = (int) MathUtils.clamp(getRAsInt() * factor, 0, 255);
+        int scaledG = (int) MathUtils.clamp(getGAsInt() * factor, 0, 255);
+        int scaledB = (int) MathUtils.clamp(getBAsInt() * factor, 0, 255);
 
         return new Color(a, scaledR, scaledG, scaledB);
     }

@@ -14,21 +14,25 @@ public final class ChatLogger
 {
     public static ChatLogger INSTANCE;
     private final Minecraft mc;
+    private final EnumChatFormatting mainColor;
+    private final EnumChatFormatting accentColor;
     private final IChatComponent header;
 
-    public static void createInstance(String header)
+    public static void createInstance(String headerStr, EnumChatFormatting mainColor, EnumChatFormatting accentColor)
     {
         if (INSTANCE != null)
         {
             throw new IllegalStateException("ChatLogger instance has already been created");
         }
-        INSTANCE = new ChatLogger(header);
+        INSTANCE = new ChatLogger(headerStr, mainColor, accentColor);
     }
 
-    private ChatLogger(String header)
+    private ChatLogger(String headerStr, EnumChatFormatting mainColor, EnumChatFormatting accentColor)
     {
         this.mc = Minecraft.getMinecraft();
-        this.header = new ChatComponentText(header);;
+        this.mainColor = mainColor;
+        this.accentColor = accentColor;
+        this.header = new ChatComponentText(accentColor + "[" + mainColor + headerStr + accentColor + "] ");
     }
 
     public void addLog(String log)
@@ -124,6 +128,11 @@ public final class ChatLogger
     public void addCenteredComponentLogs(Collection<IChatComponent> logs)
     {
         logs.forEach(this::addCenteredLog);
+    }
+
+    public void addFancyLogsBox(Collection<IChatComponent> content, String title)
+    {
+        addFancyLogsBox(content, title, mainColor, accentColor);
     }
 
     public void addFancyLogsBox(Collection<IChatComponent> content, String title, EnumChatFormatting titleColor, EnumChatFormatting barColor)

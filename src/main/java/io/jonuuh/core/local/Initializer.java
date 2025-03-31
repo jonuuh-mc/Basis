@@ -1,16 +1,8 @@
 package io.jonuuh.core.local;
 
-import io.jonuuh.core.lib.config.SettingsConfigurationAdapter;
-import io.jonuuh.core.lib.gui.AbstractGuiScreen;
-import io.jonuuh.core.lib.update.UpdateHandler;
 import io.jonuuh.core.lib.util.StaticAssetRequestFinishedEvent;
 import io.jonuuh.core.lib.util.StaticAssetRequester;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraftforge.client.ClientCommandHandler;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import org.lwjgl.input.Keyboard;
 
 public class Initializer
 {
@@ -41,21 +33,21 @@ public class Initializer
     @SubscribeEvent
     public void onAssetReqFinished(StaticAssetRequestFinishedEvent event)
     {
-        String asset = event.asset;
-        System.out.println("asset req finished: " + asset);
-
-        // TODO: pass asset in here
-        UpdateHandler.createInstance(modID, version);
-//        UpdateHandler.INSTANCE.start();
-
-        // TODO: is it okay for all this to be in here, dependant on github api call finish?
-        //  try registering a keybind on some other key press for example (arbitrary time) - does it show up in controls menu?
-        //  same for something like creating the gui and command to open the gui?
-        KeyBinding keyBinding = new KeyBinding("<description>", Keyboard.KEY_NONE, modID);
-        ClientRegistry.registerKeyBinding(keyBinding);
-        MinecraftForge.EVENT_BUS.register(new Events(keyBinding));
-
-        AbstractGuiScreen guiScreen = new SettingsGuiScreen(SettingsConfigurationAdapter.INSTANCE.getDefaultCategorySettings());
-        ClientCommandHandler.instance.registerCommand(new CommandOpenSettingsGui(modID, guiScreen));
+//        String asset = event.asset;
+//        System.out.println("asset req finished: " + asset);
+//
+//        // TODO: pass asset in here
+////        UpdateHandler.createInstance(modID, version);
+////        UpdateHandler.INSTANCE.start();
+//
+//        // TODO: is it okay for all this to be in here, dependant on github api call finish?
+//        //  try registering a keybind on some other key press for example (arbitrary time) - does it show up in controls menu?
+//        //  same for something like creating the gui and command to open the gui?
+//        KeyBinding keyBinding = new KeyBinding("<description>", Keyboard.KEY_NONE, modID);
+//        ClientRegistry.registerKeyBinding(keyBinding);
+//        MinecraftForge.EVENT_BUS.register(new Events(keyBinding));
+//
+//        AbstractGuiScreen guiScreen = new SettingsGuiScreen(SettingsConfigurationAdapter.INSTANCE.getDefaultCategorySettings());
+//        ClientCommandHandler.instance.registerCommand(new CommandOpenSettingsGui(modID, guiScreen));
     }
 }

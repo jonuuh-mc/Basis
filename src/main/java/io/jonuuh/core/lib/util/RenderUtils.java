@@ -71,7 +71,9 @@ public final class RenderUtils
                 w * sr.getScaleFactor(), h * sr.getScaleFactor());
     }
 
-    // Vertices MUST be in counterclockwise order (opengl triangle winding order)
+    /**
+     * Vertices MUST be in <a href="https://www.khronos.org/opengl/wiki/Face_Culling">counterclockwise order</a>
+     */
     public static void drawVertices(int glMode, float[][] vertices, Color color)
     {
         GL11.glColor4ub(color.r, color.g, color.b, color.a);

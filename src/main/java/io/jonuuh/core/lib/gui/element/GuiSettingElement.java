@@ -1,7 +1,7 @@
 package io.jonuuh.core.lib.gui.element;
 
-import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.config.setting.types.Setting;
+import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 
 public abstract class GuiSettingElement extends GuiElement
 {
@@ -22,6 +22,8 @@ public abstract class GuiSettingElement extends GuiElement
         super(parent, elementName, xPos, yPos);
     }
 
+    // TODO: enforce concrete type by overriding in subclasses?
+    //  also add feature to auto init element "value" with setting value?
     public void associateSetting(Setting<?> associatedSetting)
     {
         this.associatedSetting = associatedSetting;

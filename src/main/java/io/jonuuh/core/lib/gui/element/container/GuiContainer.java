@@ -3,6 +3,7 @@ package io.jonuuh.core.lib.gui.element.container;
 import io.jonuuh.core.lib.gui.GuiColorType;
 import io.jonuuh.core.lib.gui.element.GuiElement;
 import io.jonuuh.core.lib.util.Color;
+import net.minecraft.client.audio.SoundHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -130,7 +131,12 @@ public abstract class GuiContainer extends GuiElement
         }
     }
 
-//    @Override
+    @Override
+    protected void playClickSound(SoundHandler soundHandler)
+    {
+    }
+
+    //    @Override
 //    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
 //    {
 ////        GL11.glPushMatrix();

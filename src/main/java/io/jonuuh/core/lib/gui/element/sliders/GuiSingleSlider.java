@@ -1,8 +1,9 @@
 package io.jonuuh.core.lib.gui.element.sliders;
 
+import io.jonuuh.core.lib.config.setting.types.single.IntSetting;
 import io.jonuuh.core.lib.gui.GuiColorType;
-import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.gui.element.GuiSettingElement;
+import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
 import org.lwjgl.input.Keyboard;
@@ -18,8 +19,8 @@ public class GuiSingleSlider extends GuiSettingElement
     protected double normalPointerValue;
 
     protected DecimalFormat decimalFormat;
-    protected float pointerSize;
     protected int isMovingTimer;
+    protected int pointerSize;
 
     public GuiSingleSlider(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, double min, double max, double startValue, boolean isVertical)
     {
@@ -28,7 +29,6 @@ public class GuiSingleSlider extends GuiSettingElement
         this.max = max;
 
         this.isVertical = isVertical;
-        this.pointerSize = isVertical ? width : height;
 
         this.decimalFormat = new DecimalFormat("#.###");
 
@@ -97,13 +97,15 @@ public class GuiSingleSlider extends GuiSettingElement
     @Override
     protected void updateSetting()
     {
+        // TODO: erm
+        ((IntSetting) associatedSetting).setCurrentValue((int) getValue());
     }
 
-//    @Override
-//    protected void onInitGui(int guiScreenWidth, int guiScreenHeight)
-//    {
-//        pointerSize = isVertical ? width : height;
-//    }
+    @Override
+    protected void onInitGui(int guiScreenWidth, int guiScreenHeight)
+    {
+        pointerSize = isVertical ? width : height;
+    }
 
     @Override
     protected void onScreenTick()

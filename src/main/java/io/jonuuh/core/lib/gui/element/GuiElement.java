@@ -74,6 +74,8 @@ public abstract class GuiElement
     protected boolean mouseDown;
     protected boolean drawBounds;
 
+    protected Margins margins;
+
     protected String tooltipStr;
 
     // TODO: use a ticker with onScreenTick instead for tooltips?
@@ -229,6 +231,15 @@ public abstract class GuiElement
         return width;
     }
 
+    public int getInitialWidth()
+    {
+        return initialWidth;
+    }
+
+    public boolean isInitialWidth()
+    {
+        return width == initialWidth;
+    }
     public void setWidth(int width)
     {
         this.width = width;
@@ -244,10 +255,7 @@ public abstract class GuiElement
         this.height = height;
     }
 
-    public int getInitialWidth()
-    {
-        return initialWidth;
-    }
+
 
     public int getInitialHeight()
     {
@@ -332,6 +340,16 @@ public abstract class GuiElement
     public void setMouseDown(boolean mouseDown)
     {
         this.mouseDown = mouseDown;
+    }
+
+    public Margins getMargins()
+    {
+        return margins;
+    }
+
+    public void setMargins(Margins margins)
+    {
+        this.margins = margins;
     }
 
     /**
@@ -489,7 +507,9 @@ public abstract class GuiElement
 
                 if (drawBounds)
                 {
-                    RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), width, height, focused ? new Color("#00ff00") : new Color("#ff55ff"));
+                    RenderUtils.drawRoundedRect(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), width, height, hasParent() ? parent.getOuterRadius() : 3,
+                            focused ? new Color("#00ff00") : new Color("#ff55ff"), true);
+//                    RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), width, height, focused ? new Color("#00ff00") : new Color("#ff55ff"));
                     mc.fontRendererObj.drawString(String.valueOf(zLevel), worldXPos() + width - mc.fontRendererObj.getStringWidth(String.valueOf(zLevel)),
                             worldYPos() + height - mc.fontRendererObj.FONT_HEIGHT, getColor(GuiColorType.ACCENT2).toPackedARGB(), true);
                 }

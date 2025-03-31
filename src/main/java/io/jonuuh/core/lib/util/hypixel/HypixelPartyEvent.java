@@ -6,8 +6,8 @@ import java.util.Arrays;
 
 public class HypixelPartyEvent extends Event
 {
-    public Type type;
-    public String[] playerNames;
+    public final Type type;
+    public final String[] playerNames;
 
     public HypixelPartyEvent(Type type, String[] playerNames)
     {

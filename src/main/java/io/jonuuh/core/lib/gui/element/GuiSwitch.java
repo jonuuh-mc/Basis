@@ -1,8 +1,8 @@
 package io.jonuuh.core.lib.gui.element;
 
+import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.gui.GuiColorType;
 import io.jonuuh.core.lib.gui.element.container.GuiContainer;
-import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
 import org.lwjgl.input.Keyboard;
@@ -17,7 +17,6 @@ public class GuiSwitch extends GuiSettingElement
     public GuiSwitch(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, String tooltipStr, boolean switchState)
     {
         super(parent, elementName, xPos, yPos, Math.max(height, width), Math.min(Math.max(height, width), height), tooltipStr); // height should never be > width, width should never be < height
-        this.pointerSize = height - 2F;
         this.switchState = switchState;
     }
 
@@ -52,11 +51,11 @@ public class GuiSwitch extends GuiSettingElement
         trySendChangeToSetting();
     }
 
-//    @Override
-//    protected void onInitGui(int guiScreenWidth, int guiScreenHeight)
-//    {
-//        pointerSize = height - 2F;
-//    }
+    @Override
+    protected void onInitGui(int guiScreenWidth, int guiScreenHeight)
+    {
+        pointerSize = height - 2F;
+    }
 
     @Override
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)

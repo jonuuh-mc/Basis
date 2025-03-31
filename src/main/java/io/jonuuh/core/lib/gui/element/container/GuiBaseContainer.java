@@ -16,7 +16,7 @@ public class GuiBaseContainer extends GuiContainer
 
     public GuiBaseContainer(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, float outerRadius, float innerRadius)
     {
-        super(parent, elementName, xPos, yPos, width, height, outerRadius, innerRadius);
+        this(parent, elementName, xPos, yPos, width, height, outerRadius, innerRadius, null);
     }
 
     @Override

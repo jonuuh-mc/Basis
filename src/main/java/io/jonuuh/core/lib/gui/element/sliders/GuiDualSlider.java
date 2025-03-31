@@ -1,8 +1,8 @@
 package io.jonuuh.core.lib.gui.element.sliders;
 
 import io.jonuuh.core.lib.gui.GuiColorType;
-import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.gui.element.GuiSettingElement;
+import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
 import org.lwjgl.opengl.GL11;
@@ -19,7 +19,7 @@ public class GuiDualSlider extends GuiSettingElement
 
     protected DecimalFormat decimalFormat;
     protected boolean isLastHeldPointerLeft;
-    protected float pointerSize;
+    protected int pointerSize;
 
     public GuiDualSlider(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, double min, double max, double startValueLeft, double startValueRight, boolean isVertical)
     {
@@ -28,7 +28,6 @@ public class GuiDualSlider extends GuiSettingElement
         this.max = max;
 
         this.isVertical = isVertical;
-        this.pointerSize = isVertical ? width : height;
 
         this.decimalFormat = new DecimalFormat("#.###");
 
@@ -134,11 +133,11 @@ public class GuiDualSlider extends GuiSettingElement
     {
     }
 
-//    @Override
-//    protected void onInitGui(int guiScreenWidth, int guiScreenHeight)
-//    {
-//        pointerSize = isVertical ? width : height;
-//    }
+    @Override
+    protected void onInitGui(int guiScreenWidth, int guiScreenHeight)
+    {
+        pointerSize = isVertical ? width : height;
+    }
 
     @Override
     public void onMouseDown(int mouseX, int mouseY)
@@ -187,7 +186,7 @@ public class GuiDualSlider extends GuiSettingElement
 //        float x = /*(i == 0) ?*/ xPos /*: getPointerScreenPos(i - 1)*/;
 //        float w = /*(i == 0) ? */ (leftPointerScreenPos - xPos) /*: (currPointerCenter - getPointerScreenPos(i - 1))*/;
 
-        float pOffset = pointerSize / 2F;
+//        float pOffset = pointerSize / 2F;
 
         // far left
         RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), (worldYPos() + trackHeight), (leftPointerScreenPos - worldXPos()) /*- pOffset*/, trackHeight, parent.getOuterRadius(), getColor(GuiColorType.ACCENT1), true);
