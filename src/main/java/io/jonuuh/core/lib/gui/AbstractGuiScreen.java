@@ -1,7 +1,7 @@
 package io.jonuuh.core.lib.gui;
 
-import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.gui.element.GuiElement;
+import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.gui.event.CloseGuiEvent;
 import io.jonuuh.core.lib.gui.event.InitGuiEvent;
 import io.jonuuh.core.lib.gui.event.KeyInputEvent;
@@ -12,6 +12,7 @@ import io.jonuuh.core.lib.gui.event.ScreenDrawEvent;
 import io.jonuuh.core.lib.gui.event.ScreenTickEvent;
 import io.jonuuh.core.lib.util.MathUtils;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.ScaledResolution;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
@@ -21,13 +22,12 @@ public abstract class AbstractGuiScreen extends GuiScreen
 {
     protected GuiContainer rootContainer;
     protected GuiElement currentFocus;
+    // TODO: implement something like this later? could be shared between all guiscreens of a mod
+//    protected FontRenderer customFontRenderer = new FontRenderer(mc.gameSettings, new ResourceLocation("core:ascii.png"), mc.renderEngine, false);
+
 
     public AbstractGuiScreen()
     {
-//        this.rootContainer = rootContainer;
-//        rootContainer.getNestedChildren().forEach(System.out::println);
-//
-//        // TODO: make recursive instead of using getNestedChildren?
 //        for (GuiElement element : rootContainer.getNestedChildren())
 //        {
 //            Setting<?> setting = settings.get(element.elementName);
@@ -38,54 +38,9 @@ public abstract class AbstractGuiScreen extends GuiScreen
 //                System.out.println("associated setting for: " + element.elementName);
 //            }
 //        }
-
-//        if (elementMap.size() != settings.size())
-//        {
-//            for (String settingName : settings.keySet())
-//            {
-//                if (elementMap.get(settingName) == null)
-//                {
-//                    Log4JLogger.INSTANCE.warn("No UI element found for setting '{}'", settingName);
-//                }
-//            }
-//
-//            for (String elementName : elementMap.keySet())
-//            {
-//                if (settings.get(elementName) == null)
-//                {
-//                    Log4JLogger.INSTANCE.warn("No setting found for UI element '{}'", elementName);
-//                }
-//            }
-//        }
-
-//        this.inverseElementMap = new HashMap<>();
-//        for (Map.Entry<String, GuiInteractableElement> entry : elementMap.entrySet())
-//        {
-//            inverseElementMap.put(entry.getValue(), entry.getKey());
-//        }
-
-//        GuiTooltip.createInstance(Minecraft.getMinecraft());
     }
 
     protected abstract GuiContainer initRootContainer();
-
-    /**
-     * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
-     * window resizes, the buttonList is cleared beforehand.
-     */
-    @Override
-    public void initGui()
-    {
-        Keyboard.enableRepeatEvents(true);
-
-//        rootContainer.setLocalXPos(Math.max((width / 2) - (rootContainer.getInitialWidth() / 2), 0));
-//        rootContainer.setLocalYPos(Math.max((height / 2) - (rootContainer.getInitialHeight() / 2), 0));
-//
-//        rootContainer.setWidth(Math.min(width - rootContainer.localXPos() /*- (width / 10)*/, rootContainer.getInitialWidth()));
-//        rootContainer.setHeight(Math.min(height - rootContainer.localYPos() /*- (height / 10)*/, rootContainer.getInitialHeight()));
-
-        rootContainer.propagateEvent(new InitGuiEvent(width, height));
-    }
 
     @Override
     public boolean doesGuiPauseGame()
@@ -93,11 +48,23 @@ public abstract class AbstractGuiScreen extends GuiScreen
         return false;
     }
 
+    /**
+     * Called when the GUI is displayed or when the window resizes
+     */
+    @Override
+    public void initGui()
+    {
+        Keyboard.enableRepeatEvents(true);
+
+//        rootContainer.setWidth(50); // shows
+        rootContainer.propagateEvent(new InitGuiEvent(new ScaledResolution(mc)));
+    }
+
     @Override
     public void onGuiClosed()
     {
         Keyboard.enableRepeatEvents(false);
-        currentFocus = null; // TODO: focused element should lose focus on gui close
+        currentFocus = null;
         rootContainer.propagateEvent(new CloseGuiEvent());
     }
 
@@ -118,13 +85,6 @@ public abstract class AbstractGuiScreen extends GuiScreen
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
         rootContainer.propagateEvent(new ScreenDrawEvent(mouseX, mouseY, partialTicks));
-
-//        attemptClaimDefaultTooltip(mouseX, mouseY);
-//        // Can be true either by the above function or individual "claims" of the tooltip within element classes (e.g. GuiAbstractSlider)
-//        if (GuiTooltip.isClaimed())
-//        {
-//            GuiTooltip.draw();
-//        }
     }
 
     public void handleMouseInput() throws IOException
@@ -165,7 +125,7 @@ public abstract class AbstractGuiScreen extends GuiScreen
             }
         }
 
-        System.out.println("mouseDownElements: " + event.mouseDownElements);
+//        System.out.println("mouseDownElements: " + event.mouseDownElements);
         System.out.println("greatestZElement: " + greatestZElement);
 
         greatestZElement.dispatchMouseDownEvent(mouseX, mouseY);
@@ -180,7 +140,6 @@ public abstract class AbstractGuiScreen extends GuiScreen
             return;
         }
 
-//        rootContainer.propagateEvent(new MouseUpEvent(mouseX,  mouseY, mouseEventButton));
         if (currentFocus != null && currentFocus.isMouseDown())
         {
             currentFocus.dispatchMouseUpEvent(mouseX, mouseY);
@@ -191,43 +150,5 @@ public abstract class AbstractGuiScreen extends GuiScreen
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long msHeld)
     {
         rootContainer.propagateEvent(new MouseDragEvent(mouseX, mouseY, clickedMouseButton, msHeld));
-//        System.out.println("mouseClickMove: " + mouseX + " " + mouseY + " " + clickedMouseButton + " " + msHeld);
     }
-
-//    /**
-//     * If tooltip was not already claimed (in onScreenDraw for an indiv. element),
-//     * track hovering time and draw tooltip if an element has been hovered for >= 500ms
-//     */
-//    protected void attemptClaimDefaultTooltip(int mouseX, int mouseY)
-//    {
-//        if (GuiTooltip.isClaimed())
-//        {
-//            return;
-//        }
-//
-//        for (GuiElement element : containerMap.get("CONTAINER").getChildren())
-//        {
-//            if (element.isHovered() /*&& !element.getTooltipStr().isEmpty()*/)
-//            {
-//                if (element.startHoverTime == 0)
-//                {
-//                    element.startHoverTime = Minecraft.getSystemTime();
-//                }
-//
-//                element.hoverTimeMs = (int) (Minecraft.getSystemTime() - element.startHoverTime);
-//
-//                if (element.hoverTimeMs >= 500)
-//                {
-//                    element.claimHoverTooltip(mouseX, mouseY);
-//                }
-//
-//                break; // only track hover time for one element at a time (assume elements are not overlapping) TODO: this might be problematic
-//            }
-//            else if (element.startHoverTime != 0 || element.hoverTimeMs != 0)
-//            {
-//                element.startHoverTime = 0;
-//                element.hoverTimeMs = 0;
-//            }
-//        }
-//    }
 }

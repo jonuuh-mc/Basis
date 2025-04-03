@@ -18,6 +18,7 @@ import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.audio.SoundHandler;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
@@ -28,11 +29,12 @@ public abstract class GuiElement
 {
     /** A reference to the static minecraft object */
     public final Minecraft mc;
-    /** This element's immediate ancestor: the container it's inside; Should only ever be null for the root container of the element tree */
-    public final GuiContainer parent;
     /** A readable name qualifying this element TODO: no enforcement of this being unique */
     public final String elementName;
+    /** This element's immediate ancestor: the container it's inside; Should only ever be null for the root container of the element tree */
+    protected GuiContainer parent;
 
+    // TODO: implement similar feature to colorMap? propagate up tree until finding a parent that has this defined
     /** A resource representing the default mouse down sound */
     protected final ResourceLocation resourceClickSound;
     /** A map of colors that may be used by this element */
@@ -43,26 +45,16 @@ public abstract class GuiElement
      */
     protected Map<GuiEventType, GuiEventBehavior> eventBehaviors;
 
-    protected final int initialXPos;
-    protected final int initialYPos;
-    /** Initial constructed width of this element, used for element resizing */
-    protected final int initialWidth;
-    /** Initial constructed height of this element, used for element resizing */
-    protected final int initialHeight;
+    /** Element x position within its {@link GuiElement#parent} */
+    protected float localXPos;
+    /** Element y position within its {@link GuiElement#parent} */
+    protected float localYPos;
+    /** The sum of all world xPos from this element's ancestors */
+    protected float inheritedXPos;
+    /** The sum of all world yPos from this element's ancestors */
+    protected float inheritedYPos;
 
-    /** Local xPos, should almost never be used alone */
-    private int xPos;
-    /** Local yPos, should almost never be used alone */
-    private int yPos;
-    /** Logical width of this element */
-    protected int width;
-    /** Logical height of this element */
-    protected int height;
-
-    /** The sum of all xPos from this element's ancestors */
-    protected int inheritedXPos;
-    /** The sum of all yPos from this element's ancestors */
-    protected int inheritedYPos;
+    protected Dimensions dimensions;
 
     /** Which symbolic layer this element is on: equal to how many parents this element has */
     protected int zLevel;
@@ -74,57 +66,68 @@ public abstract class GuiElement
     protected boolean mouseDown;
     protected boolean drawBounds;
 
-    protected Margins margins;
+    protected Margin margin;
+    protected Padding padding;
 
     protected String tooltipStr;
 
     // TODO: use a ticker with onScreenTick instead for tooltips?
     protected int hoverTimeCounter;
 
-    protected GuiElement(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, String tooltipStr)
+    protected GuiElement(String elementName, float localXPos, float localYPos, float width, float height)
     {
         this.mc = Minecraft.getMinecraft();
-        this.parent = parent;
         this.elementName = elementName;
 
-        this.initialXPos = this.xPos = xPos;
-        this.initialYPos = this.yPos = yPos;
-
-        this.initialWidth = this.width = width;
-        this.initialHeight = this.height = height;
-
-        this.inheritedXPos = hasParent() ? parent.worldXPos() : 0;
-        this.inheritedYPos = hasParent() ? parent.worldYPos() : 0;
+        this.localXPos = localXPos;
+        this.localYPos = localYPos;
+        this.dimensions = new Dimensions(width, height);
 
         this.visible = true;
         this.enabled = true;
-        this.zLevel = this.getNumParents();
 
         this.drawBounds = true; // TODO: debug
-        this.tooltipStr = tooltipStr;
 
         this.resourceClickSound = new ResourceLocation("core:click");
         this.eventBehaviors = new HashMap<>();
         this.colorMap = new HashMap<>();
-
-        // TODO: why is this even legal honestly - putting a partially constructed object into a map?
-        if (hasParent() /*&& !elementName.contains("$")*/)
-        {
-            parent.addChild(this);
-        }
     }
 
-    protected GuiElement(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height)
+    protected GuiElement(String elementName, float localXPos, float localYPos, Dimensions dimensions)
     {
-        this(parent, elementName, xPos, yPos, width, height, "");
+        this(elementName, localXPos, localYPos, dimensions.width, dimensions.height);
     }
 
-    protected GuiElement(GuiContainer parent, String elementName, int xPos, int yPos)
+    protected GuiElement(String elementName, float localXPos, float localYPos)
     {
-        this(parent, elementName, xPos, yPos, 200, 20);
+        this(elementName, localXPos, localYPos, new Dimensions());
     }
 
-    // TODO: add `return this` for all setters?
+    public GuiContainer getParent()
+    {
+        return parent;
+    }
+
+    /**
+     * Use {@link GuiContainer#addChild(GuiElement)} instead?
+     * TODO: can't make this protected unless this & container are in same class; factory, bridge, accessor, visitor, something?
+     */
+    public void setParent(GuiContainer parent)
+    {
+        this.parent = parent;
+
+//        if (!parent.hasChild(this))
+//        {
+//            parent.addChild(this);
+//        }
+//        else
+//        {
+//            this.setInheritedXPos(parent.worldXPos());
+//            this.setInheritedYPos(parent.worldYPos());
+//        }
+    }
+
+    // TODO: add `return this` for setters?
 
     public boolean hasParent()
     {
@@ -161,105 +164,120 @@ public abstract class GuiElement
     }
 
     /**
-     * Element x position in world space (accounting for all x movement from ancestors)
+     * Element x position in world space (local pos + sum of all ancestors world pos)
      */
-    public int worldXPos()
+    public float worldXPos()
     {
-        return xPos + inheritedXPos;
+        return localXPos + inheritedXPos;
     }
 
     /**
-     * Element y position in world space (accounting for all y movement from ancestors)
+     * Element y position in world space (local pos + sum of all ancestors world pos)
      */
-    public int worldYPos()
+    public float worldYPos()
     {
-        return yPos + inheritedYPos;
+        return localYPos + inheritedYPos;
     }
 
-    public int localXPos()
+    public float getLocalXPos()
     {
-        return xPos;
+        return localXPos;
     }
 
-    public int localYPos()
+    public float getLocalYPos()
     {
-        return yPos;
+        return localYPos;
     }
 
-    public void setLocalXPos(int xPos)
+    public void setLocalXPos(float localXPos)
     {
-        this.xPos = xPos;
+        this.localXPos = localXPos;
     }
 
-    public void setLocalYPos(int yPos)
+    public void setLocalYPos(float localYPos)
     {
-        this.yPos = yPos;
+        this.localYPos = localYPos;
     }
 
-    public int getInitialXPos()
-    {
-        return initialXPos;
-    }
-
-    public int getInitialYPos()
-    {
-        return initialYPos;
-    }
-
-    public int getInheritedXPos()
+    public float getInheritedXPos()
     {
         return inheritedXPos;
     }
 
-    public void setInheritedXPos(int inheritedXPos)
+    public void setInheritedXPos(float inheritedXPos)
     {
         this.inheritedXPos = inheritedXPos;
+
+        if (this instanceof GuiContainer)
+        {
+            for (GuiElement child : ((GuiContainer) this).getChildren())
+            {
+                child.setInheritedXPos(this.worldXPos());
+            }
+        }
     }
 
-    public int getInheritedYPos()
+    public float getInheritedYPos()
     {
         return inheritedYPos;
     }
 
-    public void setInheritedYPos(int inheritedYPos)
+    public void setInheritedYPos(float inheritedYPos)
     {
         this.inheritedYPos = inheritedYPos;
+
+        if (this instanceof GuiContainer)
+        {
+            for (GuiElement child : ((GuiContainer) this).getChildren())
+            {
+                child.setInheritedYPos(this.worldYPos());
+            }
+        }
     }
 
-    public int getWidth()
+    public Dimensions getDimensions()
     {
-        return width;
+        return dimensions;
     }
 
-    public int getInitialWidth()
+    public float getMinWidth()
     {
-        return initialWidth;
+        return dimensions.minWidth;
     }
 
-    public boolean isInitialWidth()
+    public float getWidth()
     {
-        return width == initialWidth;
-    }
-    public void setWidth(int width)
-    {
-        this.width = width;
+        return dimensions.width;
     }
 
-    public int getHeight()
+    public float getMaxWidth()
     {
-        return height;
+        return dimensions.maxWidth;
     }
 
-    public void setHeight(int height)
+    public void setWidth(float width)
     {
-        this.height = height;
+        dimensions.width = width;
     }
 
-
-
-    public int getInitialHeight()
+    public float getMinHeight()
     {
-        return initialHeight;
+        return dimensions.minHeight;
+    }
+
+    public float getHeight()
+    {
+        return dimensions.height;
+    }
+
+    public float getMaxHeight()
+    {
+        return dimensions.maxHeight;
+    }
+
+    public void setHeight(float height)
+    {
+        dimensions.height = height;
     }
 
     public boolean isVisible()
@@ -270,6 +288,14 @@ public abstract class GuiElement
     public void setVisible(boolean visible)
     {
         this.visible = visible;
+
+        if (this instanceof GuiContainer)
+        {
+            for (GuiElement child : ((GuiContainer) this).getChildren())
+            {
+                child.setVisible(visible);
+            }
+        }
     }
 
     public boolean isHovered()
@@ -342,14 +368,24 @@ public abstract class GuiElement
         this.mouseDown = mouseDown;
     }
 
-    public Margins getMargins()
+    public Margin getMargin()
     {
-        return margins;
+        return margin;
     }
 
-    public void setMargins(Margins margins)
+    public void setMargin(Margin margin)
     {
-        this.margins = margins;
+        this.margin = margin;
+    }
+
+    public Padding getPadding()
+    {
+        return padding;
+    }
+
+    public void setPadding(Padding padding)
+    {
+        this.padding = padding;
     }
 
     /**
@@ -357,7 +393,7 @@ public abstract class GuiElement
      * <p>The behavior should return a boolean: whether to override the default behavior
      *
      * @param eventType the event type
-     * @param behavior  the custom behavior
+     * @param behavior the custom behavior
      * @see GuiEventBehavior
      */
     public final void assignCustomEventBehavior(GuiEventType eventType, GuiEventBehavior behavior)
@@ -398,7 +434,7 @@ public abstract class GuiElement
     {
         if (event instanceof InitGuiEvent)
         {
-            dispatchInitGuiEvent(((InitGuiEvent) event).guiScreenWidth, ((InitGuiEvent) event).guiScreenHeight);
+            dispatchInitGuiEvent(((InitGuiEvent) event).scaledResolution);
         }
         else if (event instanceof CloseGuiEvent)
         {
@@ -443,32 +479,67 @@ public abstract class GuiElement
         }
     }
 
-    public final void dispatchInitGuiEvent(int guiScreenWidth, int guiScreenHeight)
+    public final void dispatchInitGuiEvent(ScaledResolution scaledResolution)
     {
         boolean overrideDefaultBehavior = tryApplyCustomEventBehavior(GuiEventType.INIT);
 
         if (!overrideDefaultBehavior)
         {
-            // TODO: need to account for str width/height in drawing strings which will be damn near impossible given scaling of text with gl11
-            //  drawing text is the sole reason i need to find a more mc idiomatic way to scale gui on resize
-
-            // TODO: make this eased or clamped? linear scaling makes for too small/large elements at smallest/biggest screen size
-//            currWidthScale = (float) guiScreenWidth / guiScreenWidthInit;
-//            currHeightScale = (float) guiScreenHeight / guiScreenHeightInit;
-
-//            System.out.println(currWidthScale + " " + currHeightScale);
-//
-//            width = (int) (widthInit * currWidthScale);
-//            height = (int) (heightInit * currHeightScale);
-//
-//            xPos = (int) (xPosInit * currWidthScale);
-//            yPos = (int) (yPosInit * currHeightScale);
+            // TODO: scuffed fix for now with added elements not having proper order? maybe this is just fine
+            //  better to be dynamic now than have something break later to inflexibility?
+            //  what if we want to add elements while gui is open? would need to do this in onscreentick or something
+            setZLevel(getNumParents());
         }
 
-        onInitGui(guiScreenWidth, guiScreenHeight);
+        onInitGui(scaledResolution);
+
+
+//        if (this.padding != null && this instanceof GuiContainer)
+//        {
+//
+//            for (GuiElement child : ((GuiContainer) this).getChildren())
+//            {
+//                child.setInheritedYPos(this.worldYPos());
+//            }
+//
+//        }
+
+//        this.applyPadding();
     }
 
-    protected void onInitGui(int guiScreenWidth, int guiScreenHeight)
+//    protected void applyPadding()
+//    {
+//        if (hasParent() && parent.padding != null)
+//        {
+//            Padding padding = parent.padding;
+//
+//            if (localXPos < padding.getLeftPadding())
+//            {
+//                setLocalXPos(padding.getLeftPadding());
+//            }
+//
+//            if (localXPos + width > parent.width - padding.getRightPadding())
+//            {
+//                // how far the element is across the right padding line
+//                float withinPaddingAmt = (localXPos + width) - (parent.width - padding.getRightPadding());
+//                setLocalXPos(localXPos - withinPaddingAmt);
+//            }
+//
+//            if (localYPos < padding.getTopPadding())
+//            {
+//                setLocalYPos(padding.getTopPadding());
+//            }
+//
+//            if (localYPos + height > parent.height - padding.getBottomPadding())
+//            {
+//                // how far the element is across the bottom padding line
+//                float withinPaddingAmt = (localYPos + height) - (parent.height - padding.getBottomPadding());
+//                setLocalYPos(localXPos - withinPaddingAmt);
+//            }
+//        }
+//    }
+
+    protected void onInitGui(ScaledResolution scaledResolution)
     {
     }
 
@@ -500,18 +571,19 @@ public abstract class GuiElement
         {
             if (visible)
             {
-                hovered = (mouseX >= worldXPos()) && (mouseX < worldXPos() + width)
-                        && (mouseY >= worldYPos()) && (mouseY < worldYPos() + height);
+                hovered = (mouseX >= worldXPos()) && (mouseX < worldXPos() + getWidth())
+                        && (mouseY >= worldYPos()) && (mouseY < worldYPos() + getHeight());
 
                 onScreenDraw(mouseX, mouseY, partialTicks);
 
                 if (drawBounds)
                 {
-                    RenderUtils.drawRoundedRect(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), width, height, hasParent() ? parent.getOuterRadius() : 3,
+                    // TODO: width test
+                    RenderUtils.drawRoundedRect(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), getWidth(), getHeight(), hasParent() ? parent.getOuterRadius() : 3,
                             focused ? new Color("#00ff00") : new Color("#ff55ff"), true);
 //                    RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), width, height, focused ? new Color("#00ff00") : new Color("#ff55ff"));
-                    mc.fontRendererObj.drawString(String.valueOf(zLevel), worldXPos() + width - mc.fontRendererObj.getStringWidth(String.valueOf(zLevel)),
-                            worldYPos() + height - mc.fontRendererObj.FONT_HEIGHT, getColor(GuiColorType.ACCENT2).toPackedARGB(), true);
+                    mc.fontRendererObj.drawString(String.valueOf(zLevel), worldXPos() + getWidth() - mc.fontRendererObj.getStringWidth(String.valueOf(zLevel)),
+                            worldYPos() + getHeight() - mc.fontRendererObj.FONT_HEIGHT, getColor(GuiColorType.ACCENT2).toPackedARGB(), true);
                 }
             }
             return;
@@ -531,7 +603,7 @@ public abstract class GuiElement
             // default behaviors; none for now, should add tooltip handling here later?
 
             // TODO: something like this?
-            if (hovered)
+            if (hovered && hoverTimeCounter != 20)
             {
                 hoverTimeCounter = 20;
             }

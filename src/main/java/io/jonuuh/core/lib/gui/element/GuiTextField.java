@@ -1,10 +1,9 @@
 package io.jonuuh.core.lib.gui.element;
 
-import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
+import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
-import io.jonuuh.core.lib.util.Color;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ChatAllowedCharacters;
@@ -22,21 +21,15 @@ public class GuiTextField extends GuiSettingElement
     protected boolean isTyping;
     protected int selectionPos;
 
-    public GuiTextField(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, String text, String tooltipStr)
+    public GuiTextField(String elementName, float xPos, float yPos, float width, float height, String text)
     {
-        super(parent, elementName, xPos, yPos, width, height, tooltipStr);
+        super(elementName, xPos, yPos, width, height);
         this.text = text;
     }
 
-    public GuiTextField(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, String text)
+    public GuiTextField(String elementName, float xPos, float yPos, String text)
     {
-        super(parent, elementName, xPos, yPos, width, height);
-        this.text = text;
-    }
-
-    public GuiTextField(GuiContainer parent, String elementName, int xPos, int yPos, String text)
-    {
-        super(parent, elementName, xPos, yPos);
+        super(elementName, xPos, yPos);
         this.text = text;
     }
 
@@ -71,14 +64,14 @@ public class GuiTextField extends GuiSettingElement
         setSelectionPos(selectionPos + amount);
     }
 
-    private int getCursorScreenPos()
+    private float getCursorScreenPos()
     {
         return worldXPos() + fontRenderer.getStringWidth(getTextBeforeCursor()) - 1;
     }
 
     private String getTextBelowMouseX(int mouseX)
     {
-        return fontRenderer.trimStringToWidth(text, mouseX - worldXPos() + 1);
+        return fontRenderer.trimStringToWidth(text, (int) (mouseX - worldXPos() + 1));
     }
 
     public int getSelectionStart()
@@ -186,7 +179,7 @@ public class GuiTextField extends GuiSettingElement
             setSelectionPos(getTextBelowMouseX(mouseX).length());
         }
 
-        RenderUtils.drawRectangle(GL11.GL_POLYGON, worldXPos(), worldYPos(), width, height, new Color("#BF242424"));
+        RenderUtils.drawRectangle(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), new Color("#BF242424"));
 
         if (hasSelection())
         {
@@ -198,14 +191,14 @@ public class GuiTextField extends GuiSettingElement
             RenderUtils.drawRectangle(GL11.GL_POLYGON, getCursorScreenPos(), worldYPos() - 2, 1, fontRenderer.FONT_HEIGHT + 2, new Color("#00ff00")/*.setA(0.5F)*/);
         }
 
-        fontRenderer.drawString(text, worldXPos(), worldYPos(), -1);
+        fontRenderer.drawString(text, worldXPos(), worldYPos(), -1, false);
     }
 
     public void drawSelectionHighlight()
     {
-        int cursorX = getCursorScreenPos();
+        float cursorX = getCursorScreenPos();
         int rectWidth = fontRenderer.getStringWidth(getSelectedText()) - 1;
-        int rectX = isSelectionForward() ? cursorX + 1 : cursorX - rectWidth;
+        float rectX = isSelectionForward() ? cursorX + 1 : cursorX - rectWidth;
 //        System.out.println("cursorPos: " + cursorPos + ", selectionPos: " + selectionPos);
 
         RenderUtils.drawRectangle(GL11.GL_POLYGON, rectX, worldYPos(), rectWidth, fontRenderer.FONT_HEIGHT - 1, new Color("#BF009ac2")); // 3399FF

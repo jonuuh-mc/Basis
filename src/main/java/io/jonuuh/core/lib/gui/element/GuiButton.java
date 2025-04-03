@@ -1,7 +1,6 @@
 package io.jonuuh.core.lib.gui.element;
 
 import io.jonuuh.core.lib.gui.GuiColorType;
-import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.gui.event.GuiEventBehavior;
 import io.jonuuh.core.lib.gui.event.GuiEventType;
 import io.jonuuh.core.lib.util.RenderUtils;
@@ -12,27 +11,21 @@ public class GuiButton extends GuiElement
 {
     protected String buttonLabel;
 
-    public GuiButton(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, String tooltipStr, String buttonLabel, GuiEventBehavior mouseDownBehavior)
+    public GuiButton(String elementName, float xPos, float yPos, float width, float height, String buttonLabel, GuiEventBehavior mouseDownBehavior)
     {
-        super(parent, elementName, xPos, yPos, width, height, tooltipStr);
+        super(elementName, xPos, yPos, width, height);
         init(buttonLabel, mouseDownBehavior);
     }
 
-    public GuiButton(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, String buttonLabel, GuiEventBehavior mouseDownBehavior)
+    public GuiButton(String elementName, float xPos, float yPos, float width, float height, GuiEventBehavior mouseDownBehavior)
     {
-        super(parent, elementName, xPos, yPos, width, height);
-        init(buttonLabel, mouseDownBehavior);
-    }
-
-    public GuiButton(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, GuiEventBehavior mouseDownBehavior)
-    {
-        super(parent, elementName, xPos, yPos, width, height);
+        super(elementName, xPos, yPos, width, height);
         init("", mouseDownBehavior);
     }
 
-    public GuiButton(GuiContainer parent, String elementName, int xPos, int yPos, GuiEventBehavior mouseDownBehavior)
+    public GuiButton(String elementName, float xPos, float yPos, GuiEventBehavior mouseDownBehavior)
     {
-        super(parent, elementName, xPos, yPos);
+        super(elementName, xPos, yPos);
         init("", mouseDownBehavior);
     }
 
@@ -45,28 +38,38 @@ public class GuiButton extends GuiElement
         assignCustomEventBehavior(GuiEventType.MOUSE_DOWN, mouseDownBehavior);
     }
 
+    public String getButtonLabel()
+    {
+        return buttonLabel;
+    }
+
+    public void setButtonLabel(String buttonLabel)
+    {
+        this.buttonLabel = buttonLabel;
+    }
+
     @Override
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), width, height, 3, getColor(GuiColorType.BASE), true);
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), 3, getColor(GuiColorType.BASE), true);
 
-        String buttonText = RenderUtils.trimStringToWidthWithEllipsis(buttonLabel, this.width);
+        String buttonText = RenderUtils.trimStringToWidthWithEllipsis(buttonLabel, (int) getWidth());
 
-        mc.fontRendererObj.drawString(buttonText, worldXPos() + ((float) width / 2) - ((float) mc.fontRendererObj.getStringWidth(buttonText) / 2),
-                worldYPos() + ((float) height / 2) - ((float) mc.fontRendererObj.FONT_HEIGHT / 2), getColor(GuiColorType.ACCENT1).toPackedARGB(), true);
+        mc.fontRendererObj.drawString(buttonText, worldXPos() + (getWidth() / 2) - ((float) mc.fontRendererObj.getStringWidth(buttonText) / 2),
+                worldYPos() + (getHeight() / 2) - ((float) mc.fontRendererObj.FONT_HEIGHT / 2), getColor(GuiColorType.ACCENT1).toPackedARGB(), true);
     }
 
-    @Override
-    public void onMouseDown(int mouseX, int mouseY)
-    {
-        setLocalYPos(localYPos() + 1);
-    }
-
-    @Override
-    public void onMouseUp(int mouseX, int mouseY)
-    {
-        setLocalYPos(localYPos() - 1);
-    }
+//    @Override
+//    public void onMouseDown(int mouseX, int mouseY)
+//    {
+//        setLocalYPos(getLocalYPos() + 1);
+//    }
+//
+//    @Override
+//    public void onMouseUp(int mouseX, int mouseY)
+//    {
+//        setLocalYPos(getLocalYPos() - 1);
+//    }
 
     @Override
     protected void onKeyTyped(char typedChar, int keyCode)

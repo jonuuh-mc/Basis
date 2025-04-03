@@ -1,8 +1,7 @@
 package io.jonuuh.core.lib.gui.element;
 
-import io.jonuuh.core.lib.gui.GuiColorType;
-import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
+import io.jonuuh.core.lib.gui.GuiColorType;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
 import org.lwjgl.opengl.GL11;
@@ -13,26 +12,21 @@ public class GuiCheckbox extends GuiSettingElement
     protected boolean drawCheck;
     protected boolean isChecked;
 
-    public GuiCheckbox(GuiContainer parent, String elementName, int xPos, int yPos, int size, String tooltipStr, boolean isChecked)
+    public GuiCheckbox(String elementName, float xPos, float yPos, float size, boolean isChecked)
     {
-        super(parent, elementName, xPos, yPos, size, size, tooltipStr);
+        super(elementName, xPos, yPos, size, size);
         this.isChecked = isChecked;
         this.drawCheck = false; // TODO
     }
 
-    public GuiCheckbox(GuiContainer parent, String elementName, int xPos, int yPos, String tooltipStr, boolean isChecked)
+    public GuiCheckbox(String elementName, float xPos, float yPos, boolean isChecked)
     {
-        this(parent, elementName, xPos, yPos, 16, tooltipStr, isChecked);
+        this(elementName, xPos, yPos, 16, isChecked);
     }
 
-    public GuiCheckbox(GuiContainer parent, String elementName, int xPos, int yPos, boolean isChecked)
+    public GuiCheckbox(String elementName, float xPos, float yPos)
     {
-        this(parent, elementName, xPos, yPos, "", isChecked);
-    }
-
-    public GuiCheckbox(GuiContainer parent, String elementName, int xPos, int yPos)
-    {
-        this(parent, elementName, xPos, yPos, false);
+        this(elementName, xPos, yPos, false);
     }
 
     public boolean isChecked()
@@ -56,18 +50,18 @@ public class GuiCheckbox extends GuiSettingElement
     {
         if (!drawCheck)
         {
-            RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), width, height, parent.getInnerRadius(), getColor(GuiColorType.ACCENT1), true);
+            RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), parent.getInnerRadius(), getColor(GuiColorType.ACCENT1), true);
 
             if (isChecked)
             {
-                float pad = width * 0.075F;
-                RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos() + pad, worldYPos() + pad, width - (pad * 2), height - (pad * 2), parent.getInnerRadius(), getColor(GuiColorType.BASE), true);
+                float pad = getWidth() * 0.075F;
+                RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos() + pad, worldYPos() + pad, getWidth() - (pad * 2), getHeight() - (pad * 2), parent.getInnerRadius(), getColor(GuiColorType.BASE), true);
             }
         }
         else
         {
             Color boxColor = isChecked ? getColor(GuiColorType.BASE) : getColor(GuiColorType.ACCENT1);
-            RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), width, height, parent.getInnerRadius(), boxColor, true);
+            RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), parent.getInnerRadius(), boxColor, true);
 
             if (isChecked)
             {
@@ -78,9 +72,9 @@ public class GuiCheckbox extends GuiSettingElement
                 float pad = 2F;
                 RenderUtils.drawVertices(GL11.GL_LINE_STRIP,
                         new float[][]{
-                                new float[]{worldXPos() + width - pad, worldYPos() + pad + 1},
-                                new float[]{worldXPos() + (width * 0.333F), worldYPos() + height - pad - 1},
-                                new float[]{worldXPos() + pad, worldYPos() + (width * 0.5F)}},
+                                new float[]{worldXPos() + getWidth() - pad, worldYPos() + pad + 1},
+                                new float[]{worldXPos() + (getWidth() * 0.333F), worldYPos() + getHeight() - pad - 1},
+                                new float[]{worldXPos() + pad, worldYPos() + (getWidth() * 0.5F)}},
                         getColor(GuiColorType.ACCENT1));
 
                 GL11.glLineWidth(1F);

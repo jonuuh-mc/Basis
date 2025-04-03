@@ -1,25 +1,19 @@
 package io.jonuuh.core.lib.gui.element;
 
 import io.jonuuh.core.lib.config.setting.types.Setting;
-import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 
 public abstract class GuiSettingElement extends GuiElement
 {
     protected Setting<?> associatedSetting;
 
-    protected GuiSettingElement(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, String tooltipStr)
+    protected GuiSettingElement(String elementName, float xPos, float yPos, float width, float height)
     {
-        super(parent, elementName, xPos, yPos, width, height, tooltipStr);
+        super(elementName, xPos, yPos, width, height);
     }
 
-    protected GuiSettingElement(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height)
+    protected GuiSettingElement(String elementName, float xPos, float yPos)
     {
-        super(parent, elementName, xPos, yPos, width, height);
-    }
-
-    protected GuiSettingElement(GuiContainer parent, String elementName, int xPos, int yPos)
-    {
-        super(parent, elementName, xPos, yPos);
+        super(elementName, xPos, yPos);
     }
 
     // TODO: enforce concrete type by overriding in subclasses?

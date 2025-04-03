@@ -6,18 +6,20 @@ import io.jonuuh.core.lib.util.Color;
 import net.minecraft.client.audio.SoundHandler;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 public abstract class GuiContainer extends GuiElement
 {
+    // TODO: make this a map again?
     protected final List<GuiElement> children;
     protected float outerRadius;
     protected float innerRadius;
 
-    protected GuiContainer(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, float outerRadius, float innerRadius, Map<GuiColorType, Color> colorMap)
+    protected GuiContainer(String elementName, float xPos, float yPos, float width, float height, float outerRadius, float innerRadius, Map<GuiColorType, Color> colorMap)
     {
-        super(parent, elementName, xPos, yPos, width, height);
+        super(elementName, xPos, yPos, width, height);
         this.children = new ArrayList<>();
         this.outerRadius = outerRadius;
         this.innerRadius = innerRadius;
@@ -28,9 +30,9 @@ public abstract class GuiContainer extends GuiElement
         }
     }
 
-    protected GuiContainer(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, float outerRadius, float innerRadius)
+    protected GuiContainer(String elementName, float xPos, float yPos, float width, float height, float outerRadius, float innerRadius)
     {
-        this(parent, elementName, xPos, yPos, width, height, outerRadius, innerRadius, null);
+        this(elementName, xPos, yPos, width, height, outerRadius, innerRadius, null);
     }
 
     public List<GuiElement> getChildren()
@@ -43,6 +45,12 @@ public abstract class GuiContainer extends GuiElement
         return !children.isEmpty();
     }
 
+    public boolean hasChild(GuiElement child)
+    {
+        return children.contains(child);
+    }
+
+    // TODO: only for debugging for now, needs to be removed
     public List<GuiElement> getNestedChildren()
     {
         List<GuiElement> elements = new ArrayList<>();
@@ -70,25 +78,43 @@ public abstract class GuiContainer extends GuiElement
         return innerRadius;
     }
 
-    public void addChild(GuiElement element)
+    public void addChild(GuiElement child)
     {
-        children.add(element);
+        if (child.getParent() != this)
+        {
+            child.setParent(this);
+        }
+
+        children.add(child);
+
+        child.setInheritedXPos(this.worldXPos());
+        child.setInheritedYPos(this.worldYPos());
+
+        // TODO: can be broken if adding children in wrong order
+        child.setZLevel(child.getNumParents());
 
 //        boolean southBounds = (element.localYPos())
-
         // TODO: add handling for bounds of element being outside its parent? snap to relevant to inner parent edge?
     }
 
-//    public void addChildren(Collection<GuiElement> children)
-//    {
-//        for (GuiElement child : children)
-//        {
-//            addChild(child);
-//        }
-//    }
+    public void addChildren(Collection<GuiElement> children)
+    {
+        for (GuiElement child : children)
+        {
+            addChild(child);
+        }
+    }
+
+    public void addChildren(GuiElement... children)
+    {
+        for (GuiElement child : children)
+        {
+            addChild(child);
+        }
+    }
 
     @Override
-    public void setLocalXPos(int xPos)
+    public void setLocalXPos(float xPos)
     {
         super.setLocalXPos(xPos);
         updateChildrenInheritedXPos();
@@ -96,7 +122,7 @@ public abstract class GuiContainer extends GuiElement
     }
 
     @Override
-    public void setLocalYPos(int yPos)
+    public void setLocalYPos(float yPos)
     {
         super.setLocalYPos(yPos);
         updateChildrenInheritedYPos();
@@ -105,29 +131,17 @@ public abstract class GuiContainer extends GuiElement
 
     protected void updateChildrenInheritedXPos()
     {
-        for (GuiElement child : this.getChildren())
+        for (GuiElement child : children)
         {
-            // TODO: whether this is before or after "recursive" call should be VERY critical (pos inheritance in wrong order?); check in debugger?
             child.setInheritedXPos(this.worldXPos());
-
-            if (child instanceof GuiContainer)
-            {
-                ((GuiContainer) child).updateChildrenInheritedXPos();
-            }
         }
     }
 
     protected void updateChildrenInheritedYPos()
     {
-        for (GuiElement child : this.getChildren())
+        for (GuiElement child : children)
         {
-            // TODO: whether this is before or after "recursive" call should be VERY critical (pos inheritance in wrong order?); check in debugger?
             child.setInheritedYPos(this.worldYPos());
-
-            if (child instanceof GuiContainer)
-            {
-                ((GuiContainer) child).updateChildrenInheritedYPos();
-            }
         }
     }
 
@@ -137,7 +151,7 @@ public abstract class GuiContainer extends GuiElement
     }
 
     //    @Override
-//    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
+//    public void onScreenDraw(float mouseX, float mouseY, float partialTicks)
 //    {
 ////        GL11.glPushMatrix();
 ////        GL11.glEnable(GL11.GL_SCISSOR_TEST);

@@ -94,7 +94,6 @@ public final class SettingsConfigurationAdapter
         }
     }
 
-
     /**
      * Retrieve the Settings associated with a given configuration category
      *
@@ -126,7 +125,7 @@ public final class SettingsConfigurationAdapter
     /**
      * Saves the forge Configuration to file.
      * <p>
-     * Writes each category of the Configuration and it's properties to the given file
+     * Writes each category of the Configuration and its properties to the given file
      *
      * @see net.minecraftforge.common.config.ConfigCategory#write(java.io.BufferedWriter, int)
      */

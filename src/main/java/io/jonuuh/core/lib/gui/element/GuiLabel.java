@@ -1,8 +1,8 @@
 package io.jonuuh.core.lib.gui.element;
 
 import io.jonuuh.core.lib.gui.GuiColorType;
-import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.ScaledResolution;
 
 public class GuiLabel extends GuiElement
 {
@@ -12,20 +12,20 @@ public class GuiLabel extends GuiElement
     protected boolean centerStrInHeight;
     protected boolean fitWidthToStr;
     protected boolean fitHeightToStr;
-    protected int textXPos;
-    protected int textYPos;
+    protected float textXPos;
+    protected float textYPos;
 
-    public GuiLabel(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, String text)
+    public GuiLabel(String elementName, float xPos, float yPos, float width, float height, String text)
     {
-        super(parent, elementName, xPos, yPos, width, height);
+        super(elementName, xPos, yPos, width, height);
         this.fontRenderer = mc.fontRendererObj;
         this.text = text;
         centerStrInWidth = centerStrInHeight = true;
     }
 
-    public GuiLabel(GuiContainer parent, String elementName, int xPos, int yPos, String text)
+    public GuiLabel(String elementName, float xPos, float yPos, String text)
     {
-        super(parent, elementName, xPos, yPos);
+        super(elementName, xPos, yPos);
         this.fontRenderer = mc.fontRendererObj;
         this.text = text;
     }
@@ -41,27 +41,27 @@ public class GuiLabel extends GuiElement
         return this;
     }
 
-    protected void onInitGui(int guiScreenWidth, int guiScreenHeight)
+    protected void onInitGui(ScaledResolution scaledResolution)
     {
         textXPos = worldXPos();
         textYPos = worldYPos();
 
         if (centerStrInWidth)
         {
-            textXPos = worldXPos() + (width / 2) - (fontRenderer.getStringWidth(text) / 2);
+            textXPos = worldXPos() + (getWidth() / 2) - (fontRenderer.getStringWidth(text) / 2F);
         }
         else if (fitWidthToStr)
         {
-            width = fontRenderer.getStringWidth(text);
+            setWidth(fontRenderer.getStringWidth(text));
         }
 
         if (centerStrInHeight)
         {
-            textYPos = worldYPos() + (height / 2) - ((fontRenderer.FONT_HEIGHT - 1) / 2);
+            textYPos = worldYPos() + (getHeight() / 2) - ((fontRenderer.FONT_HEIGHT - 1) / 2F);
         }
         else if (fitHeightToStr)
         {
-            height = fontRenderer.FONT_HEIGHT - 1;
+            setHeight(fontRenderer.FONT_HEIGHT - 1);
         }
     }
 

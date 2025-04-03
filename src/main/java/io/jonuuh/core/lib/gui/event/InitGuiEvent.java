@@ -1,13 +1,13 @@
 package io.jonuuh.core.lib.gui.event;
 
+import net.minecraft.client.gui.ScaledResolution;
+
 public class InitGuiEvent extends GuiEvent
 {
-    public final int guiScreenWidth;
-    public final int guiScreenHeight;
+    public final ScaledResolution scaledResolution;
 
-    public InitGuiEvent(int guiScreenWidth, int guiScreenHeight)
+    public InitGuiEvent(ScaledResolution scaledResolution)
     {
-        this.guiScreenWidth = guiScreenWidth;
-        this.guiScreenHeight = guiScreenHeight;
+        this.scaledResolution = scaledResolution;
     }
 }

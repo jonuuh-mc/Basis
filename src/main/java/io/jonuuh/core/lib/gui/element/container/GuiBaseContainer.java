@@ -9,19 +9,19 @@ import java.util.Map;
 
 public class GuiBaseContainer extends GuiContainer
 {
-    public GuiBaseContainer(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, float outerRadius, float innerRadius, Map<GuiColorType, Color> colorMap)
+    public GuiBaseContainer(String elementName, float xPos, float yPos, float width, float height, float outerRadius, float innerRadius, Map<GuiColorType, Color> colorMap)
     {
-        super(parent, elementName, xPos, yPos, width, height, outerRadius, innerRadius, colorMap);
+        super(elementName, xPos, yPos, width, height, outerRadius, innerRadius, colorMap);
     }
 
-    public GuiBaseContainer(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, float outerRadius, float innerRadius)
+    public GuiBaseContainer(String elementName, float xPos, float yPos, float width, float height, float outerRadius, float innerRadius)
     {
-        this(parent, elementName, xPos, yPos, width, height, outerRadius, innerRadius, null);
+        this(elementName, xPos, yPos, width, height, outerRadius, innerRadius, null);
     }
 
     @Override
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), width, height, innerRadius, getColor(GuiColorType.BACKGROUND), true);
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), innerRadius, getColor(GuiColorType.BACKGROUND), true);
     }
 }

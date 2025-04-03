@@ -2,9 +2,9 @@ package io.jonuuh.core.lib.gui.element;
 
 import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.gui.GuiColorType;
-import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
+import net.minecraft.client.gui.ScaledResolution;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -14,25 +14,20 @@ public class GuiSwitch extends GuiSettingElement
     protected boolean switchState;
 
     // TODO: make vertical option? subclass?
-    public GuiSwitch(GuiContainer parent, String elementName, int xPos, int yPos, int width, int height, String tooltipStr, boolean switchState)
+    public GuiSwitch(String elementName, float xPos, float yPos, float width, float height, boolean switchState)
     {
-        super(parent, elementName, xPos, yPos, Math.max(height, width), Math.min(Math.max(height, width), height), tooltipStr); // height should never be > width, width should never be < height
+        super(elementName, xPos, yPos, Math.max(height, width), Math.min(Math.max(height, width), height)); // height should never be > width, width should never be < height
         this.switchState = switchState;
     }
 
-    public GuiSwitch(GuiContainer parent, String elementName, int xPos, int yPos, String tooltipStr, boolean switchState)
+    public GuiSwitch(String elementName, float xPos, float yPos, boolean switchState)
     {
-        this(parent, elementName, xPos, yPos, 32, 16, tooltipStr, switchState);
+        this(elementName, xPos, yPos, 20, 10, switchState);
     }
 
-    public GuiSwitch(GuiContainer parent, String elementName, int xPos, int yPos, boolean switchState)
+    public GuiSwitch(String elementName, float xPos, float yPos)
     {
-        this(parent, elementName, xPos, yPos, "", switchState);
-    }
-
-    public GuiSwitch(GuiContainer parent, String elementName, int xPos, int yPos)
-    {
-        this(parent, elementName, xPos, yPos, false);
+        this(elementName, xPos, yPos, false);
     }
 
     public boolean getSwitchState()
@@ -52,20 +47,20 @@ public class GuiSwitch extends GuiSettingElement
     }
 
     @Override
-    protected void onInitGui(int guiScreenWidth, int guiScreenHeight)
+    protected void onInitGui(ScaledResolution scaledResolution)
     {
-        pointerSize = height - 2F;
+        pointerSize = getHeight() - 2F;
     }
 
     @Override
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
-        float padding = ((height - pointerSize) / 2F);
-        float pointerX = switchState ? (worldXPos() + width - pointerSize - padding) : worldXPos() + padding;
+        float padding = ((getHeight() - pointerSize) / 2F);
+        float pointerX = switchState ? (worldXPos() + getWidth() - pointerSize - padding) : worldXPos() + padding;
         Color trackColor = switchState ? getColor(GuiColorType.BASE) : getColor(GuiColorType.ACCENT2);
 
         // Track
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), width, height, parent.getInnerRadius(), trackColor, true);
+        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), parent.getInnerRadius(), trackColor, true);
         // Pointer
         RenderUtils.drawRoundedRect(GL11.GL_POLYGON, pointerX, worldYPos() + padding, pointerSize, pointerSize, parent.getInnerRadius() - 1, getColor(GuiColorType.ACCENT1), true);
     }
