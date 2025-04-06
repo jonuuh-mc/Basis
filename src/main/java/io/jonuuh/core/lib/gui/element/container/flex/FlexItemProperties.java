@@ -11,7 +11,7 @@ public class FlexItemProperties
     public FlexItemProperties(int order, int grow, int shrink, /*float basis,*/ FlexAlign align)
     {
         setOrder(order);
-        setGrow(grow);
+        setGrow(grow); // TODO: grow only works if element basis is >0, is this a problem?
         setShrink(shrink);
 //        setBasis(basis);
         setAlign(align);

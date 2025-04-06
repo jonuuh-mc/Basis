@@ -208,7 +208,7 @@ public final class SettingsConfigurationAdapter
     /**
      * Load a value field for each Setting in the given Settings.
      * <p>
-     * IMPORTANT: This can create {@link Configuration#get(String, String, String, String, Property.Type) new properties}
+     * TODO: This can create {@link Configuration#get(String, String, String, String, Property.Type) new properties}
      * in the Configuration if they didn't already exist, which can cause unexpected writing to file on
      * {@link SettingsConfigurationAdapter#saveConfiguration() save}. For example attempting to load one list of
      * settings from file that didn't exist in file, then saving some other list of settings that did exist in

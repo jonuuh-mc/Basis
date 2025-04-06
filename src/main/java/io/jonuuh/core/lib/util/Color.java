@@ -199,6 +199,7 @@ public class Color
         this(MAX_COMPONENT_BYTE, MAX_COMPONENT_BYTE, MAX_COMPONENT_BYTE, MAX_COMPONENT_BYTE);
     }
 
+    // TODO: this has literally no use now that fields are immutable (no setters)
     /**
      * Copies the components of this color into a new color
      */

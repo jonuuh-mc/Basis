@@ -3,6 +3,7 @@ package io.jonuuh.core.lib.config.setting;
 import io.jonuuh.core.lib.config.setting.types.Setting;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
+// TODO: this class probably should be removed, was just for experimentation
 public final class SettingEvent<T> extends Event
 {
     public final Setting<T> setting;
