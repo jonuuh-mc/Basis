@@ -1,18 +1,11 @@
 package io.jonuuh.core.lib.gui.element;
 
+import io.jonuuh.core.lib.gui.AbstractGuiScreen;
 import io.jonuuh.core.lib.gui.GuiColorType;
 import io.jonuuh.core.lib.gui.element.container.GuiContainer;
-import io.jonuuh.core.lib.gui.event.CloseGuiEvent;
-import io.jonuuh.core.lib.gui.event.GuiEvent;
+import io.jonuuh.core.lib.gui.element.container.GuiWindow;
 import io.jonuuh.core.lib.gui.event.GuiEventBehavior;
 import io.jonuuh.core.lib.gui.event.GuiEventType;
-import io.jonuuh.core.lib.gui.event.InitGuiEvent;
-import io.jonuuh.core.lib.gui.event.KeyInputEvent;
-import io.jonuuh.core.lib.gui.event.MouseDownEvent;
-import io.jonuuh.core.lib.gui.event.MouseDragEvent;
-import io.jonuuh.core.lib.gui.event.MouseScrollEvent;
-import io.jonuuh.core.lib.gui.event.ScreenDrawEvent;
-import io.jonuuh.core.lib.gui.event.ScreenTickEvent;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.Minecraft;
@@ -24,24 +17,25 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public abstract class GuiElement
 {
     /** A reference to the static minecraft object */
-    public final Minecraft mc;
+    public static final Minecraft mc;
+    /** A resource pointing to the default mouse down sound */
+    public static final ResourceLocation resourceClickSound;
+
     /** A readable name qualifying this element TODO: no enforcement of this being unique */
     public final String elementName;
     /** This element's immediate ancestor: the container it's inside; Should only ever be null for the root container of the element tree */
     protected GuiContainer parent;
 
-    // TODO: implement similar feature to colorMap? propagate up tree until finding a parent that has this defined
-    /** A resource representing the default mouse down sound */
-    protected final ResourceLocation resourceClickSound;
     /** A map of colors that may be used by this element */
     protected Map<GuiColorType, Color> colorMap;
     /**
      * A map of custom event behavior lambdas which usually will have no entries;
-     * Allows for 'injecting' into and potentially overriding events dispatched by the GuiScreen when they are handled in this class
+     * Allows for 'injecting' into and potentially overriding events dispatched by the GuiScreen when they are handled by a GuiElement
      */
     protected Map<GuiEventType, GuiEventBehavior> eventBehaviors;
 
@@ -62,7 +56,6 @@ public abstract class GuiElement
     protected boolean visible;
     protected boolean enabled;
     protected boolean hovered;
-    protected boolean focused;
     protected boolean mouseDown;
     protected boolean drawBounds;
 
@@ -74,9 +67,15 @@ public abstract class GuiElement
     // TODO: use a ticker with onScreenTick instead for tooltips?
     protected int hoverTimeCounter;
 
+    static
+    {
+        mc = Minecraft.getMinecraft();
+        // TODO: implement similar feature to colorMap? propagate up tree until finding a parent that has this defined?
+        resourceClickSound = new ResourceLocation("core:click");
+    }
+
     protected GuiElement(String elementName, float localXPos, float localYPos, float width, float height)
     {
-        this.mc = Minecraft.getMinecraft();
         this.elementName = elementName;
 
         this.localXPos = localXPos;
@@ -88,7 +87,6 @@ public abstract class GuiElement
 
         this.drawBounds = true; // TODO: debug
 
-        this.resourceClickSound = new ResourceLocation("core:click");
         this.eventBehaviors = new HashMap<>();
         this.colorMap = new HashMap<>();
     }
@@ -128,6 +126,18 @@ public abstract class GuiElement
     }
 
     // TODO: add `return this` for setters?
+
+    public AbstractGuiScreen getGuiScreen()
+    {
+        if (this instanceof GuiWindow)
+        {
+            return ((GuiWindow) this).guiScreen;
+        }
+        else // if (this.hasParent()) (shouldn't be necessary, should have a parent if not a GuiWindow)
+        {
+            return parent.getGuiScreen();
+        }
+    }
 
     public boolean hasParent()
     {
@@ -204,35 +214,19 @@ public abstract class GuiElement
         return inheritedXPos;
     }
 
-    public void setInheritedXPos(float inheritedXPos)
-    {
-        this.inheritedXPos = inheritedXPos;
-
-        if (this instanceof GuiContainer)
-        {
-            for (GuiElement child : ((GuiContainer) this).getChildren())
-            {
-                child.setInheritedXPos(this.worldXPos());
-            }
-        }
-    }
-
     public float getInheritedYPos()
     {
         return inheritedYPos;
     }
 
+    public void setInheritedXPos(float inheritedXPos)
+    {
+        this.inheritedXPos = inheritedXPos;
+    }
+
     public void setInheritedYPos(float inheritedYPos)
     {
         this.inheritedYPos = inheritedYPos;
-
-        if (this instanceof GuiContainer)
-        {
-            for (GuiElement child : ((GuiContainer) this).getChildren())
-            {
-                child.setInheritedYPos(this.worldYPos());
-            }
-        }
     }
 
     public Dimensions getDimensions()
@@ -288,14 +282,6 @@ public abstract class GuiElement
     public void setVisible(boolean visible)
     {
         this.visible = visible;
-
-        if (this instanceof GuiContainer)
-        {
-            for (GuiElement child : ((GuiContainer) this).getChildren())
-            {
-                child.setVisible(visible);
-            }
-        }
     }
 
     public boolean isHovered()
@@ -350,13 +336,13 @@ public abstract class GuiElement
 
     public boolean isFocused()
     {
-        return focused;
+        return getGuiScreen().getCurrentFocus() == this;
     }
 
-    public void setFocused(boolean focused)
-    {
-        this.focused = focused;
-    }
+//    public void setFocused(boolean focused)
+//    {
+//        this.focused = focused;
+//    }
 
     public boolean isMouseDown()
     {
@@ -389,14 +375,25 @@ public abstract class GuiElement
     }
 
     /**
+     * Perform some action on this element.
+     *
+     * @see GuiContainer#performAction(Consumer)
+     */
+    public void performAction(Consumer<GuiElement> action)
+    {
+        action.accept(this);
+    }
+
+    /**
      * Assign a custom behavior to this element for some gui event
-     * <p>The behavior should return a boolean: whether to override the default behavior
+     * <p>
+     * The behavior should return a boolean: whether to override the default behavior
      *
      * @param eventType the event type
      * @param behavior the custom behavior
      * @see GuiEventBehavior
      */
-    public final void assignCustomEventBehavior(GuiEventType eventType, GuiEventBehavior behavior)
+    public void assignCustomEventBehavior(GuiEventType eventType, GuiEventBehavior behavior)
     {
         eventBehaviors.put(eventType, behavior);
     }
@@ -407,76 +404,22 @@ public abstract class GuiElement
      * @param eventType the event type
      * @return true if this behavior exists and should override the default behavior for this event, otherwise false
      */
-    protected final boolean tryApplyCustomEventBehavior(GuiEventType eventType)
+    protected boolean tryApplyCustomEventBehavior(GuiEventType eventType)
     {
         GuiEventBehavior behavior = eventBehaviors.get(eventType);
         return behavior != null && behavior.apply(this);
     }
 
-    // depth first searching i think?
-    public final void propagateEvent(GuiEvent event)
+    public GuiElement getGreatestZLevelHovered(GuiElement currGreatest)
     {
-        // handle events as we propagate down each tree branch.
-        // handling order per element matters for drawing element order for example,
-        // an element in a container should be drawn after (on top) of the container
-        handleEvent(event);
-
-        if (this instanceof GuiContainer)
+        if (hovered && enabled && visible)
         {
-            for (GuiElement child : ((GuiContainer) this).getChildren())
+            if (this.zLevel > currGreatest.zLevel)
             {
-                child.propagateEvent(event);
+                return this;
             }
         }
-    }
-
-    private void handleEvent(GuiEvent event)
-    {
-        if (event instanceof InitGuiEvent)
-        {
-            dispatchInitGuiEvent(((InitGuiEvent) event).scaledResolution);
-        }
-        else if (event instanceof CloseGuiEvent)
-        {
-            dispatchCloseGuiEvent();
-        }
-        else if (event instanceof ScreenDrawEvent)
-        {
-            ScreenDrawEvent e = (ScreenDrawEvent) event;
-            dispatchScreenDrawEvent(e.mouseX, e.mouseY, e.partialTicks);
-        }
-        else if (event instanceof ScreenTickEvent)
-        {
-            dispatchScreenTickEvent();
-        }
-        else if (event instanceof KeyInputEvent)
-        {
-            dispatchKeyInputEvent(((KeyInputEvent) event).typedChar, ((KeyInputEvent) event).keyCode);
-        }
-        else if (event instanceof MouseDownEvent)
-        {
-            if (hovered && enabled && visible)
-            {
-                ((MouseDownEvent) event).collectMouseDownElement(this);
-            }
-            // reset focus of whichever element (if any) currently has focus
-            if (focused)
-            {
-                focused = false;
-            }
-        }
-//        else if (event instanceof MouseUpEvent)
-//        {
-//        }
-        else if (event instanceof MouseDragEvent)
-        {
-            MouseDragEvent e = (MouseDragEvent) event;
-            dispatchMouseDragEvent(e.mouseX, e.mouseY, e.clickedMouseButton, e.msHeld);
-        }
-        else if (event instanceof MouseScrollEvent)
-        {
-            dispatchMouseScrollEvent(((MouseScrollEvent) event).wheelDelta);
-        }
+        return currGreatest;
     }
 
     public final void dispatchInitGuiEvent(ScaledResolution scaledResolution)
@@ -489,22 +432,10 @@ public abstract class GuiElement
             //  better to be dynamic now than have something break later to inflexibility?
             //  what if we want to add elements while gui is open? would need to do this in onscreentick or something
             setZLevel(getNumParents());
+            // TODO: just do this via container.addChild() similarly to updateInheritedXPos() and etc
         }
 
         onInitGui(scaledResolution);
-
-
-//        if (this.padding != null && this instanceof GuiContainer)
-//        {
-//
-//            for (GuiElement child : ((GuiContainer) this).getChildren())
-//            {
-//                child.setInheritedYPos(this.worldYPos());
-//            }
-//
-//        }
-
-//        this.applyPadding();
     }
 
 //    protected void applyPadding()
@@ -549,11 +480,6 @@ public abstract class GuiElement
 
         if (!overrideDefaultBehavior)
         {
-            // reset focus of whichever element (if any) currently has focus
-            if (focused)
-            {
-                focused = false;
-            }
         }
 
         onCloseGui();
@@ -578,10 +504,9 @@ public abstract class GuiElement
 
                 if (drawBounds)
                 {
-                    // TODO: width test
                     RenderUtils.drawRoundedRect(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), getWidth(), getHeight(), hasParent() ? parent.getOuterRadius() : 3,
-                            focused ? new Color("#00ff00") : new Color("#ff55ff"), true);
-//                    RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), width, height, focused ? new Color("#00ff00") : new Color("#ff55ff"));
+                            isFocused() ? new Color("#00ff00") : new Color("#ff55ff"), true);
+
                     mc.fontRendererObj.drawString(String.valueOf(zLevel), worldXPos() + getWidth() - mc.fontRendererObj.getStringWidth(String.valueOf(zLevel)),
                             worldYPos() + getHeight() - mc.fontRendererObj.FONT_HEIGHT, getColor(GuiColorType.ACCENT2).toPackedARGB(), true);
                 }
@@ -600,8 +525,6 @@ public abstract class GuiElement
 
         if (!overrideDefaultBehavior)
         {
-            // default behaviors; none for now, should add tooltip handling here later?
-
             // TODO: something like this?
             if (hovered && hoverTimeCounter != 20)
             {
@@ -613,7 +536,6 @@ public abstract class GuiElement
             }
         }
 
-        //  shouldn't be tied to fps, unlike screen drawing
         onScreenTick();
     }
 
@@ -628,7 +550,6 @@ public abstract class GuiElement
         if (!overrideDefaultBehavior)
         {
             mouseDown = true;
-            focused = true;
             playClickSound(mc.getSoundHandler());
         }
 
@@ -661,10 +582,6 @@ public abstract class GuiElement
 
         if (!overrideDefaultBehavior)
         {
-            if (!focused)
-            {
-                return;
-            }
         }
 
         onMouseScroll(wheelDelta);
@@ -700,10 +617,6 @@ public abstract class GuiElement
 
         if (!overrideDefaultBehavior)
         {
-            if (!focused)
-            {
-                return;
-            }
         }
 
         onKeyTyped(typedChar, keyCode);

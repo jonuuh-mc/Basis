@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public abstract class GuiContainer extends GuiElement
 {
@@ -80,10 +81,15 @@ public abstract class GuiContainer extends GuiElement
 
     public void addChild(GuiElement child)
     {
-        if (child.getParent() != this)
+        if (child instanceof GuiWindow)
         {
-            child.setParent(this);
+            throw new IllegalArgumentException();
         }
+
+//        if (child.getParent() != this)
+//        {
+        child.setParent(this);
+//        }
 
         children.add(child);
 
@@ -118,7 +124,6 @@ public abstract class GuiContainer extends GuiElement
     {
         super.setLocalXPos(xPos);
         updateChildrenInheritedXPos();
-//        System.out.println(elementName + " xPos: " + xPos + " initX: " + initialXPos + " inheritedX: " + inheritedXPos);
     }
 
     @Override
@@ -126,7 +131,20 @@ public abstract class GuiContainer extends GuiElement
     {
         super.setLocalYPos(yPos);
         updateChildrenInheritedYPos();
-//        System.out.println(elementName + " yPos: " + yPos + " initY " + initialYPos + " inheritedY: " + inheritedYPos);
+    }
+
+    @Override
+    public void setInheritedXPos(float inheritedXPos)
+    {
+        super.setInheritedXPos(inheritedXPos);
+        updateChildrenInheritedXPos();
+    }
+
+    @Override
+    public void setInheritedYPos(float inheritedYPos)
+    {
+        super.setInheritedYPos(inheritedYPos);
+        updateChildrenInheritedYPos();
     }
 
     protected void updateChildrenInheritedXPos()
@@ -142,6 +160,52 @@ public abstract class GuiContainer extends GuiElement
         for (GuiElement child : children)
         {
             child.setInheritedYPos(this.worldYPos());
+        }
+    }
+
+    // TODO: refactor this and inherited pos updates to use performAction()?
+    @Override
+    public void setVisible(boolean visible)
+    {
+        super.setVisible(visible);
+
+        for (GuiElement child : children)
+        {
+            child.setVisible(visible);
+        }
+    }
+
+    @Override
+    public GuiElement getGreatestZLevelHovered(GuiElement currGreatest)
+    {
+        currGreatest = super.getGreatestZLevelHovered(currGreatest);
+
+        for (GuiElement child : children)
+        {
+            currGreatest = child.getGreatestZLevelHovered(currGreatest);
+        }
+        return currGreatest;
+    }
+
+    /**
+     * Propagate some action which returns no result down the element tree starting from this container,
+     * performing the action depth first in pre-order on every element along the way.
+     * <p>
+     * One reason the actions are performed in pre-order is for propagating a screen draw event;
+     * parents should be drawn before their children so that they appear visually behind the children
+     *
+     * @param action The action to be performed
+     */
+    @Override
+    public void performAction(Consumer<GuiElement> action)
+    {
+        // Apply the action to this element
+        super.performAction(action);
+
+        for (GuiElement child : children)
+        {
+            // Continue propagating the action to any additional children
+            child.performAction(action);
         }
     }
 

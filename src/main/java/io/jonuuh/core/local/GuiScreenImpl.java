@@ -5,13 +5,16 @@ import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.gui.AbstractGuiScreen;
 import io.jonuuh.core.lib.gui.GuiColorType;
 import io.jonuuh.core.lib.gui.element.GuiElement;
+import io.jonuuh.core.lib.gui.element.GuiLabel;
 import io.jonuuh.core.lib.gui.element.container.GuiBaseContainer;
-import io.jonuuh.core.lib.gui.element.container.GuiContainer;
+import io.jonuuh.core.lib.gui.element.container.GuiScrollContainer;
+import io.jonuuh.core.lib.gui.element.container.GuiWindow;
 import io.jonuuh.core.lib.gui.element.container.flex.FlexAlign;
 import io.jonuuh.core.lib.gui.element.container.flex.FlexDirection;
 import io.jonuuh.core.lib.gui.element.container.flex.FlexJustify;
 import io.jonuuh.core.lib.gui.element.container.flex.GuiFlexContainer;
 import io.jonuuh.core.lib.util.Color;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.EnumChatFormatting;
 
@@ -43,7 +46,14 @@ public class GuiScreenImpl extends AbstractGuiScreen
 //        System.out.println(mc.gameSettings.guiScale);
     }
 
-//    @SubscribeEvent
+    @Override
+    public void initGui()
+    {
+        super.initGui();
+//        System.out.println(rootContainer.getGreatestZLevelHovered(rootContainer));
+    }
+
+    //    @SubscribeEvent
 //    public void onSettingChange(SettingEvent<?> event)
 //    {
 //        if (event.setting == settings.get(LocalSettingKey.FLEX_DIRECTION_MAIN))
@@ -95,7 +105,7 @@ public class GuiScreenImpl extends AbstractGuiScreen
 //        forceUpdate(mainFlex);
 //    }
 
-    private GuiContainer newRootContainerTest()
+    private GuiWindow newRootContainerTest()
     {
         Map<GuiColorType, Color> colorMap = ImmutableMap.of(
                 GuiColorType.ACCENT1, new Color(),
@@ -103,10 +113,8 @@ public class GuiScreenImpl extends AbstractGuiScreen
                 GuiColorType.BASE, new Color("#BF1450A0"),
                 GuiColorType.BACKGROUND, new Color("#BF242424"));
 
-        GuiFlexContainer rootContainer = new GuiFlexContainer("ROOT", 0, 0, 800, 400, 1, 3, colorMap);
-        rootContainer.setDirection(FlexDirection.COLUMN);
-//        rootContainer.setJustifyContent(FlexJustify.AROUND);
-        rootContainer.setAlignItems(FlexAlign.CENTER);
+        GuiWindow rootContainer = new GuiWindow(this, new ScaledResolution(Minecraft.getMinecraft()), 0, 0, colorMap);
+//        rootContainer.setDirection(FlexDirection.COLUMN);
 
 //        GuiFlexContainer mainContent = new GuiFlexContainer("mainContent", 200, 50, 600, 400, 4, 4);
 
@@ -137,8 +145,12 @@ public class GuiScreenImpl extends AbstractGuiScreen
 //        mainContent.addChildren(mainFlex);
         mainFlex.addChildren(container1, container2/*, container3, container4*/);
 
+        GuiScrollContainer scrollContainer = new GuiScrollContainer("testScroll", 0, 0, 50, 150, 300);
+        scrollContainer.addChild(new GuiLabel("testLabel", 0, 0, 20, 20, "test"));
+
+        mainFlex.addChild(scrollContainer);
 //        GuiDropdown dropdown = new GuiDropdown("dropdown", 0, 0, 75, 20, "Select:",
-//                Arrays.asList(new String[]{"One", "Two", "Three", "Four", "Five"}));
+//                Arrays.asList("One", "Two", "Three", "Four", "Five"));
 //        mainFlex.addChild(dropdown);
 
 
@@ -174,7 +186,7 @@ public class GuiScreenImpl extends AbstractGuiScreen
         return rootContainer;
     }
 
-    protected GuiContainer initRootContainer()
+    protected GuiWindow initRootContainer()
     {
 //        System.out.println("settings: " + settings);
 

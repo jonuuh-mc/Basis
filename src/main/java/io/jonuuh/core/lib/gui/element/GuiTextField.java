@@ -186,7 +186,7 @@ public class GuiTextField extends GuiSettingElement
             drawSelectionHighlight();
         }
 
-        if (Display.isActive() && focused && (cursorFlashCounter % 20 < 10 || isTyping))
+        if (Display.isActive() && isFocused() && (cursorFlashCounter % 20 < 10 || isTyping))
         {
             RenderUtils.drawRectangle(GL11.GL_POLYGON, getCursorScreenPos(), worldYPos() - 2, 1, fontRenderer.FONT_HEIGHT + 2, new Color("#00ff00")/*.setA(0.5F)*/);
         }
@@ -206,7 +206,7 @@ public class GuiTextField extends GuiSettingElement
 
     public void onMouseDown(int mouseX, int mouseY)
     {
-        if (!focused)
+        if (!isFocused())
         {
             cursorFlashCounter = 0;
         }

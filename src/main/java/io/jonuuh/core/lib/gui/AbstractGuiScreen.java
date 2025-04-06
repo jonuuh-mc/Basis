@@ -1,15 +1,7 @@
 package io.jonuuh.core.lib.gui;
 
 import io.jonuuh.core.lib.gui.element.GuiElement;
-import io.jonuuh.core.lib.gui.element.container.GuiContainer;
-import io.jonuuh.core.lib.gui.event.CloseGuiEvent;
-import io.jonuuh.core.lib.gui.event.InitGuiEvent;
-import io.jonuuh.core.lib.gui.event.KeyInputEvent;
-import io.jonuuh.core.lib.gui.event.MouseDownEvent;
-import io.jonuuh.core.lib.gui.event.MouseDragEvent;
-import io.jonuuh.core.lib.gui.event.MouseScrollEvent;
-import io.jonuuh.core.lib.gui.event.ScreenDrawEvent;
-import io.jonuuh.core.lib.gui.event.ScreenTickEvent;
+import io.jonuuh.core.lib.gui.element.container.GuiWindow;
 import io.jonuuh.core.lib.util.MathUtils;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
@@ -20,28 +12,25 @@ import java.io.IOException;
 
 public abstract class AbstractGuiScreen extends GuiScreen
 {
-    protected GuiContainer rootContainer;
+    protected GuiWindow rootContainer;
     protected GuiElement currentFocus;
     // TODO: implement something like this later? could be shared between all guiscreens of a mod
 //    protected FontRenderer customFontRenderer = new FontRenderer(mc.gameSettings, new ResourceLocation("core:ascii.png"), mc.renderEngine, false);
 
-
     public AbstractGuiScreen()
     {
-//        for (GuiElement element : rootContainer.getNestedChildren())
-//        {
-//            Setting<?> setting = settings.get(element.elementName);
-//
-//            if (setting != null && element instanceof GuiSettingElement)
-//            {
-//                ((GuiSettingElement) element).associateSetting(setting);
-//                System.out.println("associated setting for: " + element.elementName);
-//            }
-//        }
     }
 
-    protected abstract GuiContainer initRootContainer();
+    protected abstract GuiWindow initRootContainer();
 
+    public GuiElement getCurrentFocus()
+    {
+        return currentFocus;
+    }
+
+    /**
+     * Whether this screen should pause the game in singleplayer
+     */
     @Override
     public boolean doesGuiPauseGame()
     {
@@ -49,57 +38,81 @@ public abstract class AbstractGuiScreen extends GuiScreen
     }
 
     /**
-     * Called when the GUI is displayed or when the window resizes
+     * Called when this screen is first displayed or when the window resizes
      */
     @Override
     public void initGui()
     {
         Keyboard.enableRepeatEvents(true);
-
-//        rootContainer.setWidth(50); // shows
-        rootContainer.propagateEvent(new InitGuiEvent(new ScaledResolution(mc)));
+        rootContainer.performAction(element -> element.dispatchInitGuiEvent(new ScaledResolution(mc)));
     }
 
+    /**
+     * Called when this screen is unloaded
+     */
     @Override
     public void onGuiClosed()
     {
         Keyboard.enableRepeatEvents(false);
         currentFocus = null;
-        rootContainer.propagateEvent(new CloseGuiEvent());
+        rootContainer.performAction(GuiElement::dispatchCloseGuiEvent);
     }
 
+    /**
+     * Should be used similarly to {@link AbstractGuiScreen#drawScreen(int, int, float)}, but when mouse position
+     * and/or very frequent updates aren't required. Called 20 client ticks per second?
+     */
     @Override
     public void updateScreen()
     {
-        rootContainer.propagateEvent(new ScreenTickEvent());
+        rootContainer.performAction(GuiElement::dispatchScreenTickEvent);
     }
 
+    /**
+     * Mainly used to draw the elements on the screen but also as a very frequent event ticker.
+     * Called [fps] times per second?
+     */
+    @Override
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
+    {
+        rootContainer.performAction(element -> element.dispatchScreenDrawEvent(mouseX, mouseY, partialTicks));
+    }
+
+    /**
+     * Fired after parsing lwjgl {@link Keyboard} event states via {@link GuiScreen#handleKeyboardInput()}
+     * when a key is typed (apart from f11 and esc?)
+     */
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException
     {
         super.keyTyped(typedChar, keyCode);
-        rootContainer.propagateEvent(new KeyInputEvent(typedChar, keyCode));
+        currentFocus.dispatchKeyInputEvent(typedChar, keyCode);
+//        rootContainer.performAction(element -> element.dispatchKeyInputEvent(typedChar, keyCode));
     }
 
+    /**
+     * Used to parse lwjgl {@link Mouse} event states.
+     * By default, calls mouseClicked, mouseReleased, and mouseClickMove via GuiScreen superclass,
+     * but can be extended as is done here for more features like mouse wheel states
+     */
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks)
-    {
-        rootContainer.propagateEvent(new ScreenDrawEvent(mouseX, mouseY, partialTicks));
-    }
-
     public void handleMouseInput() throws IOException
     {
         super.handleMouseInput();
 
-        int wheelDelta = Mouse.getEventDWheel();
+        int wheelDelta = (int) MathUtils.clamp(Mouse.getEventDWheel(), -1, 1);
 
         if (wheelDelta != 0)
         {
-            wheelDelta = (int) MathUtils.clamp(wheelDelta, -1, 1);
-            rootContainer.propagateEvent(new MouseScrollEvent(wheelDelta));
+            currentFocus.dispatchMouseScrollEvent(wheelDelta);
+//            rootContainer.performAction(element -> element.dispatchMouseScrollEvent(wheelDelta));
         }
     }
 
+    /**
+     * Fired when a mouse button is pressed down.
+     * Downstream of {@link GuiScreen#handleMouseInput()}
+     */
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseEventButton)
     {
@@ -108,34 +121,20 @@ public abstract class AbstractGuiScreen extends GuiScreen
             return;
         }
 
-        MouseDownEvent event = new MouseDownEvent(mouseX, mouseY, mouseEventButton);
-        rootContainer.propagateEvent(event);
+        currentFocus = rootContainer.getGreatestZLevelHovered(rootContainer);
+        System.out.println("greatestZElement: " + currentFocus);
 
-        if (!event.hasHits())
-        {
-            return;
-        }
-
-        GuiElement greatestZElement = event.mouseDownElements.get(0);
-        for (GuiElement element : event.mouseDownElements)
-        {
-            if (element.getZLevel() > greatestZElement.getZLevel())
-            {
-                greatestZElement = element;
-            }
-        }
-
-//        System.out.println("mouseDownElements: " + event.mouseDownElements);
-        System.out.println("greatestZElement: " + greatestZElement);
-
-        greatestZElement.dispatchMouseDownEvent(mouseX, mouseY);
-        currentFocus = greatestZElement;
+        currentFocus.dispatchMouseDownEvent(mouseX, mouseY);
     }
 
+    /**
+     * Fired when a mouse button is released up.
+     * Downstream of {@link GuiScreen#handleMouseInput()}
+     */
     @Override
     protected void mouseReleased(int mouseX, int mouseY, int mouseEventButton)
     {
-        if (mouseEventButton != 0)
+        if (mouseEventButton != 0) // left click only
         {
             return;
         }
@@ -146,9 +145,13 @@ public abstract class AbstractGuiScreen extends GuiScreen
         }
     }
 
+    /**
+     * Fired when the mouse is moved around while pressed.
+     * Downstream of {@link GuiScreen#handleMouseInput()}
+     */
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long msHeld)
     {
-        rootContainer.propagateEvent(new MouseDragEvent(mouseX, mouseY, clickedMouseButton, msHeld));
+        rootContainer.performAction(element -> element.dispatchMouseDragEvent(mouseX, mouseY, clickedMouseButton, msHeld));
     }
 }
