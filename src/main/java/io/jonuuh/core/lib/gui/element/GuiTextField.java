@@ -1,6 +1,5 @@
 package io.jonuuh.core.lib.gui.element;
 
-import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
@@ -11,7 +10,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
-public class GuiTextField extends GuiSettingElement
+public class GuiTextField extends GuiElement
 {
     protected FontRenderer fontRenderer = mc.fontRendererObj;
     protected String text;
@@ -34,12 +33,6 @@ public class GuiTextField extends GuiSettingElement
     }
 
     // TODO: some textfield logic: `this.doneBtn.enabled = this.commandTextField.getText().trim().length() > 0;`
-
-    @Override
-    protected void updateSetting()
-    {
-        ((StringSetting) associatedSetting).setCurrentValue(text);
-    }
 
 //    public void setCursorPosition(int position)
 //    {
@@ -321,8 +314,6 @@ public class GuiTextField extends GuiSettingElement
         }
 
         clearSelection();
-
-        trySendChangeToSetting();
 
 //        String s = "";
 //        int start = getSelectionStart()/*Math.min(cursorPos, selectionPos)*/;

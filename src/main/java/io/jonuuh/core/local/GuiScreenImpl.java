@@ -2,10 +2,12 @@ package io.jonuuh.core.local;
 
 import com.google.common.collect.ImmutableMap;
 import io.jonuuh.core.lib.config.setting.Settings;
+import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.gui.AbstractGuiScreen;
 import io.jonuuh.core.lib.gui.GuiColorType;
 import io.jonuuh.core.lib.gui.element.GuiElement;
 import io.jonuuh.core.lib.gui.element.GuiLabel;
+import io.jonuuh.core.lib.gui.element.GuiSwitch;
 import io.jonuuh.core.lib.gui.element.container.GuiBaseContainer;
 import io.jonuuh.core.lib.gui.element.container.GuiScrollContainer;
 import io.jonuuh.core.lib.gui.element.container.GuiWindow;
@@ -13,6 +15,7 @@ import io.jonuuh.core.lib.gui.element.container.flex.FlexAlign;
 import io.jonuuh.core.lib.gui.element.container.flex.FlexDirection;
 import io.jonuuh.core.lib.gui.element.container.flex.FlexJustify;
 import io.jonuuh.core.lib.gui.element.container.flex.GuiFlexContainer;
+import io.jonuuh.core.lib.gui.event.GuiEventType;
 import io.jonuuh.core.lib.util.Color;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
@@ -36,22 +39,22 @@ public class GuiScreenImpl extends AbstractGuiScreen
     public void onGuiClosed()
     {
         super.onGuiClosed();
-//        settings.saveCurrentValues();
+        settings.saveCurrentValues();
     }
-
-    @Override
-    public void updateScreen()
-    {
-        super.updateScreen();
-//        System.out.println(mc.gameSettings.guiScale);
-    }
-
-    @Override
-    public void initGui()
-    {
-        super.initGui();
-//        System.out.println(rootContainer.getGreatestZLevelHovered(rootContainer));
-    }
+//
+//    @Override
+//    public void updateScreen()
+//    {
+//        super.updateScreen();
+////        System.out.println(mc.gameSettings.guiScale);
+//    }
+//
+//    @Override
+//    public void initGui()
+//    {
+//        super.initGui();
+////        System.out.println(rootContainer.getGreatestZLevelHovered(rootContainer));
+//    }
 
     //    @SubscribeEvent
 //    public void onSettingChange(SettingEvent<?> event)
@@ -149,6 +152,20 @@ public class GuiScreenImpl extends AbstractGuiScreen
         scrollContainer.addChild(new GuiLabel("testLabel", 0, 0, 20, 20, "test"));
 
         mainFlex.addChild(scrollContainer);
+
+//        mainFlex.addChild(new GuiCheckbox("checkbox",0,0,32,false));
+
+//        ((BoolSetting) associatedSetting).setCurrentValue(switchState);
+
+        // TODO: this is insanity but also kinda fire
+        BoolSetting flexDirection = settings.getBoolSetting(LocalSettingKey.FLEX_DIRECTION_MAIN);
+        GuiSwitch testSwitch = new GuiSwitch("testSwitch", 0, 0, flexDirection.getCurrentValue());
+
+        testSwitch.assignCustomPostEventBehavior(GuiEventType.MOUSE_DOWN,
+                element -> flexDirection.setCurrentValue(((GuiSwitch) element).getSwitchState()));
+
+        mainFlex.addChild(testSwitch);
+
 //        GuiDropdown dropdown = new GuiDropdown("dropdown", 0, 0, 75, 20, "Select:",
 //                Arrays.asList("One", "Two", "Three", "Four", "Five"));
 //        mainFlex.addChild(dropdown);
@@ -394,6 +411,6 @@ public class GuiScreenImpl extends AbstractGuiScreen
     // obviously terrible, just for debugging
     private void forceUpdate(GuiFlexContainer flexContainer)
     {
-        flexContainer.dispatchInitGuiEvent(new ScaledResolution(mc));
+        flexContainer.handleInitGuiEvent(new ScaledResolution(mc));
     }
 }

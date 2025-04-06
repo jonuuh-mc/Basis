@@ -23,9 +23,20 @@ public abstract class AbstractGuiScreen extends GuiScreen
 
     protected abstract GuiWindow initRootContainer();
 
+    /**
+     * Get the element that currently has focus, if any
+     */
     public GuiElement getCurrentFocus()
     {
         return currentFocus;
+    }
+
+    /**
+     * Whether any element on this screen is focused (not whether this GuiScreen itself is focused)
+     */
+    public boolean hasCurrentFocus()
+    {
+        return currentFocus != null;
     }
 
     /**
@@ -44,7 +55,7 @@ public abstract class AbstractGuiScreen extends GuiScreen
     public void initGui()
     {
         Keyboard.enableRepeatEvents(true);
-        rootContainer.performAction(element -> element.dispatchInitGuiEvent(new ScaledResolution(mc)));
+        rootContainer.performAction(element -> element.handleInitGuiEvent(new ScaledResolution(mc)));
     }
 
     /**
@@ -55,7 +66,7 @@ public abstract class AbstractGuiScreen extends GuiScreen
     {
         Keyboard.enableRepeatEvents(false);
         currentFocus = null;
-        rootContainer.performAction(GuiElement::dispatchCloseGuiEvent);
+        rootContainer.performAction(GuiElement::handleCloseGuiEvent);
     }
 
     /**
@@ -65,7 +76,7 @@ public abstract class AbstractGuiScreen extends GuiScreen
     @Override
     public void updateScreen()
     {
-        rootContainer.performAction(GuiElement::dispatchScreenTickEvent);
+        rootContainer.performAction(GuiElement::handleScreenTickEvent);
     }
 
     /**
@@ -75,7 +86,7 @@ public abstract class AbstractGuiScreen extends GuiScreen
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
-        rootContainer.performAction(element -> element.dispatchScreenDrawEvent(mouseX, mouseY, partialTicks));
+        rootContainer.performAction(element -> element.handleScreenDrawEvent(mouseX, mouseY, partialTicks));
     }
 
     /**
@@ -86,8 +97,11 @@ public abstract class AbstractGuiScreen extends GuiScreen
     protected void keyTyped(char typedChar, int keyCode) throws IOException
     {
         super.keyTyped(typedChar, keyCode);
-        currentFocus.dispatchKeyInputEvent(typedChar, keyCode);
-//        rootContainer.performAction(element -> element.dispatchKeyInputEvent(typedChar, keyCode));
+
+        if (hasCurrentFocus())
+        {
+            currentFocus.handleKeyInputEvent(typedChar, keyCode);
+        }
     }
 
     /**
@@ -102,10 +116,9 @@ public abstract class AbstractGuiScreen extends GuiScreen
 
         int wheelDelta = (int) MathUtils.clamp(Mouse.getEventDWheel(), -1, 1);
 
-        if (wheelDelta != 0)
+        if (hasCurrentFocus() && wheelDelta != 0)
         {
-            currentFocus.dispatchMouseScrollEvent(wheelDelta);
-//            rootContainer.performAction(element -> element.dispatchMouseScrollEvent(wheelDelta));
+            currentFocus.handleMouseScrollEvent(wheelDelta);
         }
     }
 
@@ -123,8 +136,7 @@ public abstract class AbstractGuiScreen extends GuiScreen
 
         currentFocus = rootContainer.getGreatestZLevelHovered(rootContainer);
         System.out.println("greatestZElement: " + currentFocus);
-
-        currentFocus.dispatchMouseDownEvent(mouseX, mouseY);
+        currentFocus.handleMouseDownEvent(mouseX, mouseY);
     }
 
     /**
@@ -139,9 +151,9 @@ public abstract class AbstractGuiScreen extends GuiScreen
             return;
         }
 
-        if (currentFocus != null && currentFocus.isMouseDown())
+        if (hasCurrentFocus() && currentFocus.isMouseDown())
         {
-            currentFocus.dispatchMouseUpEvent(mouseX, mouseY);
+            currentFocus.handleMouseUpEvent(mouseX, mouseY);
         }
     }
 
@@ -152,6 +164,6 @@ public abstract class AbstractGuiScreen extends GuiScreen
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long msHeld)
     {
-        rootContainer.performAction(element -> element.dispatchMouseDragEvent(mouseX, mouseY, clickedMouseButton, msHeld));
+        rootContainer.performAction(element -> element.handleMouseDragEvent(mouseX, mouseY, clickedMouseButton, msHeld));
     }
 }

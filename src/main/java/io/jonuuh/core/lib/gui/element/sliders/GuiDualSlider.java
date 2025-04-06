@@ -1,7 +1,8 @@
 package io.jonuuh.core.lib.gui.element.sliders;
 
 import io.jonuuh.core.lib.gui.GuiColorType;
-import io.jonuuh.core.lib.gui.element.GuiSettingElement;
+import io.jonuuh.core.lib.gui.element.Dimensions;
+import io.jonuuh.core.lib.gui.element.GuiElement;
 import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.gui.ScaledResolution;
@@ -9,7 +10,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.text.DecimalFormat;
 
-public class GuiDualSlider extends GuiSettingElement
+public class GuiDualSlider extends GuiElement
 {
     protected final double min;
     protected final double max;
@@ -36,7 +37,8 @@ public class GuiDualSlider extends GuiSettingElement
 
     public GuiDualSlider(String elementName, float xPos, float yPos, double min, double max, double startValueLeft, double startValueRight)
     {
-        this(elementName, xPos, yPos, 100, 20, min, max, startValueLeft, startValueRight, false);
+        // TODO: ???
+        this(elementName, xPos, yPos, new Dimensions().width, new Dimensions().height, min, max, startValueLeft, startValueRight, false);
     }
 
     public double getValue(boolean isLeftPointer)
@@ -129,11 +131,6 @@ public class GuiDualSlider extends GuiSettingElement
     }
 
     @Override
-    protected void updateSetting()
-    {
-    }
-
-    @Override
     protected void onInitGui(ScaledResolution scaledResolution)
     {
         pointerSize = isVertical ? getWidth() : getHeight();
@@ -170,8 +167,6 @@ public class GuiDualSlider extends GuiSettingElement
 
             // TODO: don't check for pre-claim? assumes no slider overlap (drag two sliders once)
 //            claimTooltipForPointer(lastHeldPointer);
-
-            trySendChangeToSetting();
         }
     }
 

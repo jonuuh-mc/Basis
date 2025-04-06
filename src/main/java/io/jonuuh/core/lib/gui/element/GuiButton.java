@@ -1,29 +1,30 @@
 package io.jonuuh.core.lib.gui.element;
 
 import io.jonuuh.core.lib.gui.GuiColorType;
-import io.jonuuh.core.lib.gui.event.GuiEventBehavior;
 import io.jonuuh.core.lib.gui.event.GuiEventType;
 import io.jonuuh.core.lib.util.RenderUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
+import java.util.function.Consumer;
+
 public class GuiButton extends GuiElement
 {
     protected String buttonLabel;
 
-    public GuiButton(String elementName, float xPos, float yPos, float width, float height, String buttonLabel, GuiEventBehavior mouseDownBehavior)
+    public GuiButton(String elementName, float xPos, float yPos, float width, float height, String buttonLabel, Consumer<GuiElement> mouseDownBehavior)
     {
         super(elementName, xPos, yPos, width, height);
         init(buttonLabel, mouseDownBehavior);
     }
 
-    public GuiButton(String elementName, float xPos, float yPos, float width, float height, GuiEventBehavior mouseDownBehavior)
+    public GuiButton(String elementName, float xPos, float yPos, float width, float height, Consumer<GuiElement> mouseDownBehavior)
     {
         super(elementName, xPos, yPos, width, height);
         init("", mouseDownBehavior);
     }
 
-    public GuiButton(String elementName, float xPos, float yPos, GuiEventBehavior mouseDownBehavior)
+    public GuiButton(String elementName, float xPos, float yPos, Consumer<GuiElement> mouseDownBehavior)
     {
         super(elementName, xPos, yPos);
         init("", mouseDownBehavior);
@@ -32,10 +33,10 @@ public class GuiButton extends GuiElement
     // TODO: completely insane design; want to call the separate super()s in constructors
     //  to avoid re-hardcoding default fields, but not set all the subclass fields in every constructor.
     //  this is a strange workaround
-    private void init(String buttonLabel, GuiEventBehavior mouseDownBehavior)
+    private void init(String buttonLabel, Consumer<GuiElement> mouseDownBehavior)
     {
         this.buttonLabel = buttonLabel;
-        assignCustomEventBehavior(GuiEventType.MOUSE_DOWN, mouseDownBehavior);
+        assignCustomPostEventBehavior(GuiEventType.MOUSE_DOWN, mouseDownBehavior);
     }
 
     public String getButtonLabel()

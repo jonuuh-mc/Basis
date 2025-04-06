@@ -4,7 +4,6 @@ import io.jonuuh.core.lib.gui.AbstractGuiScreen;
 import io.jonuuh.core.lib.gui.GuiColorType;
 import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.gui.element.container.GuiWindow;
-import io.jonuuh.core.lib.gui.event.GuiEventBehavior;
 import io.jonuuh.core.lib.gui.event.GuiEventType;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
@@ -18,10 +17,11 @@ import org.lwjgl.opengl.GL11;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public abstract class GuiElement
 {
-    /** A reference to the static minecraft object */
+    /** A reference to the static minecraft instance */
     public static final Minecraft mc;
     /** A resource pointing to the default mouse down sound */
     public static final ResourceLocation resourceClickSound;
@@ -33,32 +33,56 @@ public abstract class GuiElement
 
     /** A map of colors that may be used by this element */
     protected Map<GuiColorType, Color> colorMap;
-    /**
-     * A map of custom event behavior lambdas which usually will have no entries;
-     * Allows for 'injecting' into and potentially overriding events dispatched by the GuiScreen when they are handled by a GuiElement
-     */
-    protected Map<GuiEventType, GuiEventBehavior> eventBehaviors;
 
-    /** Element x position within its {@link GuiElement#parent} */
+    /**
+     * A map of custom pre-event behavior lambdas.
+     * <p>
+     * Allows for 'injecting' into and potentially overriding an element's behavior for events dispatched by the GuiScreen.
+     * <p>
+     * Keys are enums representing different events a GuiElement can act on, and values are functions which will
+     * be executed (if they exist) before their associated event's default behavior.
+     * <p>
+     * A function returning true means it SHOULD override the default behavior, false means it should not.
+     */
+    protected Map<GuiEventType, Function<GuiElement, Boolean>> preEventBehaviors;
+
+    /**
+     * A map of custom post-event behavior lambdas.
+     * <p>
+     * Allows for 'injecting' into an element's behavior for events dispatched by the GuiScreen.
+     * <p>
+     * Keys are enums representing different events a GuiElement can act on, and values are consumers which will
+     * be executed (if they exist) after their associated event's default behavior.
+     * <p>
+     * Should probably be used way more commonly than pre-event behaviors, e.g. for updating the value(s) of
+     * {@link io.jonuuh.core.lib.config.setting.types.Setting}s if associated with an element,
+     * after that element's state is changed through its default event behavior
+     */
+    protected Map<GuiEventType, Consumer<GuiElement>> postEventBehaviors;
+
+    /** Element x position within its parent */
     protected float localXPos;
-    /** Element y position within its {@link GuiElement#parent} */
+    /** Element y position within its parent */
     protected float localYPos;
     /** The sum of all world xPos from this element's ancestors */
     protected float inheritedXPos;
     /** The sum of all world yPos from this element's ancestors */
     protected float inheritedYPos;
 
-    protected Dimensions dimensions;
-
-    /** Which symbolic layer this element is on: equal to how many parents this element has */
+    /** Which symbolic layer this element is on, should be equal to how many parents this element has */
     protected int zLevel;
-
+    /** Whether this element is visible (should be drawn to screen) */
     protected boolean visible;
+    /** Whether this element can be interacted with (usually whether it can be clicked, but could be defined differently in subclasses) */
     protected boolean enabled;
+    /** Whether this element is currently hovered; Updated constantly via onScreenDraw (not via onScreenTick because mouse pos is needed) */
     protected boolean hovered;
+    /** Whether the mouse is currently pressed down on this element (!= hovered, is set true on mouse down and false on mouse release */
     protected boolean mouseDown;
-    protected boolean drawBounds;
 
+    protected boolean debug;
+
+    protected Dimensions dimensions;
     protected Margin margin;
     protected Padding padding;
 
@@ -85,9 +109,10 @@ public abstract class GuiElement
         this.visible = true;
         this.enabled = true;
 
-        this.drawBounds = true; // TODO: debug
+        this.debug = true;
 
-        this.eventBehaviors = new HashMap<>();
+        this.preEventBehaviors = new HashMap<>();
+        this.postEventBehaviors = new HashMap<>();
         this.colorMap = new HashMap<>();
     }
 
@@ -113,20 +138,11 @@ public abstract class GuiElement
     public void setParent(GuiContainer parent)
     {
         this.parent = parent;
-
-//        if (!parent.hasChild(this))
-//        {
-//            parent.addChild(this);
-//        }
-//        else
-//        {
-//            this.setInheritedXPos(parent.worldXPos());
-//            this.setInheritedYPos(parent.worldYPos());
-//        }
     }
 
-    // TODO: add `return this` for setters?
-
+    /**
+     * Propagate up the tree to retrieve a reference to the GuiScreen containing this element held by the GuiWindow (root container)
+     */
     public AbstractGuiScreen getGuiScreen()
     {
         if (this instanceof GuiWindow)
@@ -174,7 +190,7 @@ public abstract class GuiElement
     }
 
     /**
-     * Element x position in world space (local pos + sum of all ancestors world pos)
+     * Element x position in world space (local x pos + sum of all ancestors world x pos)
      */
     public float worldXPos()
     {
@@ -182,7 +198,7 @@ public abstract class GuiElement
     }
 
     /**
-     * Element y position in world space (local pos + sum of all ancestors world pos)
+     * Element y position in world space (local y pos + sum of all ancestors world y pos)
      */
     public float worldYPos()
     {
@@ -304,16 +320,6 @@ public abstract class GuiElement
         this.zLevel = zLevel;
     }
 
-    public boolean shouldDrawBounds()
-    {
-        return drawBounds;
-    }
-
-    public void setDrawBounds(boolean drawBounds)
-    {
-        this.drawBounds = drawBounds;
-    }
-
     public String getTooltipStr()
     {
         return tooltipStr;
@@ -338,11 +344,6 @@ public abstract class GuiElement
     {
         return getGuiScreen().getCurrentFocus() == this;
     }
-
-//    public void setFocused(boolean focused)
-//    {
-//        this.focused = focused;
-//    }
 
     public boolean isMouseDown()
     {
@@ -374,40 +375,10 @@ public abstract class GuiElement
         this.padding = padding;
     }
 
-    /**
-     * Perform some action on this element.
-     *
-     * @see GuiContainer#performAction(Consumer)
-     */
-    public void performAction(Consumer<GuiElement> action)
+    public boolean isPointWithinBounds(float x, float y)
     {
-        action.accept(this);
-    }
-
-    /**
-     * Assign a custom behavior to this element for some gui event
-     * <p>
-     * The behavior should return a boolean: whether to override the default behavior
-     *
-     * @param eventType the event type
-     * @param behavior the custom behavior
-     * @see GuiEventBehavior
-     */
-    public void assignCustomEventBehavior(GuiEventType eventType, GuiEventBehavior behavior)
-    {
-        eventBehaviors.put(eventType, behavior);
-    }
-
-    /**
-     * If it exists, apply the custom event behavior to this element for some event type
-     *
-     * @param eventType the event type
-     * @return true if this behavior exists and should override the default behavior for this event, otherwise false
-     */
-    protected boolean tryApplyCustomEventBehavior(GuiEventType eventType)
-    {
-        GuiEventBehavior behavior = eventBehaviors.get(eventType);
-        return behavior != null && behavior.apply(this);
+        return (x >= worldXPos()) && (x < worldXPos() + getWidth())
+                && (y >= worldYPos()) && (y < worldYPos() + getHeight());
     }
 
     public GuiElement getGreatestZLevelHovered(GuiElement currGreatest)
@@ -422,11 +393,73 @@ public abstract class GuiElement
         return currGreatest;
     }
 
-    public final void dispatchInitGuiEvent(ScaledResolution scaledResolution)
+    /**
+     * Perform some action on this element.
+     *
+     * @see GuiContainer#performAction(Consumer)
+     */
+    public void performAction(Consumer<GuiElement> action)
     {
-        boolean overrideDefaultBehavior = tryApplyCustomEventBehavior(GuiEventType.INIT);
+        action.accept(this);
+    }
 
-        if (!overrideDefaultBehavior)
+    /**
+     * Assign some custom pre-event behavior to this element
+     * <p>
+     * The behavior should return a boolean where true means it should override the default behavior, false means it should not
+     *
+     * @param eventType An enum representing the event this behavior should be associated with
+     * @param behavior A custom pre-event behavior
+     * @see GuiElement#preEventBehaviors
+     */
+    public void assignCustomPreEventBehavior(GuiEventType eventType, Function<GuiElement, Boolean> behavior)
+    {
+        preEventBehaviors.put(eventType, behavior);
+    }
+
+    /**
+     * Assign some custom post-event behavior to this element
+     *
+     * @param eventType An enum representing the event this behavior should be associated with
+     * @param behavior A custom post-event behavior
+     * @see GuiElement#postEventBehaviors
+     */
+    public void assignCustomPostEventBehavior(GuiEventType eventType, Consumer<GuiElement> behavior)
+    {
+        postEventBehaviors.put(eventType, behavior);
+    }
+
+    /**
+     * If it exists, apply the custom pre-event behavior to this element for some event type
+     *
+     * @param eventType An enum representing the event this behavior should be associated with
+     * @return true if this behavior exists and should override the default behavior for this event, otherwise false
+     */
+    protected boolean tryApplyCustomPreEventBehavior(GuiEventType eventType)
+    {
+        Function<GuiElement, Boolean> behavior = preEventBehaviors.get(eventType);
+        return behavior != null && behavior.apply(this);
+    }
+
+    /**
+     * If it exists, apply the custom post-event behavior to this element for some event type
+     *
+     * @param eventType An enum representing the event this behavior should be associated with
+     */
+    protected void tryApplyCustomPostEventBehavior(GuiEventType eventType)
+    {
+        Consumer<GuiElement> behavior = postEventBehaviors.get(eventType);
+        if (behavior != null)
+        {
+            behavior.accept(this);
+        }
+    }
+
+    public final void handleInitGuiEvent(ScaledResolution scaledResolution)
+    {
+        boolean doDefaultBehavior = !tryApplyCustomPreEventBehavior(GuiEventType.INIT);
+
+        if (doDefaultBehavior)
         {
             // TODO: scuffed fix for now with added elements not having proper order? maybe this is just fine
             //  better to be dynamic now than have something break later to inflexibility?
@@ -436,73 +469,44 @@ public abstract class GuiElement
         }
 
         onInitGui(scaledResolution);
-    }
 
-//    protected void applyPadding()
-//    {
-//        if (hasParent() && parent.padding != null)
-//        {
-//            Padding padding = parent.padding;
-//
-//            if (localXPos < padding.getLeftPadding())
-//            {
-//                setLocalXPos(padding.getLeftPadding());
-//            }
-//
-//            if (localXPos + width > parent.width - padding.getRightPadding())
-//            {
-//                // how far the element is across the right padding line
-//                float withinPaddingAmt = (localXPos + width) - (parent.width - padding.getRightPadding());
-//                setLocalXPos(localXPos - withinPaddingAmt);
-//            }
-//
-//            if (localYPos < padding.getTopPadding())
-//            {
-//                setLocalYPos(padding.getTopPadding());
-//            }
-//
-//            if (localYPos + height > parent.height - padding.getBottomPadding())
-//            {
-//                // how far the element is across the bottom padding line
-//                float withinPaddingAmt = (localYPos + height) - (parent.height - padding.getBottomPadding());
-//                setLocalYPos(localXPos - withinPaddingAmt);
-//            }
-//        }
-//    }
+        tryApplyCustomPostEventBehavior(GuiEventType.INIT);
+    }
 
     protected void onInitGui(ScaledResolution scaledResolution)
     {
     }
 
-    public final void dispatchCloseGuiEvent()
+    public final void handleCloseGuiEvent()
     {
-        boolean overrideDefaultBehavior = tryApplyCustomEventBehavior(GuiEventType.CLOSE);
+        boolean doDefaultBehavior = !tryApplyCustomPreEventBehavior(GuiEventType.CLOSE);
 
-        if (!overrideDefaultBehavior)
+        if (doDefaultBehavior)
         {
         }
 
         onCloseGui();
+
+        tryApplyCustomPostEventBehavior(GuiEventType.CLOSE);
     }
 
     protected void onCloseGui()
     {
     }
 
-    public final void dispatchScreenDrawEvent(int mouseX, int mouseY, float partialTicks)
+    public final void handleScreenDrawEvent(int mouseX, int mouseY, float partialTicks)
     {
-        boolean overrideDefaultBehavior = tryApplyCustomEventBehavior(GuiEventType.SCREEN_DRAW);
+        boolean doDefaultBehavior = !tryApplyCustomPreEventBehavior(GuiEventType.SCREEN_DRAW);
 
-        if (!overrideDefaultBehavior)
+        if (doDefaultBehavior)
         {
             if (visible)
             {
-                hovered = (mouseX >= worldXPos()) && (mouseX < worldXPos() + getWidth())
-                        && (mouseY >= worldYPos()) && (mouseY < worldYPos() + getHeight());
+                hovered = isPointWithinBounds(mouseX, mouseY);
 
                 onScreenDraw(mouseX, mouseY, partialTicks);
 
-                if (drawBounds)
+                if (debug)
                 {
                     RenderUtils.drawRoundedRect(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), getWidth(), getHeight(), hasParent() ? parent.getOuterRadius() : 3,
                             isFocused() ? new Color("#00ff00") : new Color("#ff55ff"), true);
@@ -515,15 +519,17 @@ public abstract class GuiElement
         }
 
         onScreenDraw(mouseX, mouseY, partialTicks);
+
+        tryApplyCustomPostEventBehavior(GuiEventType.SCREEN_DRAW);
     }
 
     protected abstract void onScreenDraw(int mouseX, int mouseY, float partialTicks);
 
-    public final void dispatchScreenTickEvent()
+    public final void handleScreenTickEvent()
     {
-        boolean overrideDefaultBehavior = tryApplyCustomEventBehavior(GuiEventType.SCREEN_TICK);
+        boolean doDefaultBehavior = !tryApplyCustomPreEventBehavior(GuiEventType.SCREEN_TICK);
 
-        if (!overrideDefaultBehavior)
+        if (doDefaultBehavior)
         {
             // TODO: something like this?
             if (hovered && hoverTimeCounter != 20)
@@ -537,65 +543,73 @@ public abstract class GuiElement
         }
 
         onScreenTick();
+
+        tryApplyCustomPostEventBehavior(GuiEventType.SCREEN_TICK);
     }
 
     protected void onScreenTick()
     {
     }
 
-    public final void dispatchMouseDownEvent(int mouseX, int mouseY)
+    public final void handleMouseDownEvent(int mouseX, int mouseY)
     {
-        boolean overrideDefaultBehavior = tryApplyCustomEventBehavior(GuiEventType.MOUSE_DOWN);
+        boolean doDefaultBehavior = !tryApplyCustomPreEventBehavior(GuiEventType.MOUSE_DOWN);
 
-        if (!overrideDefaultBehavior)
+        if (doDefaultBehavior)
         {
             mouseDown = true;
             playClickSound(mc.getSoundHandler());
         }
 
         onMouseDown(mouseX, mouseY);
+
+        tryApplyCustomPostEventBehavior(GuiEventType.MOUSE_DOWN);
     }
 
     protected void onMouseDown(int mouseX, int mouseY)
     {
     }
 
-    public final void dispatchMouseUpEvent(int mouseX, int mouseY)
+    public final void handleMouseUpEvent(int mouseX, int mouseY)
     {
-        boolean overrideDefaultBehavior = tryApplyCustomEventBehavior(GuiEventType.MOUSE_UP);
+        boolean doDefaultBehavior = !tryApplyCustomPreEventBehavior(GuiEventType.MOUSE_UP);
 
-        if (!overrideDefaultBehavior)
+        if (doDefaultBehavior)
         {
             mouseDown = false;
         }
 
         onMouseUp(mouseX, mouseY);
+
+        tryApplyCustomPostEventBehavior(GuiEventType.MOUSE_UP);
     }
 
     protected void onMouseUp(int mouseX, int mouseY)
     {
     }
 
-    public final void dispatchMouseScrollEvent(int wheelDelta)
+    public final void handleMouseScrollEvent(int wheelDelta)
     {
-        boolean overrideDefaultBehavior = tryApplyCustomEventBehavior(GuiEventType.MOUSE_SCROLL);
+        boolean doDefaultBehavior = !tryApplyCustomPreEventBehavior(GuiEventType.MOUSE_SCROLL);
 
-        if (!overrideDefaultBehavior)
+        if (doDefaultBehavior)
         {
         }
 
         onMouseScroll(wheelDelta);
+
+        tryApplyCustomPostEventBehavior(GuiEventType.MOUSE_SCROLL);
     }
 
     protected void onMouseScroll(int wheelDelta)
     {
     }
 
-    public final void dispatchMouseDragEvent(int mouseX, int mouseY, int clickedMouseButton, long msHeld)
+    public final void handleMouseDragEvent(int mouseX, int mouseY, int clickedMouseButton, long msHeld)
     {
-        boolean overrideDefaultBehavior = tryApplyCustomEventBehavior(GuiEventType.MOUSE_DRAG);
+        boolean doDefaultBehavior = tryApplyCustomPreEventBehavior(GuiEventType.MOUSE_DRAG);
 
-        if (!overrideDefaultBehavior)
+        if (doDefaultBehavior)
         {
             // note -> mouseDown should only be true for 1 element at a time: the highest z level that was hovered during click event
             if (!mouseDown)
@@ -605,21 +619,25 @@ public abstract class GuiElement
         }
 
         onMouseDrag(mouseX, mouseY, clickedMouseButton, msHeld);
+
+        tryApplyCustomPostEventBehavior(GuiEventType.MOUSE_DRAG);
     }
 
     protected void onMouseDrag(int mouseX, int mouseY, int clickedMouseButton, long msHeld)
     {
     }
 
-    public final void dispatchKeyInputEvent(char typedChar, int keyCode)
+    public final void handleKeyInputEvent(char typedChar, int keyCode)
     {
-        boolean overrideDefaultBehavior = tryApplyCustomEventBehavior(GuiEventType.KEY_INPUT);
+        boolean doDefaultBehavior = tryApplyCustomPreEventBehavior(GuiEventType.KEY_INPUT);
 
-        if (!overrideDefaultBehavior)
+        if (doDefaultBehavior)
         {
         }
 
         onKeyTyped(typedChar, keyCode);
+
+        tryApplyCustomPostEventBehavior(GuiEventType.KEY_INPUT);
     }
 
     protected void onKeyTyped(char typedChar, int keyCode)

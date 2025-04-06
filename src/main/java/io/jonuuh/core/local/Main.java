@@ -1,5 +1,9 @@
 package io.jonuuh.core.local;
 
+import io.jonuuh.core.lib.config.SettingsConfigurationAdapter;
+import io.jonuuh.core.lib.config.setting.Settings;
+import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
+import io.jonuuh.core.lib.config.setting.types.single.IntSetting;
 import io.jonuuh.core.lib.gui.AbstractGuiScreen;
 import io.jonuuh.core.lib.util.ChatLogger;
 import io.jonuuh.core.lib.util.Log4JLogger;
@@ -13,8 +17,8 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 public class Main
 {
     public static final String modID = "core";
-    public static final String version = "0.0.1";
     public static final String modName = "Core";
+    public static final String version = "0.0.1";
 
     @Mod.EventHandler
     public void FMLPreInit(FMLPreInitializationEvent event)
@@ -22,7 +26,7 @@ public class Main
         Log4JLogger.createInstance(modID);
         ChatLogger.createInstance(modName, EnumChatFormatting.GOLD, EnumChatFormatting.WHITE);
 
-//        SettingsConfigurationAdapter.createInstance(event.getSuggestedConfigurationFile(), new ArrayList<>());
+        SettingsConfigurationAdapter.createInstance(event.getSuggestedConfigurationFile(), initMasterSettings());
     }
 
     @Mod.EventHandler
@@ -38,23 +42,23 @@ public class Main
 //        ClientRegistry.registerKeyBinding(keyBinding);
 //        MinecraftForge.EVENT_BUS.register(new Events(keyBinding));
 
-//        Settings settings = SettingsConfigurationAdapter.INSTANCE.getDefaultCategorySettings();
-        AbstractGuiScreen guiScreen = new GuiScreenImpl(null);
+        Settings settings = SettingsConfigurationAdapter.INSTANCE.getDefaultCategorySettings();
+        AbstractGuiScreen guiScreen = new GuiScreenImpl(settings);
 //        MinecraftForge.EVENT_BUS.register(guiScreen);
         ClientCommandHandler.instance.registerCommand(new CommandOpenSettingsGui(modID, guiScreen));
     }
 
-//    private Settings initMasterSettings()
-//    {
-//        Settings settings = new Settings();
-//        settings.put(LocalSettingKey.FLEX_DIRECTION_MAIN, new BoolSetting());
-//        settings.put(LocalSettingKey.FLEX_DIRECTION_REVERSE, new BoolSetting());
-//        settings.put(LocalSettingKey.FLEX_BASIS, new IntSetting(75));
-////        settings.put(LocalSettingKey.DRAW_BACKGROUND, new BoolSetting());
-////        settings.put(LocalSettingKey.BORDER_OPACITY, new DoubleSetting(75.0));
-////        settings.put(LocalSettingKey.RENDER_RANGE, new IntArrSetting(new int[]{5,50}));
-////        settings.put(LocalSettingKey.BACKGROUND_COLOR, new StringSetting("#FFAA00"));
-////        settings.put(LocalSettingKey.MAX_DETECTION_ANGLE, new IntSetting(45));
-//        return settings;
-//    }
+    private Settings initMasterSettings()
+    {
+        Settings settings = new Settings();
+        settings.put(LocalSettingKey.FLEX_DIRECTION_MAIN, new BoolSetting());
+        settings.put(LocalSettingKey.FLEX_DIRECTION_REVERSE, new BoolSetting());
+        settings.put(LocalSettingKey.FLEX_BASIS, new IntSetting(75));
+//        settings.put(LocalSettingKey.DRAW_BACKGROUND, new BoolSetting());
+//        settings.put(LocalSettingKey.BORDER_OPACITY, new DoubleSetting(75.0));
+//        settings.put(LocalSettingKey.RENDER_RANGE, new IntArrSetting(new int[]{5,50}));
+//        settings.put(LocalSettingKey.BACKGROUND_COLOR, new StringSetting("#FFAA00"));
+//        settings.put(LocalSettingKey.MAX_DETECTION_ANGLE, new IntSetting(45));
+        return settings;
+    }
 }

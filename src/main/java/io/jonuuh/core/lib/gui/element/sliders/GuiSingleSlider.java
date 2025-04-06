@@ -1,8 +1,8 @@
 package io.jonuuh.core.lib.gui.element.sliders;
 
-import io.jonuuh.core.lib.config.setting.types.single.IntSetting;
 import io.jonuuh.core.lib.gui.GuiColorType;
-import io.jonuuh.core.lib.gui.element.GuiSettingElement;
+import io.jonuuh.core.lib.gui.element.Dimensions;
+import io.jonuuh.core.lib.gui.element.GuiElement;
 import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.gui.ScaledResolution;
@@ -11,7 +11,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.text.DecimalFormat;
 
-public class GuiSingleSlider extends GuiSettingElement
+public class GuiSingleSlider extends GuiElement
 {
     protected final double min;
     protected final double max;
@@ -37,7 +37,8 @@ public class GuiSingleSlider extends GuiSettingElement
 
     public GuiSingleSlider(String elementName, float xPos, float yPos, double min, double max, double startValue)
     {
-        this(elementName, xPos, yPos, 100, 20, min, max, startValue, false);
+        // TODO: ???
+        this(elementName, xPos, yPos, new Dimensions().width, new Dimensions().height, min, max, startValue, false);
     }
 
     public double getValue()
@@ -92,13 +93,6 @@ public class GuiSingleSlider extends GuiSettingElement
         return isVertical
                 ? (float) (worldYPos() + (getNormalizedValue() * getHeight()))
                 : (float) (worldXPos() + (getNormalizedValue() * getWidth()));
-    }
-
-    @Override
-    protected void updateSetting()
-    {
-        // TODO: erm
-        ((IntSetting) associatedSetting).setCurrentValue((int) getValue());
     }
 
     @Override
@@ -166,10 +160,6 @@ public class GuiSingleSlider extends GuiSettingElement
     {
 //        mc.getSoundHandler().playSound(PositionedSoundRecord.create(new ResourceLocation("core:tick"), 1.0F));
         setNormalizedValue(newNormalValue);
-
-        // TODO: don't check for pre-claim? assumes no slider overlap (drag two sliders once)
-//            claimTooltipForPointer(lastHeldPointer);
-        trySendChangeToSetting();
     }
 
     protected void drawHorizontalSlider()

@@ -1,6 +1,5 @@
 package io.jonuuh.core.lib.gui.element;
 
-import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.gui.GuiColorType;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
@@ -8,7 +7,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
-public class GuiSwitch extends GuiSettingElement
+public class GuiSwitch extends GuiElement
 {
     protected float pointerSize;
     protected boolean switchState;
@@ -22,7 +21,7 @@ public class GuiSwitch extends GuiSettingElement
 
     public GuiSwitch(String elementName, float xPos, float yPos, boolean switchState)
     {
-        this(elementName, xPos, yPos, 20, 10, switchState);
+        this(elementName, xPos, yPos, new Dimensions().height * 2, new Dimensions().height, switchState);
     }
 
     public GuiSwitch(String elementName, float xPos, float yPos)
@@ -43,7 +42,6 @@ public class GuiSwitch extends GuiSettingElement
     public void flip()
     {
         setSwitchState(!switchState);
-        trySendChangeToSetting();
     }
 
     @Override
@@ -74,17 +72,11 @@ public class GuiSwitch extends GuiSettingElement
     @Override
     protected void onKeyTyped(char typedChar, int keyCode)
     {
-        if (keyCode == Keyboard.KEY_RETURN /*|| keyCode == Keyboard.KEY_SPACE*/)
+        if (keyCode == Keyboard.KEY_RETURN)
         {
             flip();
             playClickSound(mc.getSoundHandler());
         }
-    }
-
-    @Override
-    protected void updateSetting()
-    {
-        ((BoolSetting) associatedSetting).setCurrentValue(switchState);
     }
 }
 
