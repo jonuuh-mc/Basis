@@ -1,33 +1,54 @@
-//    @Override
-//    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
-//    {
-////        GL11.glPushMatrix();
-////        GL11.glEnable(GL11.GL_SCISSOR_TEST);
-////        RenderUtils.scissorFromTopLeft(xPos, yPos, width, height);
-//
-//        super.onScreenDraw(mouseX, mouseY, partialTicks);
-//
-////        GL11.glDisable(GL11.GL_SCISSOR_TEST);
-////        GL11.glPopMatrix();
-//        childrenMap.values().forEach(element -> element.onScreenDraw(mouseX, mouseY, partialTicks));
-//
-////        for (GuiElement element : getNestedChildren())
-////        {
-////            if (!(element instanceof GuiContainer))
-////            {
-////                element.onScreenDraw(mouseX, mouseY, partialTicks);
-////            }
-////            else
-////            {
-////                super.onScreenDraw(mouseX, mouseY, partialTicks);
-//////                System.out.println(element.elementName + " " + element.getNumParents());
-////                if (element.getNumParents() == 0)
-////                {
-////                    super.onScreenDraw(mouseX, mouseY, partialTicks);
-////
-//////                    element.onScreenDraw(mouseX, mouseY, partialTicks);
-////                }
-////            }
-////        }
-//    }
+package io.jonuuh.core.lib.gui.element.container;
 
+import io.jonuuh.core.lib.gui.AbstractGuiScreen;
+import io.jonuuh.core.lib.gui.GuiColorType;
+import io.jonuuh.core.lib.gui.element.container.flex.FlexAlign;
+import io.jonuuh.core.lib.gui.element.container.flex.FlexJustify;
+import io.jonuuh.core.lib.gui.element.container.flex.GuiFlexContainer;
+import io.jonuuh.core.lib.util.Color;
+import net.minecraft.client.gui.ScaledResolution;
+
+import java.util.Map;
+
+public class GuiRootContainer extends GuiFlexContainer
+{
+    /** The GuiScreen containing this GuiRootContainer, should be a 1:1 relationship */
+    public final AbstractGuiScreen guiScreen;
+
+    public GuiRootContainer(AbstractGuiScreen guiScreen, ScaledResolution sr, float cornerRadius, Map<GuiColorType, Color> colorMap)
+    {
+        super("ROOT", 0, 0, sr.getScaledWidth(), sr.getScaledHeight(), colorMap);
+        this.guiScreen = guiScreen;
+        this.cornerRadius = cornerRadius;
+        this.setJustifyContent(FlexJustify.CENTER);
+        this.setAlignItems(FlexAlign.CENTER);
+    }
+
+    public GuiRootContainer(AbstractGuiScreen guiScreen, ScaledResolution sr, float cornerRadius)
+    {
+        this(guiScreen, sr, cornerRadius, null);
+    }
+
+    @Override
+    public void setParent(GuiContainer parent)
+    {
+        throw new IllegalArgumentException();
+    }
+
+    @Override
+    protected void onInitGui(ScaledResolution scaledResolution)
+    {
+//        System.out.printf("%s: (%s,%s) -> %s%n", elementName, screenWidth, screenHeight, scaledResolution.getScaleFactor());
+        setWidth(scaledResolution.getScaledWidth());
+        setHeight(scaledResolution.getScaledHeight());
+
+        super.onInitGui(scaledResolution);
+    }
+
+    @Override
+    protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
+    {
+        super.onScreenDraw(mouseX, mouseY, partialTicks);
+//        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), innerRadius, new Color("#FFFFFF", 0.2F), true);
+    }
+}

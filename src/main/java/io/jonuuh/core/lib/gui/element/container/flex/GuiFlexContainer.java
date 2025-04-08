@@ -21,9 +21,9 @@ public class GuiFlexContainer extends GuiContainer
     protected FlexAlign alignItems;
     protected boolean isMainAxisFull; // TODO: track scaling within scaleMainAxisOverflow to maintain flag
 
-    public GuiFlexContainer(String elementName, float xPos, float yPos, float width, float height, float outerRadius, float innerRadius, Map<GuiColorType, Color> colorMap)
+    public GuiFlexContainer(String elementName, float xPos, float yPos, float width, float height, Map<GuiColorType, Color> colorMap)
     {
-        super(elementName, xPos, yPos, width, height, outerRadius, innerRadius, colorMap);
+        super(elementName, xPos, yPos, width, height, colorMap);
         this.flexPropertiesMap = new HashMap<>();
         this.direction = FlexDirection.ROW;
         this.justifyContent = FlexJustify.START;
@@ -180,7 +180,7 @@ public class GuiFlexContainer extends GuiContainer
     @Override
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), innerRadius, getColor(GuiColorType.BACKGROUND), true);
+        RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), getColor(GuiColorType.BACKGROUND));
 
         drawArrow(direction, new Color("FFD700"), 8);
 

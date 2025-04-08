@@ -15,15 +15,11 @@ public abstract class GuiContainer extends GuiElement
 {
     // TODO: make this a map again?
     protected final List<GuiElement> children;
-    protected float outerRadius;
-    protected float innerRadius;
 
-    protected GuiContainer(String elementName, float xPos, float yPos, float width, float height, float outerRadius, float innerRadius, Map<GuiColorType, Color> colorMap)
+    protected GuiContainer(String elementName, float xPos, float yPos, float width, float height, Map<GuiColorType, Color> colorMap)
     {
         super(elementName, xPos, yPos, width, height);
         this.children = new ArrayList<>();
-        this.outerRadius = outerRadius;
-        this.innerRadius = innerRadius;
 
         if (colorMap != null)
         {
@@ -31,9 +27,9 @@ public abstract class GuiContainer extends GuiElement
         }
     }
 
-    protected GuiContainer(String elementName, float xPos, float yPos, float width, float height, float outerRadius, float innerRadius)
+    protected GuiContainer(String elementName, float xPos, float yPos, float width, float height)
     {
-        this(elementName, xPos, yPos, width, height, outerRadius, innerRadius, null);
+        this(elementName, xPos, yPos, width, height, null);
     }
 
     public List<GuiElement> getChildren()
@@ -69,19 +65,9 @@ public abstract class GuiContainer extends GuiElement
         return elements;
     }
 
-    public float getOuterRadius()
-    {
-        return outerRadius;
-    }
-
-    public float getInnerRadius()
-    {
-        return innerRadius;
-    }
-
     public void addChild(GuiElement child)
     {
-        if (child instanceof GuiWindow)
+        if (child instanceof GuiRootContainer)
         {
             throw new IllegalArgumentException();
         }

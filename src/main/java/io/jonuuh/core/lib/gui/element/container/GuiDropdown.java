@@ -16,13 +16,14 @@ public class GuiDropdown extends GuiFlexContainer
     protected GuiEventBehavior eventBehavior;
     protected GuiFlexContainer dropdownContainer;
     protected GuiButton header;
-    protected float openHeight;
+    protected float closedHeight;
 
     public GuiDropdown(String elementName, int xPos, int yPos, int width, int height, String prompt, Collection<String> options)
     {
-        super(elementName, xPos, yPos, width, height, 0, 0);
-        this.openHeight = height * (options.size() + 1);
-        this.eventBehavior = this::toggleOpen;
+        super(elementName, xPos, yPos, width, height * (options.size() + 1));
+        this.closedHeight = height;
+        this.setHeight(closedHeight);
+        this.getDimensions().maxHeight = height;
 //        setHeight(openHeight);
 
         this.setDirection(FlexDirection.COLUMN);

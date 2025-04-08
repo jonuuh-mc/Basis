@@ -48,7 +48,7 @@ public class GuiCheckbox extends GuiElement
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
         Color boxColor = isChecked ? getColor(GuiColorType.BASE) : getColor(GuiColorType.ACCENT1);
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), parent.getInnerRadius(), boxColor, true);
+        RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), boxColor);
 
         if (isChecked)
         {

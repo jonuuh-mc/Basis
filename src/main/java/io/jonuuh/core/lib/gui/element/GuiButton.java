@@ -4,7 +4,6 @@ import io.jonuuh.core.lib.gui.GuiColorType;
 import io.jonuuh.core.lib.gui.event.GuiEventType;
 import io.jonuuh.core.lib.util.RenderUtils;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
 import java.util.function.Consumer;
 
@@ -52,7 +51,7 @@ public class GuiButton extends GuiElement
     @Override
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), 3, getColor(GuiColorType.BASE), true);
+        RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), getColor(GuiColorType.BASE));
 
         String buttonText = RenderUtils.trimStringToWidthWithEllipsis(buttonLabel, (int) getWidth());
 

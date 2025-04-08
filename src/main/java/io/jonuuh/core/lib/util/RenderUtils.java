@@ -9,6 +9,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
 
+// TODO: why again are we using raw GL11 instead of GlStateManager
 public final class RenderUtils
 {
     /** Prevents instantiation */
@@ -39,6 +40,7 @@ public final class RenderUtils
         int strWidth = getFontRenderer().getStringWidth(str);
         int ellipsisWidth = getFontRenderer().getStringWidth("...");
 
+        // TODO: what was magic number '6' for? hard coded ellipsis width for default font maybe?
         if (strWidth > width - 6 && strWidth > ellipsisWidth)
         {
             return getFontRenderer().trimStringToWidth(str, width - 6 - ellipsisWidth).trim() + "...";
@@ -148,26 +150,40 @@ public final class RenderUtils
 //        // TODO: ?
 //    }
 
-    // TODO: make this (draw from corner rather than center) the default
-    public static void drawRoundedRect(int glMode, float x, float y, float width, float height, float radius, Color color, boolean offsetRadius)
+    public static void drawRoundedRectWithBorder(float x, float y, float width, float height, float radius, Color color, Color borderColor)
+    {
+        drawRoundedRect(x, y, width, height, radius, color);
+
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+//        GL11.glLineWidth(0.5F);
+        drawRoundedRect(GL11.GL_LINE_LOOP, x, y, width, height, radius, borderColor);
+//        GL11.glLineWidth(1F);
+        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+    }
+
+    public static void drawRoundedRect(float x, float y, float width, float height, float radius, Color color)
+    {
+        drawRoundedRect(GL11.GL_POLYGON, x, y, width, height, radius, color);
+
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+        GL11.glLineWidth(0.5F);
+        drawRoundedRect(GL11.GL_LINE_LOOP, x, y, width, height, radius, color);
+        GL11.glLineWidth(1F);
+        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+    }
+
+    public static void drawRoundedRect(int glMode, float x, float y, float width, float height, float radius, Color color)
     {
         float centerX = x + (width / 2F);
         float centerY = y + (height / 2F);
 
-        if (offsetRadius)
-        {
-            radius = Math.min(radius, (width / 2F));
-            radius = Math.min(radius, (height / 2F));
-        }
+        radius = Math.min(radius, (width / 2F));
+        radius = Math.min(radius, (height / 2F));
 
-        width = offsetRadius ? width - (radius * 2) : width;
-        height = offsetRadius ? height - (radius * 2) : height;
+        width = width - (radius * 2);
+        height = height - (radius * 2);
+
         drawRoundedRectCentered(glMode, centerX, centerY, width, height, radius, color);
-
-        GL11.glEnable(GL11.GL_LINE_SMOOTH);
-        GL11.glLineWidth(0.5F);
-        drawRoundedRectCentered(GL11.GL_LINE_LOOP, centerX, centerY, width, height, radius, color);
-        GL11.glDisable(GL11.GL_LINE_SMOOTH);
     }
 
     /*
@@ -189,9 +205,6 @@ public final class RenderUtils
         float xLeft = centerX + (width / 2.0F);
         float yUp = centerY + (height / 2.0F);
         float yDown = centerY - (height / 2.0F);
-
-        // TODO:
-//        float[][] vertices;
 
         GL11.glColor4ub(color.r, color.g, color.b, color.a);
         GL11.glPushMatrix();

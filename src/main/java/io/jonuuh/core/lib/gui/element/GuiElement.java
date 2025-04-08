@@ -3,7 +3,7 @@ package io.jonuuh.core.lib.gui.element;
 import io.jonuuh.core.lib.gui.AbstractGuiScreen;
 import io.jonuuh.core.lib.gui.GuiColorType;
 import io.jonuuh.core.lib.gui.element.container.GuiContainer;
-import io.jonuuh.core.lib.gui.element.container.GuiWindow;
+import io.jonuuh.core.lib.gui.element.container.GuiRootContainer;
 import io.jonuuh.core.lib.gui.event.GuiEventType;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
@@ -86,6 +86,9 @@ public abstract class GuiElement
     protected Margin margin;
     protected Padding padding;
 
+    /** Like the colorMap, should not be accessed directly, use getCornerRadius instead */
+    protected float cornerRadius;
+
     protected String tooltipStr;
 
     // TODO: use a ticker with onScreenTick instead for tooltips?
@@ -108,6 +111,7 @@ public abstract class GuiElement
 
         this.visible = true;
         this.enabled = true;
+        this.cornerRadius = -1F;
 
         this.debug = true;
 
@@ -141,15 +145,15 @@ public abstract class GuiElement
     }
 
     /**
-     * Propagate up the tree to retrieve a reference to the GuiScreen containing this element held by the GuiWindow (root container)
+     * Propagate up the tree to retrieve a reference to the GuiScreen containing this element held by the GuiRootContainer
      */
     public AbstractGuiScreen getGuiScreen()
     {
-        if (this instanceof GuiWindow)
+        if (this instanceof GuiRootContainer)
         {
-            return ((GuiWindow) this).guiScreen;
+            return ((GuiRootContainer) this).guiScreen;
         }
-        else // if (this.hasParent()) (shouldn't be necessary, should have a parent if not a GuiWindow)
+        else // if (this.hasParent()) (shouldn't be necessary, should have a parent if not a GuiRootContainer)
         {
             return parent.getGuiScreen();
         }
@@ -187,6 +191,25 @@ public abstract class GuiElement
         }
 
         return new Color();
+    }
+
+    public float getCornerRadius()
+    {
+        if (cornerRadius != -1F)
+        {
+            return cornerRadius;
+        }
+        else if (hasParent())
+        {
+            return parent.getCornerRadius();
+        }
+        return 0F;
+    }
+
+    public GuiElement setCornerRadius(float cornerRadius)
+    {
+        this.cornerRadius = cornerRadius;
+        return this;
     }
 
     /**
@@ -508,8 +531,12 @@ public abstract class GuiElement
 
                 if (debug)
                 {
-                    RenderUtils.drawRoundedRect(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), getWidth(), getHeight(), hasParent() ? parent.getOuterRadius() : 3,
-                            isFocused() ? new Color("#00ff00") : new Color("#ff55ff"), true);
+                    GL11.glEnable(GL11.GL_LINE_SMOOTH);
+                    GL11.glLineWidth(0.8F);
+                    RenderUtils.drawRoundedRect(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(),
+                            isFocused() ? new Color("#00ff00") : new Color("#ff55ff"));
+                    GL11.glLineWidth(1F);
+                    GL11.glDisable(GL11.GL_LINE_SMOOTH);
 
                     mc.fontRendererObj.drawString(String.valueOf(zLevel), worldXPos() + getWidth() - mc.fontRendererObj.getStringWidth(String.valueOf(zLevel)),
                             worldYPos() + getHeight() - mc.fontRendererObj.FONT_HEIGHT, getColor(GuiColorType.ACCENT2).toPackedARGB(), true);

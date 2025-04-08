@@ -184,13 +184,13 @@ public class GuiDualSlider extends GuiElement
 //        float pOffset = pointerSize / 2F;
 
         // far left
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), (worldYPos() + trackHeight), (leftPointerScreenPos - worldXPos()) /*- pOffset*/, trackHeight, parent.getOuterRadius(), getColor(GuiColorType.ACCENT1), true);
+        RenderUtils.drawRoundedRect(worldXPos(), (worldYPos() + trackHeight), (leftPointerScreenPos - worldXPos()) /*- pOffset*/, trackHeight, getCornerRadius(), getColor(GuiColorType.ACCENT1));
 
         // middle
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, leftPointerScreenPos /*- pOffset*/, (worldYPos() + trackHeight), (rightPointerScreenPos - leftPointerScreenPos) /*+ (pOffset * 2)*/, trackHeight, parent.getOuterRadius(), getColor(GuiColorType.BASE), true);
+        RenderUtils.drawRoundedRect(leftPointerScreenPos /*- pOffset*/, (worldYPos() + trackHeight), (rightPointerScreenPos - leftPointerScreenPos) /*+ (pOffset * 2)*/, trackHeight, getCornerRadius(), getColor(GuiColorType.BASE));
 
         // far right
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, rightPointerScreenPos /*+ pOffset*/, (worldYPos() + trackHeight), getWidth() - (rightPointerScreenPos - worldXPos()) /*- pOffset*/, trackHeight, parent.getOuterRadius(), getColor(GuiColorType.ACCENT1), true);
+        RenderUtils.drawRoundedRect(rightPointerScreenPos /*+ pOffset*/, (worldYPos() + trackHeight), getWidth() - (rightPointerScreenPos - worldXPos()) /*- pOffset*/, trackHeight, getCornerRadius(), getColor(GuiColorType.ACCENT1));
 
 
 //        // Draw track(s)

@@ -1,7 +1,7 @@
 package io.jonuuh.core.lib.gui;
 
 import io.jonuuh.core.lib.gui.element.GuiElement;
-import io.jonuuh.core.lib.gui.element.container.GuiWindow;
+import io.jonuuh.core.lib.gui.element.container.GuiRootContainer;
 import io.jonuuh.core.lib.util.MathUtils;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
@@ -12,7 +12,7 @@ import java.io.IOException;
 
 public abstract class AbstractGuiScreen extends GuiScreen
 {
-    protected GuiWindow rootContainer;
+    protected GuiRootContainer rootContainer;
     protected GuiElement currentFocus;
     // TODO: implement something like this later? could be shared between all guiscreens of a mod
 //    protected FontRenderer customFontRenderer = new FontRenderer(mc.gameSettings, new ResourceLocation("core:ascii.png"), mc.renderEngine, false);
@@ -21,7 +21,7 @@ public abstract class AbstractGuiScreen extends GuiScreen
     {
     }
 
-    protected abstract GuiWindow initRootContainer();
+    protected abstract GuiRootContainer initRootContainer();
 
     /**
      * Get the element that currently has focus, if any

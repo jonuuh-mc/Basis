@@ -7,7 +7,6 @@ import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.gui.ScaledResolution;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
 import java.text.DecimalFormat;
 
@@ -169,9 +168,9 @@ public class GuiSingleSlider extends GuiElement
         float pointerScreenPos = getPointerScreenPos();
 
         // left
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), trackY, (pointerScreenPos - worldXPos()), trackHeight, parent.getOuterRadius(), getColor(GuiColorType.BASE), true);
+        RenderUtils.drawRoundedRect(worldXPos(), trackY, (pointerScreenPos - worldXPos()), trackHeight, getCornerRadius(), getColor(GuiColorType.BASE));
         // right
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, pointerScreenPos, trackY, getWidth() - (pointerScreenPos - worldXPos()), trackHeight, parent.getOuterRadius(), getColor(GuiColorType.ACCENT1), true);
+        RenderUtils.drawRoundedRect(pointerScreenPos, trackY, getWidth() - (pointerScreenPos - worldXPos()), trackHeight, getCornerRadius(), getColor(GuiColorType.ACCENT1));
 
         drawPointer();
     }
@@ -213,7 +212,7 @@ public class GuiSingleSlider extends GuiElement
         float x = isVertical ? worldXPos() : getPointerScreenPos() - (size / 2);
         float y = isVertical ? getPointerScreenPos() - (size / 2) : (isMovingTimer > 0 ? worldYPos() - (offset / 2) : worldYPos());
 
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, x, y, size, size, parent.getInnerRadius(), getColor(GuiColorType.BASE), true);
+        RenderUtils.drawRoundedRect(x, y, size, size, getCornerRadius(), getColor(GuiColorType.BASE));
     }
 
 //    protected void claimTooltipForPointer(boolean isLeftPointer)

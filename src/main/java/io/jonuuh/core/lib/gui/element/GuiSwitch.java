@@ -5,7 +5,6 @@ import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.gui.ScaledResolution;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
 public class GuiSwitch extends GuiElement
 {
@@ -58,9 +57,9 @@ public class GuiSwitch extends GuiElement
         Color trackColor = switchState ? getColor(GuiColorType.BASE) : getColor(GuiColorType.ACCENT2);
 
         // Track
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), parent.getInnerRadius(), trackColor, true);
+        RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), trackColor);
         // Pointer
-        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, pointerX, worldYPos() + padding, pointerSize, pointerSize, parent.getInnerRadius() - 1, getColor(GuiColorType.ACCENT1), true);
+        RenderUtils.drawRoundedRect(pointerX, worldYPos() + padding, pointerSize, pointerSize, getCornerRadius() - 1, getColor(GuiColorType.ACCENT1));
     }
 
     @Override
