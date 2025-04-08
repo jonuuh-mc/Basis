@@ -484,11 +484,6 @@ public abstract class GuiElement
 
         if (doDefaultBehavior)
         {
-            // TODO: scuffed fix for now with added elements not having proper order? maybe this is just fine
-            //  better to be dynamic now than have something break later to inflexibility?
-            //  what if we want to add elements while gui is open? would need to do this in onscreentick or something
-            setZLevel(getNumParents());
-            // TODO: just do this via container.addChild() similarly to updateInheritedXPos() and etc
         }
 
         onInitGui(scaledResolution);

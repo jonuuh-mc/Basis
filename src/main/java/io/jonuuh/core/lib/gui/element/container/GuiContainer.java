@@ -82,8 +82,14 @@ public abstract class GuiContainer extends GuiElement
         child.setInheritedXPos(this.worldXPos());
         child.setInheritedYPos(this.worldYPos());
 
-        // TODO: can be broken if adding children in wrong order
-        child.setZLevel(child.getNumParents());
+
+        // TODO: inefficient? fix for zLevel being broken if adding a child to a container,
+        //  then adding that container as a child to another container (zlevel of first child wouldn't be
+        //  aware of the grandparent because it doesn't exist yet when its added to its parent)
+
+        // TODO: make setZLevel overridden in container similarly to setInheritedPos? would that solve this problem?
+        this.performAction(element -> element.setZLevel(element.getNumParents()));
+
 
 //        boolean southBounds = (element.localYPos())
         // TODO: add handling for bounds of element being outside its parent? snap to relevant to inner parent edge?
