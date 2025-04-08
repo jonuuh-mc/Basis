@@ -2,7 +2,6 @@ package io.jonuuh.core.lib.gui.element;
 
 import io.jonuuh.core.lib.gui.GuiColorType;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.ScaledResolution;
 
 public class GuiLabel extends GuiElement
 {
@@ -41,7 +40,8 @@ public class GuiLabel extends GuiElement
         return this;
     }
 
-    protected void onInitGui(ScaledResolution scaledResolution)
+    @Override
+    protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
         textXPos = worldXPos();
         textYPos = worldYPos();
@@ -63,11 +63,7 @@ public class GuiLabel extends GuiElement
         {
             setHeight(fontRenderer.FONT_HEIGHT - 1);
         }
-    }
 
-    @Override
-    protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
-    {
         fontRenderer.drawString(text, textXPos, textYPos, getColor(GuiColorType.BASE).toPackedARGB(), true);
     }
 }
