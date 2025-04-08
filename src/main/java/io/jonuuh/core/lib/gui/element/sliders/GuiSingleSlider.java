@@ -15,19 +15,21 @@ public class GuiSingleSlider extends GuiElement
     protected final double min;
     protected final double max;
     protected final boolean isVertical;
+    protected final boolean isInteger;
     protected double normalPointerValue;
 
     protected DecimalFormat decimalFormat;
     protected int isMovingTimer;
     protected float pointerSize;
 
-    public GuiSingleSlider(String elementName, float xPos, float yPos, float width, float height, double min, double max, double startValue, boolean isVertical)
+    public GuiSingleSlider(String elementName, float xPos, float yPos, float width, float height, double min, double max, double startValue, boolean isVertical, boolean isInteger)
     {
         super(elementName, xPos, yPos, width, height);
         this.min = min;
         this.max = max;
 
         this.isVertical = isVertical;
+        this.isInteger = isInteger;
 
         this.decimalFormat = new DecimalFormat("#.###");
 
@@ -37,12 +39,27 @@ public class GuiSingleSlider extends GuiElement
     public GuiSingleSlider(String elementName, float xPos, float yPos, double min, double max, double startValue)
     {
         // TODO: ???
-        this(elementName, xPos, yPos, new Dimensions().width, new Dimensions().height, min, max, startValue, false);
+        this(elementName, xPos, yPos, new Dimensions().width, new Dimensions().height, min, max, startValue, false, false);
+    }
+
+    public DecimalFormat getDecimalFormat()
+    {
+        return decimalFormat;
+    }
+
+    public void setDecimalFormat(DecimalFormat decimalFormat)
+    {
+        this.decimalFormat = decimalFormat;
     }
 
     public double getValue()
     {
         return MathUtils.denormalize(getNormalizedValue(), min, max);
+    }
+
+    public int getValueInt()
+    {
+        return Math.round((float) getValue());
     }
 
     public void setValue(double value)
@@ -57,38 +74,22 @@ public class GuiSingleSlider extends GuiElement
 
     public void setNormalizedValue(double normalValue)
     {
-        normalPointerValue = MathUtils.clamp(normalValue, 0, 1);
-    }
-
-    public DecimalFormat getDecimalFormat()
-    {
-        return decimalFormat;
-    }
-
-    public void setDecimalFormat(DecimalFormat decimalFormat)
-    {
-        this.decimalFormat = decimalFormat;
+        double value = MathUtils.clamp(normalValue, 0, 1);
+        // If an integer slider, round proportional to the max value
+        normalPointerValue = isInteger ? (Math.round(value * max) / max) : value;
     }
 
     // mouse position on the slider
     protected double getSliderValueAtMousePos(int mouseX, int mouseY)
     {
         return isVertical
-                ? (mouseY - worldYPos()) / (double) getHeight()
-                : (mouseX - worldXPos()) / (double) getWidth();
+                ? (mouseY - worldYPos()) / getHeight()
+                : (mouseX - worldXPos()) / getWidth();
     }
 
     // x/y screen position of the center of a pointer
     protected float getPointerScreenPos()
     {
-//        if (isVertical)
-//        {
-//            RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, xPos, center, 3, 3, new Color("#00ff00"));
-//        }
-//        else
-//        {
-//            RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, (float) (xPos + (getNormalizedValue() * getWidth())), yPos, 3, 3, new Color("#00ff00"));
-//        }
         return isVertical
                 ? (float) (worldYPos() + (getNormalizedValue() * getHeight()))
                 : (float) (worldXPos() + (getNormalizedValue() * getWidth()));
@@ -112,15 +113,19 @@ public class GuiSingleSlider extends GuiElement
     @Override
     protected void onKeyTyped(char typedChar, int keyCode)
     {
-        if (keyCode == Keyboard.KEY_LEFT || keyCode == Keyboard.KEY_A)
+        double moveAmt = MathUtils.normalize(1, min, max);
+
+        if ((isVertical && (keyCode == Keyboard.KEY_UP || keyCode == Keyboard.KEY_W))
+                || (!isVertical && (keyCode == Keyboard.KEY_LEFT || keyCode == Keyboard.KEY_A)))
         {
             isMovingTimer = 13;
-            move(getNormalizedValue() - 0.005F);
+            setNormalizedValue(getNormalizedValue() - moveAmt);
         }
-        else if (keyCode == Keyboard.KEY_RIGHT || keyCode == Keyboard.KEY_D)
+        else if ((isVertical && (keyCode == Keyboard.KEY_DOWN || keyCode == Keyboard.KEY_S))
+                || (!isVertical && (keyCode == Keyboard.KEY_RIGHT || keyCode == Keyboard.KEY_D)))
         {
             isMovingTimer = 13;
-            move(getNormalizedValue() + 0.005F);
+            setNormalizedValue(getNormalizedValue() + moveAmt);
         }
     }
 
@@ -128,7 +133,7 @@ public class GuiSingleSlider extends GuiElement
     protected void onMouseScroll(int wheelDelta)
     {
         isMovingTimer = 10;
-        move(getNormalizedValue() + (wheelDelta / 100F));
+        setNormalizedValue(getNormalizedValue() + MathUtils.normalize(wheelDelta, min, max));
     }
 
     @Override
@@ -136,7 +141,7 @@ public class GuiSingleSlider extends GuiElement
     {
         if (isVertical)
         {
-//            drawVerticalSlider();
+            drawVerticalSlider();
         }
         else
         {
@@ -151,14 +156,8 @@ public class GuiSingleSlider extends GuiElement
         // can't really be in onMouseDrag (seems to look laggy; doesn't update fast enough?)
         if (mouseDown)
         {
-            move(getSliderValueAtMousePos(mouseX, mouseY));
+            setNormalizedValue(getSliderValueAtMousePos(mouseX, mouseY));
         }
-    }
-
-    protected void move(double newNormalValue)
-    {
-//        mc.getSoundHandler().playSound(PositionedSoundRecord.create(new ResourceLocation("core:tick"), 1.0F));
-        setNormalizedValue(newNormalValue);
     }
 
     protected void drawHorizontalSlider()
@@ -175,41 +174,26 @@ public class GuiSingleSlider extends GuiElement
         drawPointer();
     }
 
-//    protected void drawVerticalSlider()
-//    {
-//        float trackWidth = (getWidth() / 3F);
-//
-//        // Draw track(s)
-//        for (int i = 0; i < normalPointerValues.length; i++)
-//        {
-//            float currPointerCenter = getPointerScreenPos(i);
-//
-//            // Right side track for last pointer
-//            if (i == normalPointerValues.length - 1)
-//            {
-//                float y = currPointerCenter;
-//                float h = height - (currPointerCenter - yPos);
-//
-//                RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos + trackWidth, y, trackWidth, h, parent.getOuterRadius(), parent.getColorMap().get("ACCENT"), true);
-//            }
-//
-//            // Left side track for all but first pointer
-//            float y = (i == 0) ? yPos : getPointerScreenPos(i - 1);
-//            float h = (i == 0) ? (currPointerCenter - yPos) : (currPointerCenter - getPointerScreenPos(i - 1));
-//
-//            RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos + trackWidth, y, trackWidth, h, parent.getOuterRadius(), colors.get(i), true);
-//        }
-//
-//        drawPointer(true);
-//        drawPointer(false);
-//    }
+    protected void drawVerticalSlider()
+    {
+        float trackWidth = (getWidth() / 3F);
+        float trackX = worldXPos() + trackWidth;
+        float pointerScreenPos = getPointerScreenPos();
+
+        // left
+        RenderUtils.drawRoundedRect(trackX, worldYPos(), trackWidth, (pointerScreenPos - worldYPos()), getCornerRadius(), getColor(GuiColorType.BASE));
+        // right
+        RenderUtils.drawRoundedRect(trackX, pointerScreenPos, trackWidth, getHeight() - (pointerScreenPos - worldYPos()), getCornerRadius(), getColor(GuiColorType.ACCENT1));
+
+        drawPointer();
+    }
 
     protected void drawPointer()
     {
         float offset = pointerSize / 4;
         float size = isMovingTimer > 0 ? pointerSize + offset : pointerSize;
 
-        float x = isVertical ? worldXPos() : getPointerScreenPos() - (size / 2);
+        float x = isVertical ? (isMovingTimer > 0 ? worldXPos() - (offset / 2) : worldXPos()) : getPointerScreenPos() - (size / 2);
         float y = isVertical ? getPointerScreenPos() - (size / 2) : (isMovingTimer > 0 ? worldYPos() - (offset / 2) : worldYPos());
 
         RenderUtils.drawRoundedRect(x, y, size, size, getCornerRadius(), getColor(GuiColorType.BASE));
