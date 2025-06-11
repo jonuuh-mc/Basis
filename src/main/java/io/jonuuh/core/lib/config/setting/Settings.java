@@ -1,5 +1,6 @@
 package io.jonuuh.core.lib.config.setting;
 
+import io.jonuuh.core.lib.config.ConfigManager;
 import io.jonuuh.core.lib.config.SettingsConfigurationAdapter;
 import io.jonuuh.core.lib.config.setting.types.Setting;
 import io.jonuuh.core.lib.config.setting.types.array.BoolArrSetting;
@@ -30,18 +31,20 @@ import java.util.Set;
  */
 public final class Settings
 {
-    private final Map<String, Setting<?>> settingMap;
     public final String configurationCategory;
+    private final Map<String, Setting<?>> settingMap;
+    private final String modID;
 
-    public Settings(String configurationCategory)
+    public Settings(String modID, String configurationCategory)
     {
-        this.settingMap = new HashMap<>();
         this.configurationCategory = configurationCategory;
+        this.settingMap = new HashMap<>();
+        this.modID = modID;
     }
 
-    public Settings()
+    public Settings(String modID)
     {
-        this(SettingsConfigurationAdapter.DEFAULT_CATEGORY);
+        this(modID, ConfigManager.DEFAULT_CATEGORY);
     }
 
     /**
@@ -121,7 +124,7 @@ public final class Settings
      */
     public void loadDefaultValues()
     {
-        SettingsConfigurationAdapter.INSTANCE.loadSettingsDefaultValues(this);
+        ConfigManager.getAdapter(modID).loadSettingsDefaultValues(this);
     }
 
     /**
@@ -129,7 +132,7 @@ public final class Settings
      */
     public void loadCurrentValues()
     {
-        SettingsConfigurationAdapter.INSTANCE.loadSettingsCurrentValues(this);
+        ConfigManager.getAdapter(modID).loadSettingsCurrentValues(this);
     }
 
     // TODO: have a gui button to save a default per setting?
@@ -139,7 +142,7 @@ public final class Settings
      */
     public void saveDefaultValues()
     {
-        SettingsConfigurationAdapter.INSTANCE.saveSettingsDefaultValues(this);
+        ConfigManager.getAdapter(modID).saveSettingsDefaultValues(this);
     }
 
     /**
@@ -147,7 +150,7 @@ public final class Settings
      */
     public void saveCurrentValues()
     {
-        SettingsConfigurationAdapter.INSTANCE.saveSettingsCurrentValues(this);
+        ConfigManager.getAdapter(modID).saveSettingsCurrentValues(this);
     }
 
     public <E extends Enum<E>> BoolSetting getBoolSetting(E settingKey)

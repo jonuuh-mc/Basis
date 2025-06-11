@@ -1,6 +1,6 @@
 package io.jonuuh.core.lib.config.command;
 
-import io.jonuuh.core.lib.config.SettingsConfigurationAdapter;
+import io.jonuuh.core.lib.config.ConfigManager;
 import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.update.UpdateHandler;
@@ -17,7 +17,7 @@ public final class CommandCore extends CommandBase
     public CommandCore(String modID)
     {
         this.commandName = modID + "$core";
-        this.updateSettings = SettingsConfigurationAdapter.INSTANCE.getSettings(UpdateHandler.configurationCategory);
+        this.updateSettings = ConfigManager.getAdapter(modID).getSettings(UpdateHandler.configurationCategory);
     }
 
     @Override

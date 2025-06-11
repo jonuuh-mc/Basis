@@ -10,13 +10,15 @@ import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.config.setting.types.single.DoubleSetting;
 import io.jonuuh.core.lib.config.setting.types.single.IntSetting;
 import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
-import io.jonuuh.core.lib.util.ChatLogger;
-import net.minecraft.util.EnumChatFormatting;
+import io.jonuuh.core.lib.util.logging.ChatLogger;
+import io.jonuuh.core.lib.util.logging.ChatLoggerManager;
+import io.jonuuh.core.lib.util.logging.Level;
+import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,12 +27,12 @@ import java.util.Map;
  * A bridge between {@link Settings} objects and a Forge {@link Configuration}.
  * <p>
  * This singleton manages the transferral pipeline to and from {@link Setting} fields (current or default),
- * {@link Property properties}, {@link net.minecraftforge.common.config.ConfigCategory categories},
+ * {@link Property properties}, {@link ConfigCategory categories},
  * a {@link Configuration}, and an external config file.
  *
  * <ul>
  *   <li>A {@link Configuration} directly reads and writes to an external config file</li>
- *   <li>Each {@link Settings} is associated 1 to 1 with a {@link net.minecraftforge.common.config.ConfigCategory ConfigCategory}</li>
+ *   <li>Each {@link Settings} is associated 1 to 1 with a {@link ConfigCategory ConfigCategory}</li>
  * </ul>
  *
  * @see Configuration
@@ -39,40 +41,11 @@ import java.util.Map;
  */
 public final class SettingsConfigurationAdapter
 {
-    public static final String DEFAULT_CATEGORY = "master";
-    public static SettingsConfigurationAdapter INSTANCE;
     private final Configuration configuration;
     private final Map<String, Settings> configCategorySettingsMap;
-
     // TODO: allow for multiple cfg files for one instance
 
-    /**
-     * Initialize the SettingsConfigurationAdapter with many Settings objects
-     *
-     * @param file The file used for the Configuration, usually the {@link net.minecraftforge.fml.common.event.FMLPreInitializationEvent#getSuggestedConfigurationFile() suggested} file
-     * @param settingsList A list of settings to use
-     */
-    public static void createInstance(File file, List<Settings> settingsList)
-    {
-        if (INSTANCE != null)
-        {
-            throw new IllegalStateException("Config instance has already been created");
-        }
-        INSTANCE = new SettingsConfigurationAdapter(file, settingsList);
-    }
-
-    /**
-     * Initialize the SettingsConfigurationAdapter with one Settings object
-     *
-     * @param file The file used for the Configuration, usually the {@link net.minecraftforge.fml.common.event.FMLPreInitializationEvent#getSuggestedConfigurationFile() suggested} file
-     * @param settings The settings to use
-     */
-    public static void createInstance(File file, Settings settings)
-    {
-        createInstance(file, Collections.singletonList(settings));
-    }
-
-    private SettingsConfigurationAdapter(File file, List<Settings> settingsList)
+    SettingsConfigurationAdapter(File file, List<Settings> settingsList)
     {
         this.configuration = new Configuration(file);
         this.configCategorySettingsMap = new HashMap<>();
@@ -107,7 +80,7 @@ public final class SettingsConfigurationAdapter
 
     public Settings getDefaultCategorySettings()
     {
-        return getSettings(DEFAULT_CATEGORY);
+        return getSettings(ConfigManager.DEFAULT_CATEGORY);
     }
 
     public void putSettings(Settings settings)
@@ -127,16 +100,17 @@ public final class SettingsConfigurationAdapter
      * <p>
      * Writes each category of the Configuration and its properties to the given file
      *
-     * @see net.minecraftforge.common.config.ConfigCategory#write(java.io.BufferedWriter, int)
+     * @see ConfigCategory#write(BufferedWriter, int)
      */
     public void saveConfiguration()
     {
         configuration.save();
 
-        if (ChatLogger.INSTANCE != null)
+        ChatLogger chatLogger = ChatLoggerManager.getLogger("core");
+        if (chatLogger != null)
         {
             String log = String.format("Config file '%s' saved", configuration.getConfigFile().getName());
-            ChatLogger.INSTANCE.addLog(log, EnumChatFormatting.GREEN);
+            chatLogger.addSuccessLog(Level.DEBUG.intLevel, log);
         }
     }
 
