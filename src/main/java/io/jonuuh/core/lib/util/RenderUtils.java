@@ -3,9 +3,13 @@ package io.jonuuh.core.lib.util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
 
@@ -71,6 +75,188 @@ public final class RenderUtils
 //        System.out.println(sr.getScaleFactor() + " " + x + " " + y + " " + w + " " + h);
         GL11.glScissor(x * sr.getScaleFactor(), (sr.getScaledHeight() - y - h) * sr.getScaleFactor(),
                 w * sr.getScaleFactor(), h * sr.getScaleFactor());
+    }
+
+
+    /**
+     * Draws a nine-sliced rectangle with the given texture.
+     * <p>
+     * Parameter visuals:
+     * <pre>{@code
+     *            SOURCE (texture)
+     * ========================================
+     *    srcCornerSize
+     *     |  ↓     ↓
+     *     |→ ┌─────┬────────────┐ -
+     *     |→ │     │            │ | texHeight
+     *        ├─────┘            │ |
+     *        │                  │ |
+     *        │                  │ |
+     *        └──────────────────┘ -
+     *        |-----texWidth-----|
+     * ========================================
+     *
+     *
+     *       DESTINATION (9-slice rectangle)
+     * ============================================
+     *        x
+     *        ↓ ---width-----|
+     *    y → ┌──┬────────┬──┐ -
+     *        ├──┼────────┼──┤ |
+     *        │  │        │  │ | height
+     *        │  │        │  │ |
+     *        │  │        │  │ |
+     *        │  │        │  │ |
+     *        ├──┼────────┼──┤ |
+     *        └──┴────────┴──┘ -
+     *        ┌──┬──┬──┬──┬──┐
+     *         1  2  3  4  5  → dstCornerRatio = 5
+     * ============================================
+     *
+     * }</pre>
+     *
+     * @param texture The texture used to draw the rectangle
+     * @param x Left x coordinate for the drawn rectangle
+     * @param y Top y coordinate for the drawn rectangle
+     * @param z Z level for the drawn rectangle
+     * @param width Width of the drawn rectangle
+     * @param height Height of the drawn rectangle
+     * @param texWidth Width of the texture
+     * @param texHeight Height of the texture
+     * @param srcCornerSize How many pixels from the corner of the texture should be shown in any corner of the drawn rectangle
+     * @param dstCornerRatio How much of the width or height of the rect should be allocated for the size of any corner in the drawn rectangle
+     * (Uses the minimum between the height and width)
+     */
+    public static void drawNineSliceTexturedRect(ResourceLocation texture, float x, float y, int z, float width, float height,
+                                                 int texWidth, int texHeight, int srcCornerSize, int dstCornerRatio)
+    {
+        dstCornerRatio = Math.max(dstCornerRatio, 3);
+
+        // 400 / 10
+        float dstCornerSize = Math.min(width / dstCornerRatio, height / dstCornerRatio);
+
+        double s1 = MathUtils.normalize(srcCornerSize, 0, Math.min(texWidth, texHeight));
+        double s2 = (1 - s1);
+
+        //  y4B > |--|--------|--|
+        //  y3B > |--|--------|--|
+        //        |  |        |  |
+        //        |  |        |  |
+        //  y2B > |--|--------|--|
+        //  y1B > |--|--------|--|
+        //        ^  ^        ^  ^
+        //      x1L  x2L    x3L  x4L
+
+        float x1L = x;
+        float x2L = x + dstCornerSize;
+        float x3L = x + (width - dstCornerSize);
+        float x4L = x + width;
+
+        float y1B = y + height;
+        float y2B = y + (height - dstCornerSize);
+        float y3B = y + dstCornerSize;
+        float y4B = y;
+
+//        z = -1;
+//        drawLine2D(x2L, y1B, x2L, y4B);
+//        drawLine2D(x3L, y1B, x3L, y4B);
+//
+//        drawLine2D(x1L, y2B, x4L, y2B);
+//        drawLine2D(x1L, y3B, x4L, y3B);
+//        System.out.println(GL11.glGetTexImage());
+
+        mc.getTextureManager().bindTexture(texture);
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer wr = tessellator.getWorldRenderer();
+
+        //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////
+        // TOP LEFT CORNER
+        wr.begin(7, DefaultVertexFormats.POSITION_TEX);
+        wr.pos(x1L, y3B, z).tex(0, s1).endVertex(); // bottom left
+        wr.pos(x2L, y3B, z).tex(s1, s1).endVertex(); // bottom right
+        wr.pos(x2L, y4B, z).tex(s1, 0).endVertex(); // top right
+        wr.pos(x1L, y4B, z).tex(0, 0).endVertex(); // top left
+        tessellator.draw();
+
+        // TOP EDGE
+        wr.begin(7, DefaultVertexFormats.POSITION_TEX);
+        wr.pos(x2L, y3B, z).tex(s1, s1).endVertex(); // bottom left
+        wr.pos(x3L, y3B, z).tex(s2, s1).endVertex(); // bottom right
+        wr.pos(x3L, y4B, z).tex(s2, 0).endVertex(); // top right
+        wr.pos(x2L, y4B, z).tex(s1, 0).endVertex(); // top left
+        tessellator.draw();
+
+        // TOP RIGHT CORNER
+        wr.begin(7, DefaultVertexFormats.POSITION_TEX);
+        wr.pos(x3L, y3B, z).tex(s2, s1).endVertex(); // bottom left
+        wr.pos(x4L, y3B, z).tex(1, s1).endVertex(); // bottom right
+        wr.pos(x4L, y4B, z).tex(1, 0).endVertex(); // top right
+        wr.pos(x3L, y4B, z).tex(s2, 0).endVertex(); // top left
+        tessellator.draw();
+
+        //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////
+        // LEFT EDGE
+        wr.begin(7, DefaultVertexFormats.POSITION_TEX);
+        wr.pos(x1L, y2B, z).tex(0, s2).endVertex(); // bottom left
+        wr.pos(x2L, y2B, z).tex(s1, s2).endVertex(); // bottom right
+        wr.pos(x2L, y3B, z).tex(s1, s1).endVertex(); // top right
+        wr.pos(x1L, y3B, z).tex(0, s1).endVertex(); // top left
+        tessellator.draw();
+
+        // CENTER
+        wr.begin(7, DefaultVertexFormats.POSITION_TEX);
+        wr.pos(x2L, y2B, z).tex(s1, s2).endVertex(); // bottom left
+        wr.pos(x3L, y2B, z).tex(s2, s2).endVertex(); // bottom right
+        wr.pos(x3L, y3B, z).tex(s2, s1).endVertex(); // top right
+        wr.pos(x2L, y3B, z).tex(s1, s1).endVertex(); // top left
+        tessellator.draw();
+
+        // RIGHT EDGE
+        wr.begin(7, DefaultVertexFormats.POSITION_TEX);
+        wr.pos(x3L, y2B, z).tex(s2, s2).endVertex(); // bottom left
+        wr.pos(x4L, y2B, z).tex(1, s2).endVertex(); // bottom right
+        wr.pos(x4L, y3B, z).tex(1, s1).endVertex(); // top right
+        wr.pos(x3L, y3B, z).tex(s2, s1).endVertex(); // top left
+        tessellator.draw();
+
+        //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////
+        // BOTTOM LEFT CORNER
+        wr.begin(7, DefaultVertexFormats.POSITION_TEX);
+        wr.pos(x1L, y1B, z).tex(0, 1).endVertex(); // bottom left
+        wr.pos(x2L, y1B, z).tex(s1, 1).endVertex(); // bottom right
+        wr.pos(x2L, y2B, z).tex(s1, s2).endVertex(); // top right
+        wr.pos(x1L, y2B, z).tex(0, s2).endVertex(); // top left
+        tessellator.draw();
+
+        // BOTTOM EDGE
+        wr.begin(7, DefaultVertexFormats.POSITION_TEX);
+        wr.pos(x2L, y1B, z).tex(s1, 1).endVertex(); // bottom left
+        wr.pos(x3L, y1B, z).tex(s2, 1).endVertex(); // bottom right
+        wr.pos(x3L, y2B, z).tex(s2, s2).endVertex(); // top right
+        wr.pos(x2L, y2B, z).tex(s1, s2).endVertex(); // top left
+        tessellator.draw();
+
+        // BOTTOM RIGHT CORNER
+        wr.begin(7, DefaultVertexFormats.POSITION_TEX);
+        wr.pos(x3L, y1B, z).tex(s2, 1).endVertex(); // bottom left
+        wr.pos(x4L, y1B, z).tex(1, 1).endVertex(); // bottom right
+        wr.pos(x4L, y2B, z).tex(1, s2).endVertex(); // top right
+        wr.pos(x3L, y2B, z).tex(s2, s2).endVertex(); // top left
+        tessellator.draw();
+    }
+
+    public static void drawLine2D(double x1, double y1, double x2, double y2)
+    {
+        GL11.glColor4f(1F, 1F, 1F, 0.2F);
+        GL11.glPushMatrix();
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glBegin(GL11.GL_LINES);
+        GL11.glVertex2d(x1, y1);
+        GL11.glVertex2d(x2, y2);
+        GL11.glEnd();
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glPopMatrix();
+        GL11.glColor4f(1F, 1F, 1F, 1F);
     }
 
     /**
