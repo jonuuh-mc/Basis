@@ -164,6 +164,9 @@ public abstract class AbstractGuiScreen extends GuiScreen
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long msHeld)
     {
-        rootContainer.performAction(element -> element.handleMouseDragEvent(mouseX, mouseY, clickedMouseButton, msHeld));
+        if (hasCurrentFocus())
+        {
+            currentFocus.handleMouseDragEvent(mouseX, mouseY, clickedMouseButton, msHeld);
+        }
     }
 }
