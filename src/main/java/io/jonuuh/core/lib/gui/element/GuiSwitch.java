@@ -20,7 +20,7 @@ public class GuiSwitch extends GuiElement
 
     public GuiSwitch(String elementName, float xPos, float yPos, boolean switchState)
     {
-        this(elementName, xPos, yPos, new Dimensions().height * 2, new Dimensions().height, switchState);
+        this(elementName, xPos, yPos, DEFAULT_HEIGHT * 2, DEFAULT_HEIGHT, switchState);
     }
 
     public GuiSwitch(String elementName, float xPos, float yPos)

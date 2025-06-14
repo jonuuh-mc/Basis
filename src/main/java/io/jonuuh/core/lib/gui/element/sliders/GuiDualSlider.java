@@ -1,7 +1,6 @@
 package io.jonuuh.core.lib.gui.element.sliders;
 
 import io.jonuuh.core.lib.gui.GuiColorType;
-import io.jonuuh.core.lib.gui.element.Dimensions;
 import io.jonuuh.core.lib.gui.element.GuiElement;
 import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
@@ -37,8 +36,7 @@ public class GuiDualSlider extends GuiElement
 
     public GuiDualSlider(String elementName, float xPos, float yPos, double min, double max, double startValueLeft, double startValueRight)
     {
-        // TODO: ???
-        this(elementName, xPos, yPos, new Dimensions().width, new Dimensions().height, min, max, startValueLeft, startValueRight, false);
+        this(elementName, xPos, yPos, DEFAULT_WIDTH, DEFAULT_HEIGHT, min, max, startValueLeft, startValueRight, false);
     }
 
     public double getValue(boolean isLeftPointer)

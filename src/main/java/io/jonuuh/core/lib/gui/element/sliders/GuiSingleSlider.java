@@ -1,7 +1,6 @@
 package io.jonuuh.core.lib.gui.element.sliders;
 
 import io.jonuuh.core.lib.gui.GuiColorType;
-import io.jonuuh.core.lib.gui.element.Dimensions;
 import io.jonuuh.core.lib.gui.element.GuiElement;
 import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
@@ -38,8 +37,7 @@ public class GuiSingleSlider extends GuiElement
 
     public GuiSingleSlider(String elementName, float xPos, float yPos, double min, double max, double startValue)
     {
-        // TODO: ???
-        this(elementName, xPos, yPos, new Dimensions().width, new Dimensions().height, min, max, startValue, false, false);
+        this(elementName, xPos, yPos, DEFAULT_WIDTH, DEFAULT_HEIGHT, min, max, startValue, false, false);
     }
 
     public DecimalFormat getDecimalFormat()

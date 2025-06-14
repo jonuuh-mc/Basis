@@ -26,6 +26,9 @@ public abstract class GuiElement
     /** A resource pointing to the default mouse down sound */
     public static final ResourceLocation resourceClickSound;
 
+    public static final float DEFAULT_WIDTH = 100;
+    public static final float DEFAULT_HEIGHT = 20;
+
     /** A readable name qualifying this element TODO: no enforcement of this being unique */
     public final String elementName;
     /** This element's immediate ancestor: the container it's inside; Should only ever be null for the root container of the element tree */
@@ -69,6 +72,11 @@ public abstract class GuiElement
     /** The sum of all world yPos from this element's ancestors */
     protected float inheritedYPos;
 
+    /** Width of this element */
+    protected float width;
+    /** Height of this element */
+    protected float height;
+
     /** Which symbolic layer this element is on, should be equal to how many parents this element has */
     protected int zLevel;
     /** Whether this element is visible (should be drawn to screen) */
@@ -82,7 +90,6 @@ public abstract class GuiElement
 
     protected boolean debug;
 
-    protected Dimensions dimensions;
     protected Margin margin;
     protected Padding padding;
 
@@ -107,7 +114,9 @@ public abstract class GuiElement
 
         this.localXPos = localXPos;
         this.localYPos = localYPos;
-        this.dimensions = new Dimensions(width, height);
+
+        this.width = width;
+        this.height = height;
 
         this.visible = true;
         this.enabled = true;
@@ -120,14 +129,9 @@ public abstract class GuiElement
         this.colorMap = new HashMap<>();
     }
 
-    protected GuiElement(String elementName, float localXPos, float localYPos, Dimensions dimensions)
-    {
-        this(elementName, localXPos, localYPos, dimensions.width, dimensions.height);
-    }
-
     protected GuiElement(String elementName, float localXPos, float localYPos)
     {
-        this(elementName, localXPos, localYPos, new Dimensions());
+        this(elementName, localXPos, localYPos, DEFAULT_WIDTH, DEFAULT_HEIGHT);
     }
 
     public GuiContainer getParent()
@@ -268,49 +272,24 @@ public abstract class GuiElement
         this.inheritedYPos = inheritedYPos;
     }
 
-    public Dimensions getDimensions()
-    {
-        return dimensions;
-    }
-
-    public float getMinWidth()
-    {
-        return dimensions.minWidth;
-    }
-
     public float getWidth()
     {
-        return dimensions.width;
-    }
-
-    public float getMaxWidth()
-    {
-        return dimensions.maxWidth;
+        return width;
     }
 
     public void setWidth(float width)
     {
-        dimensions.width = width;
-    }
-
-    public float getMinHeight()
-    {
-        return dimensions.minHeight;
+        this.width = width;
     }
 
     public float getHeight()
     {
-        return dimensions.height;
-    }
-
-    public float getMaxHeight()
-    {
-        return dimensions.maxHeight;
+        return height;
     }
 
     public void setHeight(float height)
     {
-        dimensions.height = height;
+        this.height = height;
     }
 
     public boolean isVisible()

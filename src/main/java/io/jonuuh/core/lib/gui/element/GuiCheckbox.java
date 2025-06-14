@@ -21,7 +21,7 @@ public class GuiCheckbox extends GuiElement
 
     public GuiCheckbox(String elementName, float xPos, float yPos, boolean isChecked)
     {
-        this(elementName, xPos, yPos, new Dimensions().height, isChecked);
+        this(elementName, xPos, yPos, DEFAULT_HEIGHT, isChecked);
     }
 
     public GuiCheckbox(String elementName, float xPos, float yPos)
