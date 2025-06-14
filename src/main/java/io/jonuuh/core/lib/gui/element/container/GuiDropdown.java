@@ -2,90 +2,63 @@ package io.jonuuh.core.lib.gui.element.container;
 
 import io.jonuuh.core.lib.gui.element.GuiButton;
 import io.jonuuh.core.lib.gui.element.GuiElement;
-import io.jonuuh.core.lib.gui.element.container.flex.FlexAlign;
 import io.jonuuh.core.lib.gui.element.container.flex.FlexDirection;
-import io.jonuuh.core.lib.gui.element.container.flex.FlexItemProperties;
+import io.jonuuh.core.lib.gui.element.container.flex.FlexItem;
 import io.jonuuh.core.lib.gui.element.container.flex.GuiFlexContainer;
-import io.jonuuh.core.lib.gui.event.GuiEventBehavior;
 
 import java.util.Collection;
 
-// TODO: save me
 public class GuiDropdown extends GuiFlexContainer
 {
-    protected GuiEventBehavior eventBehavior;
     protected GuiFlexContainer dropdownContainer;
     protected GuiButton header;
-    protected float closedHeight;
 
     public GuiDropdown(String elementName, int xPos, int yPos, int width, int height, String prompt, Collection<String> options)
     {
-        super(elementName, xPos, yPos, width, height * (options.size() + 1));
-        this.closedHeight = height;
-        this.setHeight(closedHeight);
-        this.getDimensions().maxHeight = height;
-//        setHeight(openHeight);
-
+        super(elementName, xPos, yPos, width, height);
         this.setDirection(FlexDirection.COLUMN);
-        this.setAlignItems(FlexAlign.STRETCH);
 
-        GuiFlexContainer headerContainer = new GuiFlexContainer(elementName + "$header-container",
-                0, 0, 1, height, 0, 0);
+        this.header = new GuiButton(elementName + "$header", 0, 0, width, height, prompt, this::toggleOpen);
+        addItem(new FlexItem(header/*, 0, width, height, height*/).setShrink(0));
 
-        // TODO: needs width > 0 for grow to work, fix?
-        this.header = new GuiButton(elementName + "$header", 0, 0, 1, 1, prompt, eventBehavior);
-        headerContainer.addChild(header, new FlexItemProperties().setGrow(1));
-        headerContainer.setAlignItems(FlexAlign.STRETCH);
-        super.addChild(headerContainer);
-
-        GuiFlexContainer dropdownContainer = new GuiFlexContainer(elementName + "$dropdown-container",
-                0, 0, 1, 1, 0, 0);
-        dropdownContainer.setDirection(FlexDirection.COLUMN);
-        dropdownContainer.setAlignItems(FlexAlign.STRETCH);
-
+        this.dropdownContainer = new GuiFlexContainer(elementName + "$option-container",
+                0, height, width, height * options.size()).setDirection(FlexDirection.COLUMN);
         for (String option : options)
         {
-            dropdownContainer.addChild(createOption(option), new FlexItemProperties().setGrow(1));
+            dropdownContainer.addItem(new FlexItem(new GuiButton(option, 0, 0, width, height, option, this::toggleOpen)));
         }
         dropdownContainer.setVisible(false);
-        this.dropdownContainer = dropdownContainer;
 
-        super.addChild(dropdownContainer, new FlexItemProperties().setGrow(1));
+        addItem(new FlexItem(dropdownContainer).setShrink(0));
     }
 
-    protected GuiButton createOption(String buttonLabel)
+    public String getHeaderText()
     {
-        return new GuiButton(buttonLabel, 0, 0, 1, 1, buttonLabel, this::setHeaderText);
+        return header.getButtonLabel();
     }
 
-    protected boolean setHeaderText(GuiElement element)
+    public void setHeaderText(String headerText)
     {
-        header.setButtonLabel(element.elementName);
-        toggleOpen(null);
-        return false;
+        header.setButtonLabel(headerText);
     }
 
-    protected boolean toggleOpen(GuiElement element)
-    {
-        dropdownContainer.setVisible(!this.dropdownContainer.isVisible());
-        setHeight(dropdownContainer.isVisible() ? openHeight : getMaxHeight());
-        return false;
-    }
-
-//    @Override
-//    public void addChild(GuiElement child, FlexItemProperties flexProperties)
+//    protected void setHeaderText(GuiElement element)
 //    {
+//        header.setButtonLabel(element.elementName);
+//        toggleOpen(null);
 //    }
-//
-//    @Override
-//    public void addChild(GuiElement child)
-//    {
-//    }
+
+    protected void toggleOpen(GuiElement element)
+    {
+        header.setButtonLabel(((GuiButton) element).getButtonLabel());
+        dropdownContainer.setVisible(!dropdownContainer.isVisible());
+    }
 
     @Override
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
         super.onScreenDraw(mouseX, mouseY, partialTicks);
+//        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), innerRadius, getColor(GuiColorType.BACKGROUND), true);
 
 //        float size = getWidth() / 3F;
 //        RenderUtils.drawTriangle(GL11.GL_POLYGON, worldXPos() + getWidth() - size, worldYPos() + getHeight() - size,

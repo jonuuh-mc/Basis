@@ -4,35 +4,36 @@ import io.jonuuh.core.lib.gui.GuiColorType;
 import io.jonuuh.core.lib.gui.element.GuiElement;
 import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.util.Color;
-import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.EnumChatFormatting;
 import org.lwjgl.opengl.GL11;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class GuiFlexContainer extends GuiContainer
 {
-    protected Map<GuiElement, FlexItemProperties> flexPropertiesMap;
+    protected final List<FlexItem> flexItems;
     protected FlexDirection direction;
     protected FlexJustify justifyContent;
     protected FlexAlign alignItems;
-    protected boolean isMainAxisFull; // TODO: track scaling within scaleMainAxisOverflow to maintain flag
+//    protected boolean isMainAxisFull; // TODO: track scaling within resizeItems to maintain flag?
 
     public GuiFlexContainer(String elementName, float xPos, float yPos, float width, float height, Map<GuiColorType, Color> colorMap)
     {
         super(elementName, xPos, yPos, width, height, colorMap);
-        this.flexPropertiesMap = new HashMap<>();
+        this.flexItems = new ArrayList<>();
         this.direction = FlexDirection.ROW;
         this.justifyContent = FlexJustify.START;
         this.alignItems = FlexAlign.START;
     }
 
-    public GuiFlexContainer(String elementName, float xPos, float yPos, float width, float height, float outerRadius, float innerRadius)
+    public GuiFlexContainer(String elementName, float xPos, float yPos, float width, float height)
     {
-        this(elementName, xPos, yPos, width, height, outerRadius, innerRadius, null);
+        this(elementName, xPos, yPos, width, height, null);
     }
 
     public FlexDirection getDirection()
@@ -40,9 +41,10 @@ public class GuiFlexContainer extends GuiContainer
         return direction;
     }
 
-    public void setDirection(FlexDirection direction)
+    public GuiFlexContainer setDirection(FlexDirection direction)
     {
         this.direction = direction;
+        return this;
     }
 
     public FlexJustify getJustifyContent()
@@ -50,9 +52,10 @@ public class GuiFlexContainer extends GuiContainer
         return justifyContent;
     }
 
-    public void setJustifyContent(FlexJustify justifyContent)
+    public GuiFlexContainer setJustifyContent(FlexJustify justifyContent)
     {
         this.justifyContent = justifyContent;
+        return this;
     }
 
     public FlexAlign getAlignItems()
@@ -60,9 +63,25 @@ public class GuiFlexContainer extends GuiContainer
         return alignItems;
     }
 
-    public void setAlignItems(FlexAlign alignItems)
+    public GuiFlexContainer setAlignItems(FlexAlign alignItems)
     {
         this.alignItems = alignItems;
+        return this;
+    }
+
+    /**
+     * Retrieve the FlexItem wrapping the given GuiElement in this GuiFlexContainer
+     */
+    public FlexItem getFlexItem(GuiElement element)
+    {
+        for (FlexItem item : flexItems)
+        {
+            if (item.getElement().equals(element))
+            {
+                return item;
+            }
+        }
+        return null;
     }
 
     public boolean isHorizontal()
@@ -80,186 +99,119 @@ public class GuiFlexContainer extends GuiContainer
         return isHorizontal() ? getWidth() : getHeight();
     }
 
-//    public float getMainAxisMaxSize()
-//    {
-//        return isHorizontal() ? getInitialWidth() : getInitialHeight();
-//    }
-//
-//    public float getMainAxisItemsMaxSize()
-//    {
-//        return (float) children.stream().mapToDouble(this::getItemMaxBasis).sum();
-//    }
-
-    public float getItemBasesSum()
+    public float getCrossAxisSize()
     {
-        return (float) children.stream().mapToDouble(this::getItemBasis).sum();
+        return isHorizontal() ? getHeight() : getWidth();
     }
 
-    // TODO: why does this work w/out floating point error correction - check in debug?
-    protected boolean isMainAxisFull()
-    {
-        return getMainAxisSize() == getItemBasesSum();
-    }
-
-    protected float getItemMinBasis(GuiElement child)
-    {
-        return (isHorizontal() ? child.getMinWidth() : child.getMinHeight());
-    }
-
-    protected float getItemBasis(GuiElement child)
-    {
-        return (isHorizontal() ? child.getWidth() : child.getHeight());
-    }
-
-    protected float getItemMaxBasis(GuiElement child)
-    {
-        return (isHorizontal() ? child.getMaxWidth() : child.getMaxHeight());
-    }
-
-    protected void setItemBasis(GuiElement child, float basis)
-    {
-        if (isHorizontal())
-        {
-            child.setWidth(basis);
-        }
-        else
-        {
-            child.setHeight(basis);
-        }
-    }
-
-
-    protected FlexAlign getItemAlign(GuiElement child)
-    {
-        boolean hasProperty = flexPropertiesMap.get(child).getAlign() != null;
-        return hasProperty ? flexPropertiesMap.get(child).getAlign() : alignItems;
-    }
-
-//    public int getTotalGrowth()
-//    {
-//        int sum = 0;
-//        for (GuiElement child : children)
-//        {
-//            sum += flexPropertiesMap.get(child).getGrow();
-//        }
-//        return sum;
-//    }
-//
-//    public int getTotalShrink()
-//    {
-//        int sum = 0;
-//        for (GuiElement child : children)
-//        {
-//            sum += flexPropertiesMap.get(child).getShrink();
-//        }
-//        return sum;
-//    }
-
-    // TODO: this is fine right? containsKey definitely checks for identical reference? (unless guiElement overrides equals?)
-    public void setFlexProperties(GuiElement child, FlexItemProperties flexProperties)
-    {
-        if (flexPropertiesMap.containsKey(child))
-        {
-            flexPropertiesMap.put(child, flexProperties);
-        }
-    }
-
-    public void addChild(GuiElement child, FlexItemProperties flexProperties)
-    {
-        super.addChild(child);
-        flexPropertiesMap.put(child, flexProperties);
-//        child.setFlexProperties(flexProperties);
-    }
-
+    /**
+     * Adds a child to this container's list of children, but NOT to this GuiFlexContainer's list of flex items
+     * <p>
+     * For a GuiFlexContainer {@link GuiFlexContainer#addItem(FlexItem)} should almost always be used instead!
+     */
+    @Deprecated
     @Override
     public void addChild(GuiElement child)
     {
-        this.addChild(child, new FlexItemProperties());
+        super.addChild(child);
+    }
+
+    /**
+     * @see GuiFlexContainer#addChild(GuiElement)
+     */
+    @Deprecated
+    @Override
+    public void addChildren(Collection<GuiElement> children)
+    {
+        super.addChildren(children);
+    }
+
+    /**
+     * @see GuiFlexContainer#addChild(GuiElement)
+     */
+    @Deprecated
+    @Override
+    public void addChildren(GuiElement... children)
+    {
+        super.addChildren(children);
+    }
+
+    public void addItem(FlexItem item)
+    {
+        super.addChild(item.getElement());
+        flexItems.add(item);
+    }
+
+    public void addItems(Collection<FlexItem> items)
+    {
+        for (FlexItem item : items)
+        {
+            addItem(item);
+        }
+    }
+
+    public void addItems(FlexItem... items)
+    {
+        for (FlexItem item : items)
+        {
+            addItem(item);
+        }
     }
 
     @Override
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
         RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), getColor(GuiColorType.BACKGROUND));
+//        RenderUtils.drawNineSliceTexturedRect(new ResourceLocation("core:background.png"),
+//                worldXPos(), worldYPos(), zLevel - 90, getWidth(), getHeight(), 52, 52, 12, 6);
 
-        drawArrow(direction, new Color("FFD700"), 8);
+        if (debug)
+        {
+            drawArrow(direction, new Color("FFD700"), 8);
 
-        FlexDirection alignDir = (direction == FlexDirection.ROW || direction == FlexDirection.ROW_REVERSE)
-                ? FlexDirection.COLUMN : FlexDirection.ROW;
-        drawArrow(alignDir, new Color(EnumChatFormatting.WHITE), 5);
+            FlexDirection alignDir = (direction == FlexDirection.ROW || direction == FlexDirection.ROW_REVERSE) ? FlexDirection.COLUMN : FlexDirection.ROW;
+            drawArrow(alignDir, new Color(EnumChatFormatting.WHITE), 5);
 
-        String info = this.elementName;
+            String info = this.elementName;
 //        String info = direction.toString().toLowerCase() + ", " + justifyContent.toString().toLowerCase() + ", " + alignItems.toString().toLowerCase();
-        float textX = worldXPos() + (getWidth() / 4) - (mc.fontRendererObj.getStringWidth(info) / 2F);
-        float textY = worldYPos() + getHeight() - mc.fontRendererObj.FONT_HEIGHT;
-        mc.fontRendererObj.drawString(info, textX, textY, getColor(GuiColorType.ACCENT1).toPackedARGB(), true);
+            float textX = worldXPos() + (getWidth() / 4) - (mc.fontRendererObj.getStringWidth(info) / 2F);
+            float textY = worldYPos() + getHeight() - mc.fontRendererObj.FONT_HEIGHT;
+            mc.fontRendererObj.drawString(info, textX, textY, getColor(GuiColorType.ACCENT1).toPackedARGB(), true);
+        }
     }
 
     @Override
     protected void onInitGui(ScaledResolution scaledResolution)
     {
-//        System.out.println("FlexContainer onInitGui: " + this.elementName);
-        // TODO: might be a problem later
-        if (!hasChildren())
+        updateItemsLayout();
+    }
+
+    public void updateItemsLayout()
+    {
+        if (flexItems.isEmpty())
         {
             return;
         }
 
-        // TODO:
-        // root container
-        if (!hasParent())
+        // should fix a few small problems (e.g. size reset is for post-stretch and direction change)
+        // forget what pos reset is for
+        for (FlexItem item : flexItems)
         {
-            int screenWidth = scaledResolution.getScaledWidth();
-            int screenHeight = scaledResolution.getScaledHeight();
-
-//            int xPadding = screenWidth / 10;
-//            int yPadding = screenHeight / 10;
-            int xPadding = 90;
-            int yPadding = 90;
-//            System.out.printf("(%s,%s) -> %s%n", screenWidth, screenHeight, scaledResolution.getScaleFactor());
-
-            setLocalXPos(Math.max((screenWidth / 2F) - (getMaxWidth() / 2), xPadding));
-            setLocalYPos(Math.max((screenHeight / 2F) - (getMaxHeight() / 2), yPadding));
-
-            setWidth(Math.min(screenWidth - getLocalXPos() - xPadding, getMaxWidth()));
-            setHeight(Math.min(screenHeight - getLocalYPos() - yPadding, getMaxHeight()));
+            GuiElement element = item.getElement();
+            element.setLocalXPos(0);
+            element.setLocalYPos(0);
+            element.setWidth(item.getInitWidth());
+            element.setHeight(item.getInitHeight());
         }
 
-        if (elementName.equals("mainFlex"))
-        {
-//            this.setJustifyContent(FlexJustify.START);
-//            flexPropertiesMap.get(this.children.get(0)).setGrow(1);
-//            flexPropertiesMap.get(this.children.get(0)).setAlign(FlexAlign.STRETCH);
-
-//            this.children.get(1).setFlexProperties(new FlexItemProperties().setGrow(1));
-//            this.children.get(2).setFlexProperties(new FlexItemProperties().setGrow(100));
-//            this.children.get(3).setFlexProperties(new FlexItemProperties().setGrow(1));
-//            System.out.println();
-//            this.children.get(2).setFlexProperties(new FlexItemProperties().setBasis(50));
-//            this.children.get(2).setWidth(50);
-//            this.children.get(2).setFlexProperties(new FlexItemProperties().setAlign(FlexAlign.END));
-        }
-
-        // The total free space along the main axis
-        // Can be positive to denote that free space is available or negative to denote that the children are overflowing
+        // The total free space along the main axis gained or lost SINCE the last resize
+        // Should be positive when free space is available and negative when items are overflowing
         float freeLength = getMainAxisSize() - getItemBasesSum();
 
-//        float maxAllocated = getMainAxisItemsMaxSize();
-//        float freeSizeMax = getMainAxisMaxSize() - maxAllocated;
-//
-//        float totalLostSize = freeSizeMax - freeSize;
-//        float remainingFreeSize = freeSizeMax - (freeSizeMax - freeSize);
-//
-//        System.out.println(elementName + " " + freeSize + " across all runs: " + maxAllocated + " " + freeSizeMax +
-//                " " + totalLostSize + " " + remainingFreeSize) ;
-
-        if (freeLength > 0)
+        if (freeLength != 0)
         {
-            growMainAxis(freeLength);
-        }
-        else if (freeLength < 0)
-        {
-            shrinkMainAxis(freeLength);
+            ResizeType resizeType = (freeLength < 0) ? ResizeType.SHRINK : ResizeType.GROW;
+            resizeMainAxisItems(freeLength, resizeType);
         }
 
         justifyMainAxis();
@@ -268,105 +220,152 @@ public class GuiFlexContainer extends GuiContainer
         alignCrossAxis();
     }
 
-    /**
-     * Shrink this container's children along the main axis.
-     * <p>
-     * Horizontal main axis: shrink width, Vertical main axis: shrink height.
-     * <p>
-     * How much each child shrinks is proportional to both their relative sizes and their relative shrink properties.
-     * <p>
-     * If every child has a default shrink property (1), they shrink only relative to each others size (larger basis child shrinks more).
-     * If any child has a non-default shrink property, the children will shrink relative to theirs and each other's size
-     * and theirs and each other's shrink property.
-     * <p>
-     * A shrink property of 0 means a child won't shrink at all.
-     *
-     * @param freeLength Free space along the main axis, should always be negative if this function is called
-     */
-    protected void shrinkMainAxis(float freeLength)
+    // note: if an element has a basis of 0, it won't ever grow - is this a problem?
+    // what if an element is shrunk to the point of being 0 and then cannot grow back up again
+    protected void resizeMainAxisItems(float freeLength, ResizeType resizeType)
     {
-        // Total of all children's shrink weights
-        float totalShrinkWeight = 0;
+        // Total of all item's resize weights
+        float totalResizeWeight = 0;
 
-        for (GuiElement child : children)
+        for (FlexItem item : flexItems)
         {
-            totalShrinkWeight += (getItemBasis(child) * flexPropertiesMap.get(child).getShrink());
+            totalResizeWeight += getItemResizeWeight(item, resizeType);
         }
 
-        for (GuiElement child : children)
+        // A total resize weight of 0 means all items have a shrink property of 0,
+        // or a grow property of 0 (or a basis of 0): in which case nothing needs to be resized
+        if (totalResizeWeight <= 0)
         {
-            // *Not* how much the child will shrink by; have had a hard time trying to visualize this number
-            // Can't really describe it better than how much "weight" a child has in the shrink
-            float shrinkWeight = getItemBasis(child) * flexPropertiesMap.get(child).getShrink();
+            return;
+        }
 
-            // The actual physical amount this child will shrink by (a negative #, freeLength should always be -)
-            // A total shrink weight of 0 means all children have a shrink property of 0 (or a basis of 0),
-            // in that case always shrink by 0 to avoid div by 0
-            float shrinkAmount = totalShrinkWeight > 0 ? freeLength * (shrinkWeight / totalShrinkWeight) : 0;
+        for (FlexItem item : flexItems)
+        {
+            // *Not* how much the child will shrink/grow by; have had a hard time trying to visualize this number
+            // Can't really describe it better than how much "weight" a child has in the shrink/grow
+            float resizeWeight = getItemResizeWeight(item, resizeType);
 
-            // Clamp new basis between min basis and main axis size
-            // (max of main axis size if a child has shrink property of 0;
-            // even if a child has a shrink of 0, prevent it from breaking out the side of the container)
-            float newBasisClamped = (float) MathUtils.clamp(getItemBasis(child) + shrinkAmount, getItemMinBasis(child), getMainAxisSize());
-            setItemBasis(child, newBasisClamped);
+            // The actual physical amount this child will shrink/grow by
+            // (Shrink: A negative #, freeLength should always be - during a shrink)
+            // (Grow: A positive #, freeLength should always be + during a grow)
+            float resizeAmount = freeLength * (resizeWeight / totalResizeWeight);
+            float currBasisResized = getItemBasis(item) + resizeAmount;
+            float newBasis;
+
+            if (resizeType.equals(ResizeType.SHRINK))
+            {
+                // Prevent new basis from going below min basis TODO: test that this works correctly (item should break out of bounds of its container if shrinking container below item min basis?)
+                newBasis = Math.max(currBasisResized, getItemMinBasis(item));
+            }
+            else
+            {
+                // Prevent new basis from going above max basis TODO: how does container size work here? worried about breaking out of side, etc?
+                newBasis = Math.min(currBasisResized, getItemMaxBasis(item));
+            }
+
+            setItemBasis(item, newBasis);
         }
     }
 
-    protected void growMainAxis(float freeLength)
+    /**
+     * Spaces the items out along the main axis according to this containers' {@link GuiFlexContainer#justifyContent} property
+     * <p>
+     * This does not change the widths or heights of any elements, only the x or y positions of the items in the container.
+     */
+    protected void justifyMainAxis()
     {
-//        float totalBasis = 0;
-//
-//        for (GuiElement child : children)
-//        {
-//            totalBasis += getItemBasis(child);
-//        }
-//
-//        for (GuiElement child : children)
-//        {
-//            float growAmount = freeLength * (getItemBasis(child) / totalBasis);
-//            setItemBasis(child, Math.min(getItemMaxBasis(child), getItemBasis(child) + growAmount));
-//        }
+        float freeLength = getMainAxisSize() - getItemBasesSum();
+        boolean isMainAxisFull = freeLength == 0; // TODO: why does this work w/out floating point error correction - check in debug?
+        float currentPos = 0;
 
-        float totalGrowWeight = 0;
-
-        for (GuiElement child : children)
+        // Justify start by default if no free space
+        if (!isMainAxisFull)
         {
-            totalGrowWeight += (getItemBasis(child) * (flexPropertiesMap.get(child).getGrow() + 1));
+            switch (justifyContent)
+            {
+                case START:
+                    currentPos = isReversed() ? freeLength : 0;
+                    break;
+                case END:
+                    currentPos = isReversed() ? 0 : freeLength;
+                    break;
+                case CENTER:
+                    currentPos = freeLength / 2F;
+                    break;
+                case EVENLY:
+                    currentPos = freeLength / (flexItems.size() + 1);
+                    break;
+                case AROUND:
+                    currentPos = (freeLength / (flexItems.size())) / 2;
+                    break;
+            }
         }
 
-        for (GuiElement child : children)
+        int i = isReversed() ? flexItems.size() - 1 : 0;
+
+        // TODO: implement flex item order property in here?
+        while (isReversed() ? i >= 0 : i < flexItems.size())
         {
-            float growWeight = getItemBasis(child) * (flexPropertiesMap.get(child).getGrow() + 1);
-            float growAmount = freeLength * (growWeight / totalGrowWeight);
-            System.out.println("par. width: " + getMainAxisSize() + "; growing " + child.elementName
-                    + " with g=" + flexPropertiesMap.get(child).getGrow() + " by " + growAmount);
+            FlexItem item = flexItems.get(i);
+            justifyChildLocalPos(item, currentPos);
+            currentPos += getItemBasis(item);
 
-            float newBasis = (flexPropertiesMap.get(child).getGrow() == 0)
-                    ? Math.min(getItemMaxBasis(child), getItemBasis(child) + growAmount)
-                    : getItemBasis(child) + growAmount;
+            if (!isMainAxisFull)
+            {
+                switch (justifyContent)
+                {
+                    case BETWEEN:
+                        currentPos += (flexItems.size() > 1 ? freeLength / (flexItems.size() - 1) : 0);
+                        //                  ^ prevent div by zero if only one item in flexItems
+                        break;
+                    case EVENLY:
+                        currentPos += (freeLength / (flexItems.size() + 1));
+                        break;
+                    case AROUND:
+                        currentPos += (freeLength / (flexItems.size()));
+                        break;
+                }
+            }
 
-            setItemBasis(child, newBasis);
+            i += isReversed() ? -1 : 1;
         }
+    }
 
-//        int totalGrow = getTotalGrowth();
-//
-//        for (GuiElement child : children)
-//        {
-//            // default of 0
-//            int itemGrow = flexPropertiesMap.get(child).getGrow();
-//
-//            // if no items have any grow, growth is 0,
-//            // also even if total grow is not 0, any item with no grow has a growth of 0: 0/?
-//            float growth = (totalGrow != 0) ? (freeLength * ((float) itemGrow / totalGrow)) : 0;
-//
-//            System.out.println("growing " + child.elementName + " with g=" + itemGrow + " by" + growth);
-//
-//            setItemBasis(child, Math.max(getItemMaxBasis(child), getItemBasis(child) + growth));
-//        }
+    /**
+     * Aligns the items along the cross axis according to this containers' {@link GuiFlexContainer#alignItems} property
+     * <p>
+     * This can change the widths or heights of items if the container or an item has a FlexAlign property of stretch
+     */
+    protected void alignCrossAxis()
+    {
+        for (FlexItem item : flexItems)
+        {
+            FlexAlign itemAlignment = (item.getAlign() != null) ? item.getAlign() : alignItems;
+
+            switch (itemAlignment)
+            {
+                case START:
+                    alignChildLocalPos(item, 0);
+                    break;
+                case END:
+                    alignChildLocalPos(item, getCrossAxisSize() - getItemCrossAxisLength(item));
+                    break;
+                case CENTER:
+                    alignChildLocalPos(item, (getCrossAxisSize() / 2) - (getItemCrossAxisLength(item) / 2));
+                    break;
+                case STRETCH:
+                    setItemCrossAxisLength(item, getCrossAxisSize());
+                    break;
+            }
+        }
     }
 
     /**
      * TODO: desperately need to fix this, causes problems
+     * TODO: was past me just referring to the situation with dropdowns being expanded on window resize?
+     *  was this fixed by element min/max implementation?
+     * TODO: might make sense to loop over children instead, scrollbars might only be relevant on cross axis and
+     *  thus this could be used naturally to prevent them overflowing parent?
      * <p>
      * Shrink and grow overflowing items on the cross axis.
      * <p>
@@ -381,245 +380,120 @@ public class GuiFlexContainer extends GuiContainer
      */
     protected void scaleCrossAxisOverflow()
     {
-        // TODO: ?
-//        float freeLength = getMainAxisSize() - getItemBasesSum();
-        float freeCrossAxisLength;
+        for (FlexItem item : flexItems)
+        {
+            float crossAxisSize = getCrossAxisSize();
 
+            // If item is under or equal to container height
+            if (getItemCrossAxisLength(item) <= crossAxisSize)
+            {
+                float itemInitCrossAxisLength = isHorizontal() ? item.getInitHeight() : item.getInitWidth();
+
+                // If item initial height is greater than container height
+                // (grow item back up after it was previously cropped down on cross axis)
+                if (itemInitCrossAxisLength > crossAxisSize /*&& item.getMaxHeight() <= this.getHeight()*/)
+                {                                            // ^ stylistic decision: should item max dimens. only be enforced along main axis? might make most sense that way
+                    setItemCrossAxisLength(item, crossAxisSize);
+                }
+            }
+            // Else: if item is greater than container height, crop to container height
+            else
+            {
+                setItemCrossAxisLength(item, crossAxisSize);
+            }
+        }
+    }
+
+    // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
+    protected float getItemMinBasis(FlexItem item)
+    {
+        return (isHorizontal() ? item.getMinWidth() : item.getMinHeight());
+    }
+
+    protected float getItemMaxBasis(FlexItem item)
+    {
+        return (isHorizontal() ? item.getMaxWidth() : item.getMaxHeight());
+    }
+
+    protected float getItemBasis(FlexItem item)
+    {
+        return (isHorizontal() ? item.getElement().getWidth() : item.getElement().getHeight());
+    }
+
+    protected void setItemBasis(FlexItem item, float basis)
+    {
+        GuiElement element = item.getElement();
         if (isHorizontal())
         {
-            for (GuiElement child : children)
-            {
-//                // If child is overflowing container height
-//                if (child.getHeight() > this.getHeight())
-//                {
-//                    child.setHeight(this.getHeight());
-//                }
-//
-//                // If child is under container height but its max height is still greater than container height
-//                else if (child.getHeight() < this.getHeight() && child.getMaxHeight() >= this.getHeight())
-//                {
-//                    child.setHeight(this.getHeight());
-//                }
-//
-//                else if (child.getHeight() < this.getHeight() && child.getMaxHeight() < this.getHeight())
-//                {
-//                    child.setHeight(child.getMaxHeight());
-//                }
-                child.setHeight(Math.min(child.getMaxHeight(), this.getHeight()));
-            }
+            element.setWidth(basis);
+            return;
         }
-        else
-        {
-            for (GuiElement child : children)
-            {
-                child.setWidth(Math.min(child.getMaxWidth(), this.getWidth()));
-            }
-        }
-
-//        Consumer<GuiElement> attemptCrossAxisScale = isHorizontal()
-//                ? child -> child.setHeight(Math.min(child.getInitialHeight(), this.getHeight()))
-//                : child -> child.setWidth(Math.min(child.getInitialWidth(), this.getWidth()));
-//        children.forEach(attemptCrossAxisScale);
+        element.setHeight(basis);
     }
 
-    protected void justifyMainAxis()
+    protected float getItemBasesSum()
     {
-        float allocatedSizePostOverFlowScale = getItemBasesSum();
-        float freeSizePostOverFlowScale = getMainAxisSize() - allocatedSizePostOverFlowScale;
-
-//        System.out.println(elementName + " pre scale freeSize: " + freeSize +
-//                " post scale: " + allocatedSizePostOverFlowScale + " " + getMainAxisSize());
-
-
-        if (!isReversed())
-        {
-            justifyInOrder(allocatedSizePostOverFlowScale, freeSizePostOverFlowScale);
-        }
-        else
-        {
-            justifyInReverse(allocatedSizePostOverFlowScale, freeSizePostOverFlowScale);
-        }
+        return (float) flexItems.stream().mapToDouble(this::getItemBasis).sum();
     }
 
-    protected void justifyInOrder(float allocatedSize, float freeSize)
+    // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
+    protected float getItemCrossAxisLength(FlexItem item)
     {
-        float sizeCovered = justifyContent == FlexJustify.CENTER && !isMainAxisFull() ? (freeSize / 2) : 0;
-
-        float sizePerSpace = justifyContent == FlexJustify.BETWEEN ? ((children.size() > 1) ? freeSize / (children.size() - 1) : 0)
-                : justifyContent == FlexJustify.AROUND ? freeSize / children.size()
-                : justifyContent == FlexJustify.EVENLY ? freeSize / (1 + children.size()) : 0;
-
-        // Justify start by default if no free space
-        if (isMainAxisFull() || justifyContent == FlexJustify.START || justifyContent == FlexJustify.CENTER)
-        {
-            for (GuiElement child : children)
-            {
-                justifyChildLocalPos(child, sizeCovered);
-                sizeCovered += getItemBasis(child);
-            }
-        }
-        else
-        {
-            switch (justifyContent)
-            {
-                case END:
-                    for (int i = children.size() - 1; i >= 0; i--)
-                    {
-                        GuiElement child = children.get(i);
-                        sizeCovered += getItemBasis(child);
-                        justifyChildLocalPos(child, this.getWidth() - sizeCovered);
-                    }
-                    break;
-                case BETWEEN:
-                    for (int i = 0; i < children.size(); i++)
-                    {
-                        GuiElement child = children.get(i);
-                        justifyChildLocalPos(child, sizeCovered + (sizePerSpace * i));
-                        sizeCovered += getItemBasis(child);
-                    }
-                    break;
-                case AROUND:
-                    sizeCovered = sizePerSpace / 2;
-                    for (GuiElement child : children)
-                    {
-                        justifyChildLocalPos(child, sizeCovered);
-                        sizeCovered += getItemBasis(child) + sizePerSpace;
-                    }
-                    break;
-                case EVENLY:
-                    for (int i = 0; i < children.size(); i++)
-                    {
-                        GuiElement child = children.get(i);
-                        justifyChildLocalPos(child, sizeCovered + (sizePerSpace * (i + 1)));
-                        sizeCovered += getItemBasis(child);
-                    }
-                    break;
-            }
-        }
+        return (isHorizontal() ? item.getElement().getHeight() : item.getElement().getWidth());
     }
 
-    protected void justifyInReverse(float allocatedSize, float freeSize)
+    protected void setItemCrossAxisLength(FlexItem item, float basis)
     {
-        float sizeCovered = justifyContent == FlexJustify.CENTER && !isMainAxisFull() ? (freeSize / 2) : 0;
-
-        float sizePerSpace = justifyContent == FlexJustify.BETWEEN ? ((children.size() > 1) ? freeSize / (children.size() - 1) : 0)
-                : justifyContent == FlexJustify.AROUND ? freeSize / children.size()
-                : justifyContent == FlexJustify.EVENLY ? freeSize / (1 + children.size()) : 0;
-
-        // Justify start by default if negative free space
-        if (isMainAxisFull() || justifyContent == FlexJustify.START || justifyContent == FlexJustify.CENTER)
+        GuiElement element = item.getElement();
+        if (isHorizontal())
         {
-            for (GuiElement child : children)
-            {
-                sizeCovered += getItemBasis(child);
-                justifyChildLocalPos(child, allocatedSize - sizeCovered);
-            }
+            element.setHeight(basis);
+            return;
         }
-        else
-        {
-            switch (justifyContent)
-            {
-                case END:
-                    for (int i = children.size() - 1; i >= 0; i--)
-                    {
-                        GuiElement child = children.get(i);
-                        sizeCovered += getItemBasis(child);
-                        justifyChildLocalPos(child, sizeCovered);
-                    }
-                    break;
-                case BETWEEN:
-                    for (int i = 0; i < children.size(); i++)
-                    {
-                        GuiElement child = children.get(i);
-                        sizeCovered += getItemBasis(child);
-                        justifyChildLocalPos(child, allocatedSize - sizeCovered - (sizePerSpace * i));
-                    }
-                    break;
-                case AROUND:
-                    sizeCovered = sizePerSpace / 2;
-                    for (GuiElement child : children)
-                    {
-                        sizeCovered += getItemBasis(child) + sizePerSpace;
-                        justifyChildLocalPos(child, sizeCovered);
-                    }
-                    break;
-                case EVENLY:
-                    for (int i = 0; i < children.size(); i++)
-                    {
-                        GuiElement child = children.get(i);
-                        sizeCovered += getItemBasis(child);
-                        justifyChildLocalPos(child, allocatedSize - sizeCovered - (sizePerSpace * (i + 1)));
-                    }
-                    break;
-            }
-        }
+        element.setWidth(basis);
     }
 
-    protected void alignCrossAxis()
+    // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
+    protected float getItemResizeWeight(FlexItem item, ResizeType resizeType)
     {
-        for (GuiElement child : children)
-        {
-            FlexAlign alignment = getItemAlign(child);
-
-            switch (alignment)
-            {
-                case START:
-                    // stretch(child, true);
-                    alignChildLocalPos(child, 0);
-                    break;
-                case END:
-                    // stretch(child, true);
-                    alignChildLocalPos(child, isHorizontal() ? this.getHeight() - child.getHeight() : this.getWidth() - child.getWidth());
-                    break;
-                case CENTER:
-                    // stretch(child, true);
-                    float pos = isHorizontal() ? (this.getHeight() / 2) - (child.getHeight() / 2) : (this.getWidth() / 2) - (child.getWidth() / 2);
-                    alignChildLocalPos(child, pos);
-                    break;
-                case STRETCH:
-                    // TODO: on direction change from row to col, reset all children dimens. to initials?
-                    //  otherwise elements remain stretched on prev axis after flip?
-                    if (isHorizontal())
-                    {
-                        child.setHeight(this.getHeight());
-                    }
-                    else
-                    {
-                        child.setWidth(this.getWidth());
-                    }
-                    break;
-            }
-        }
+        boolean isShrink = resizeType.equals(ResizeType.SHRINK);
+        return getItemBasis(item) * (isShrink ? item.getShrink() : item.getGrow());
     }
 
-    protected void justifyChildLocalPos(GuiElement child, float pos)
+    protected void justifyChildLocalPos(FlexItem item, float pos)
     {
         switch (direction)
         {
             case ROW:
             case ROW_REVERSE:
-                child.setLocalXPos(pos);
+                item.getElement().setLocalXPos(pos);
                 break;
             case COLUMN:
             case COLUMN_REVERSE:
-                child.setLocalYPos(pos);
+                item.getElement().setLocalYPos(pos);
                 break;
         }
     }
 
-    protected void alignChildLocalPos(GuiElement child, float pos)
+    protected void alignChildLocalPos(FlexItem item, float pos)
     {
         switch (direction)
         {
             case ROW:
             case ROW_REVERSE:
-                child.setLocalYPos(pos);
+                item.getElement().setLocalYPos(pos);
                 break;
             case COLUMN:
             case COLUMN_REVERSE:
-                child.setLocalXPos(pos);
+                item.getElement().setLocalXPos(pos);
                 break;
         }
+    }
+
+    protected enum ResizeType
+    {
+        SHRINK,
+        GROW;
     }
 
     // TODO: debug

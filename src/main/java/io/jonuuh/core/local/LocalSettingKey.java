@@ -2,12 +2,11 @@ package io.jonuuh.core.local;
 
 enum LocalSettingKey
 {
-    FLEX_DIRECTION_MAIN,
-    FLEX_DIRECTION_REVERSE,
+    FLEX_DIRECTION,
+    FLEX_JUSTIFY,
+    FLEX_ALIGN,
+    FLEX_GROW,
+    FLEX_SHRINK,
+    FLEX_ALIGN_SELF,
     FLEX_BASIS
-//    DRAW_BACKGROUND,
-//    BORDER_OPACITY,
-//    BACKGROUND_COLOR,
-//    MAX_DETECTION_ANGLE,
-//    RENDER_RANGE
 }

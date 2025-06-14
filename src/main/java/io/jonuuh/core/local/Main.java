@@ -1,12 +1,10 @@
 package io.jonuuh.core.local;
 
-import io.jonuuh.core.lib.config.SettingsConfigurationAdapter;
 import io.jonuuh.core.lib.config.setting.Settings;
-import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.config.setting.types.single.IntSetting;
+import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
 import io.jonuuh.core.lib.gui.AbstractGuiScreen;
-import io.jonuuh.core.lib.util.ChatLogger;
-import io.jonuuh.core.lib.util.Log4JLogger;
+import io.jonuuh.core.lib.util.logging.ChatLoggerManager;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.fml.common.Mod;
@@ -23,10 +21,8 @@ public class Main
     @Mod.EventHandler
     public void FMLPreInit(FMLPreInitializationEvent event)
     {
-        Log4JLogger.createInstance(modID);
-        ChatLogger.createInstance(modName, EnumChatFormatting.GOLD, EnumChatFormatting.WHITE);
-
-        SettingsConfigurationAdapter.createInstance(event.getSuggestedConfigurationFile(), initMasterSettings());
+        ChatLoggerManager.putLogger(modName, EnumChatFormatting.GOLD, EnumChatFormatting.WHITE);
+//        ConfigManager.putAdapter(modID, event.getSuggestedConfigurationFile(), initMasterSettings());
     }
 
     @Mod.EventHandler
@@ -42,17 +38,23 @@ public class Main
 //        ClientRegistry.registerKeyBinding(keyBinding);
 //        MinecraftForge.EVENT_BUS.register(new Events(keyBinding));
 
-        Settings settings = SettingsConfigurationAdapter.INSTANCE.getDefaultCategorySettings();
-        AbstractGuiScreen guiScreen = new GuiScreenImpl(settings);
+//        Settings settings = ConfigManager.getAdapter(modID).getDefaultCategorySettings();
+        AbstractGuiScreen guiScreen = new GuiScreenImpl(null);
 //        MinecraftForge.EVENT_BUS.register(guiScreen);
         ClientCommandHandler.instance.registerCommand(new CommandOpenSettingsGui(modID, guiScreen));
     }
 
     private Settings initMasterSettings()
     {
-        Settings settings = new Settings();
-        settings.put(LocalSettingKey.FLEX_DIRECTION_MAIN, new BoolSetting());
-        settings.put(LocalSettingKey.FLEX_DIRECTION_REVERSE, new BoolSetting());
+        Settings settings = new Settings(modID);
+        settings.put(LocalSettingKey.FLEX_DIRECTION, new StringSetting("ROW"));
+        settings.put(LocalSettingKey.FLEX_JUSTIFY, new StringSetting("START"));
+        settings.put(LocalSettingKey.FLEX_ALIGN, new StringSetting("START"));
+
+        settings.put(LocalSettingKey.FLEX_GROW, new IntSetting(0));
+        settings.put(LocalSettingKey.FLEX_SHRINK, new IntSetting(1));
+        settings.put(LocalSettingKey.FLEX_ALIGN_SELF, new StringSetting("START"));
+
         settings.put(LocalSettingKey.FLEX_BASIS, new IntSetting(75));
 //        settings.put(LocalSettingKey.DRAW_BACKGROUND, new BoolSetting());
 //        settings.put(LocalSettingKey.BORDER_OPACITY, new DoubleSetting(75.0));
