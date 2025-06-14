@@ -1,7 +1,7 @@
 package io.jonuuh.core.lib.gui.element;
 
 import io.jonuuh.core.lib.gui.GuiColorType;
-import io.jonuuh.core.lib.gui.event.GuiEventType;
+import io.jonuuh.core.lib.gui.GuiEventType;
 import io.jonuuh.core.lib.util.RenderUtils;
 import org.lwjgl.input.Keyboard;
 

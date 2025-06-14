@@ -2,9 +2,9 @@ package io.jonuuh.core.lib.gui.element;
 
 import io.jonuuh.core.lib.gui.AbstractGuiScreen;
 import io.jonuuh.core.lib.gui.GuiColorType;
+import io.jonuuh.core.lib.gui.GuiEventType;
 import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.gui.element.container.GuiRootContainer;
-import io.jonuuh.core.lib.gui.event.GuiEventType;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.Minecraft;

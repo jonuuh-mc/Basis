@@ -5,6 +5,7 @@ import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.gui.AbstractGuiScreen;
 import io.jonuuh.core.lib.gui.GuiColorType;
+import io.jonuuh.core.lib.gui.GuiEventType;
 import io.jonuuh.core.lib.gui.element.GuiElement;
 import io.jonuuh.core.lib.gui.element.GuiLabel;
 import io.jonuuh.core.lib.gui.element.GuiSwitch;
