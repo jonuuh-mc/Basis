@@ -1,8 +1,11 @@
 package io.jonuuh.core.lib.gui.element.container.flex;
 
-import io.jonuuh.core.lib.gui.GuiColorType;
 import io.jonuuh.core.lib.gui.element.GuiElement;
 import io.jonuuh.core.lib.gui.element.container.GuiContainer;
+import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexAlign;
+import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexDirection;
+import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexJustify;
+import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.gui.ScaledResolution;
@@ -493,7 +496,7 @@ public class GuiFlexContainer extends GuiContainer
     protected enum ResizeType
     {
         SHRINK,
-        GROW;
+        GROW
     }
 
     // TODO: debug

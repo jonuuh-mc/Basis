@@ -1,4 +1,4 @@
-package io.jonuuh.core.lib.gui.element.container.flex;
+package io.jonuuh.core.lib.gui.element.container.flex.properties;
 
 public enum FlexAlign
 {

@@ -1,6 +1,7 @@
 package io.jonuuh.core.lib.gui.element.container.flex;
 
 import io.jonuuh.core.lib.gui.element.GuiElement;
+import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexAlign;
 
 /**
  * A wrapper for a GuiElement inside a GuiFlexContainer;
@@ -33,7 +34,6 @@ public class FlexItem
     private int grow;
     /** Part of how much weight this element has when the items along the main axis are shrunk */
     private int shrink;
-
     /** How this item should be aligned along the cross axis */
     private FlexAlign alignSelf;
 
@@ -60,10 +60,15 @@ public class FlexItem
         this(element, minWidth, maxWidth, minHeight, maxHeight, 0, 0, 1, null);
     }
 
+    public FlexItem(GuiElement element, int order, int grow, int shrink, FlexAlign alignSelf)
+    {
+        this(element, 0, Integer.MAX_VALUE, 0, Integer.MAX_VALUE, order, grow, shrink, alignSelf);
+    }
+
     public FlexItem(GuiElement element)
     {
-        // TODO: need to figure out good defaults for min/maxes (default max = initial probably won't let anything grow)
-        this(element, 0, element.getWidth(), 0, element.getHeight());
+        // TODO: need to figure out good defaults for min/maxes
+        this(element, 0, Integer.MAX_VALUE, 0, Integer.MAX_VALUE);
     }
 
 //    public FlexItem(float minWidth, float maxWidth)

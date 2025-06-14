@@ -1,10 +1,10 @@
 package io.jonuuh.core.lib.gui.element.container;
 
 import io.jonuuh.core.lib.gui.AbstractGuiScreen;
-import io.jonuuh.core.lib.gui.GuiColorType;
-import io.jonuuh.core.lib.gui.element.container.flex.FlexAlign;
-import io.jonuuh.core.lib.gui.element.container.flex.FlexJustify;
 import io.jonuuh.core.lib.gui.element.container.flex.GuiFlexContainer;
+import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexAlign;
+import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexJustify;
+import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.util.Color;
 import net.minecraft.client.gui.ScaledResolution;
 

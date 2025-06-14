@@ -1,6 +1,6 @@
 package io.jonuuh.core.lib.gui.element;
 
-import io.jonuuh.core.lib.gui.GuiColorType;
+import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.gui.ScaledResolution;

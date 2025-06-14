@@ -1,4 +1,4 @@
-package io.jonuuh.core.lib.gui;
+package io.jonuuh.core.lib.gui.properties;
 
 public enum GuiEventType
 {

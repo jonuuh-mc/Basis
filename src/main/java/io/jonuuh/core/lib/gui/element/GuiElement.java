@@ -1,10 +1,11 @@
 package io.jonuuh.core.lib.gui.element;
 
 import io.jonuuh.core.lib.gui.AbstractGuiScreen;
-import io.jonuuh.core.lib.gui.GuiColorType;
-import io.jonuuh.core.lib.gui.GuiEventType;
 import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.gui.element.container.GuiRootContainer;
+import io.jonuuh.core.lib.gui.properties.GuiColorType;
+import io.jonuuh.core.lib.gui.properties.GuiEventType;
+import io.jonuuh.core.lib.gui.properties.Spacing;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.Minecraft;
@@ -90,8 +91,8 @@ public abstract class GuiElement
 
     protected boolean debug;
 
-    protected Margin margin;
-    protected Padding padding;
+    protected Spacing margin;
+    protected Spacing padding;
 
     /** Like the colorMap, should not be accessed directly, use getCornerRadius instead */
     protected float cornerRadius;
@@ -358,22 +359,22 @@ public abstract class GuiElement
         this.mouseDown = mouseDown;
     }
 
-    public Margin getMargin()
+    public Spacing getMargin()
     {
         return margin;
     }
 
-    public void setMargin(Margin margin)
+    public void setMargin(Spacing margin)
     {
         this.margin = margin;
     }
 
-    public Padding getPadding()
+    public Spacing getPadding()
     {
         return padding;
     }
 
-    public void setPadding(Padding padding)
+    public void setPadding(Spacing padding)
     {
         this.padding = padding;
     }

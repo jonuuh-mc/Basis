@@ -2,9 +2,9 @@ package io.jonuuh.core.lib.gui.element.container;
 
 import io.jonuuh.core.lib.gui.element.GuiButton;
 import io.jonuuh.core.lib.gui.element.GuiElement;
-import io.jonuuh.core.lib.gui.element.container.flex.FlexDirection;
 import io.jonuuh.core.lib.gui.element.container.flex.FlexItem;
 import io.jonuuh.core.lib.gui.element.container.flex.GuiFlexContainer;
+import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexDirection;
 
 import java.util.Collection;
 

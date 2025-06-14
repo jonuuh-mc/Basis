@@ -1,7 +1,7 @@
 package io.jonuuh.core.lib.gui.element.container;
 
-import io.jonuuh.core.lib.gui.GuiColorType;
 import io.jonuuh.core.lib.gui.element.GuiElement;
+import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.util.Color;
 import net.minecraft.client.audio.SoundHandler;
 

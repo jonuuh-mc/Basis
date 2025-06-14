@@ -1,7 +1,7 @@
 package io.jonuuh.core.lib.gui.element.sliders;
 
-import io.jonuuh.core.lib.gui.GuiColorType;
 import io.jonuuh.core.lib.gui.element.GuiElement;
+import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.gui.ScaledResolution;

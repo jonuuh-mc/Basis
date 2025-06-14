@@ -1,6 +1,6 @@
 package io.jonuuh.core.lib.gui.element;
 
-import io.jonuuh.core.lib.gui.GuiColorType;
+import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import net.minecraft.client.gui.FontRenderer;
 
 public class GuiLabel extends GuiElement
