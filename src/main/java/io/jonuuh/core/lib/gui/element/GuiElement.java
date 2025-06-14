@@ -173,9 +173,10 @@ public abstract class GuiElement
         return hasParent() ? parent.getNumParents() + 1 : 0;
     }
 
-    public void putColor(GuiColorType type, Color color)
+    public GuiElement putColor(GuiColorType type, Color color)
     {
         colorMap.put(type, color);
+        return this;
     }
 
     public Color getColor(GuiColorType type)
