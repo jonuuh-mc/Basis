@@ -22,5 +22,6 @@ public class GuiBaseContainer extends GuiContainer
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
         RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), getColor(GuiColorType.BACKGROUND));
+        super.onScreenDraw(mouseX, mouseY, partialTicks);
     }
 }

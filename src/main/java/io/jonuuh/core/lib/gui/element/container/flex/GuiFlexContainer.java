@@ -14,6 +14,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -99,12 +100,16 @@ public class GuiFlexContainer extends GuiContainer
 
     public float getMainAxisSize()
     {
-        return isHorizontal() ? getWidth() : getHeight();
+        return isHorizontal()
+                ? getWidth() - (getPadding().getLeft() + getPadding().getRight())
+                : getHeight() - (getPadding().getTop() + getPadding().getBottom());
     }
 
     public float getCrossAxisSize()
     {
-        return isHorizontal() ? getHeight() : getWidth();
+        return isHorizontal()
+                ? getHeight() - (getPadding().getTop() + getPadding().getBottom())
+                : getWidth() - (getPadding().getLeft() + getPadding().getRight());
     }
 
     /**
@@ -181,6 +186,8 @@ public class GuiFlexContainer extends GuiContainer
             float textY = worldYPos() + getHeight() - mc.fontRendererObj.FONT_HEIGHT;
             mc.fontRendererObj.drawString(info, textX, textY, getColor(GuiColorType.ACCENT1).toPackedARGB(), true);
         }
+
+        super.onScreenDraw(mouseX, mouseY, partialTicks);
     }
 
     @Override
@@ -227,12 +234,15 @@ public class GuiFlexContainer extends GuiContainer
     // what if an element is shrunk to the point of being 0 and then cannot grow back up again
     protected void resizeMainAxisItems(float freeLength, ResizeType resizeType)
     {
+        Map<FlexItem, Float> resizeWeights = new HashMap<>();
+
         // Total of all item's resize weights
         float totalResizeWeight = 0;
 
         for (FlexItem item : flexItems)
         {
-            totalResizeWeight += getItemResizeWeight(item, resizeType);
+            resizeWeights.put(item, getItemResizeWeight(item, resizeType));
+            totalResizeWeight += resizeWeights.get(item);
         }
 
         // A total resize weight of 0 means all items have a shrink property of 0,
@@ -246,7 +256,7 @@ public class GuiFlexContainer extends GuiContainer
         {
             // *Not* how much the child will shrink/grow by; have had a hard time trying to visualize this number
             // Can't really describe it better than how much "weight" a child has in the shrink/grow
-            float resizeWeight = getItemResizeWeight(item, resizeType);
+            float resizeWeight = resizeWeights.get(item);
 
             // The actual physical amount this child will shrink/grow by
             // (Shrink: A negative #, freeLength should always be - during a shrink)
@@ -279,27 +289,32 @@ public class GuiFlexContainer extends GuiContainer
     {
         float freeLength = getMainAxisSize() - getItemBasesSum();
         boolean isMainAxisFull = freeLength == 0; // TODO: why does this work w/out floating point error correction - check in debug?
-        float currentPos = 0;
 
-        // Justify start by default if no free space
+        float defaultPadding = isHorizontal() ? getPadding().getLeft() : getPadding().getTop();
+
+        // Justify from start by default
+        float currentPos = isReversed() ? defaultPadding + freeLength : defaultPadding;
+
+        // If no free space, don't change starting pos
+        // (e.g. if justifyContent=CENTER but no free space, use default starting pos of justifyContent=START)
         if (!isMainAxisFull)
         {
             switch (justifyContent)
             {
-                case START:
-                    currentPos = isReversed() ? freeLength : 0;
-                    break;
                 case END:
-                    currentPos = isReversed() ? 0 : freeLength;
+                    currentPos = isReversed() ? defaultPadding : defaultPadding + freeLength;
                     break;
                 case CENTER:
-                    currentPos = freeLength / 2F;
+                    currentPos = defaultPadding + (freeLength / 2F);
                     break;
-                case EVENLY:
-                    currentPos = freeLength / (flexItems.size() + 1);
+                case BETWEEN:
+                    currentPos = defaultPadding;
                     break;
                 case AROUND:
-                    currentPos = (freeLength / (flexItems.size())) / 2;
+                    currentPos = defaultPadding + ((freeLength / flexItems.size()) / 2);
+                    break;
+                case EVENLY:
+                    currentPos = defaultPadding + (freeLength / (flexItems.size() + 1));
                     break;
             }
         }
@@ -341,6 +356,8 @@ public class GuiFlexContainer extends GuiContainer
      */
     protected void alignCrossAxis()
     {
+        float paddingOffset = isHorizontal() ? getPadding().getTop() : getPadding().getLeft();
+
         for (FlexItem item : flexItems)
         {
             FlexAlign itemAlignment = (item.getAlign() != null) ? item.getAlign() : alignItems;
@@ -348,15 +365,16 @@ public class GuiFlexContainer extends GuiContainer
             switch (itemAlignment)
             {
                 case START:
-                    alignChildLocalPos(item, 0);
+                    alignChildLocalPos(item, paddingOffset);
                     break;
                 case END:
-                    alignChildLocalPos(item, getCrossAxisSize() - getItemCrossAxisLength(item));
+                    alignChildLocalPos(item, getCrossAxisSize() - getItemCrossAxisLength(item) + paddingOffset);
                     break;
                 case CENTER:
-                    alignChildLocalPos(item, (getCrossAxisSize() / 2) - (getItemCrossAxisLength(item) / 2));
+                    alignChildLocalPos(item, (getCrossAxisSize() / 2) - (getItemCrossAxisLength(item) / 2) + paddingOffset);
                     break;
                 case STRETCH:
+                    alignChildLocalPos(item, paddingOffset);
                     setItemCrossAxisLength(item, getCrossAxisSize());
                     break;
             }

@@ -3,6 +3,7 @@ package io.jonuuh.core.lib.gui.element.container;
 import io.jonuuh.core.lib.gui.element.GuiElement;
 import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.util.Color;
+import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.audio.SoundHandler;
 
 import java.util.ArrayList;
@@ -206,37 +207,20 @@ public abstract class GuiContainer extends GuiElement
     {
     }
 
-    //    @Override
-//    public void onScreenDraw(float mouseX, float mouseY, float partialTicks)
-//    {
-////        GL11.glPushMatrix();
-////        GL11.glEnable(GL11.GL_SCISSOR_TEST);
-////        RenderUtils.scissorFromTopLeft(xPos, yPos, width, height);
-//
-//        super.onScreenDraw(mouseX, mouseY, partialTicks);
-//
-////        GL11.glDisable(GL11.GL_SCISSOR_TEST);
-////        GL11.glPopMatrix();
-//        childrenMap.values().forEach(element -> element.onScreenDraw(mouseX, mouseY, partialTicks));
-//
-////        for (GuiElement element : getNestedChildren())
-////        {
-////            if (!(element instanceof GuiContainer))
-////            {
-////                element.onScreenDraw(mouseX, mouseY, partialTicks);
-////            }
-////            else
-////            {
-////                super.onScreenDraw(mouseX, mouseY, partialTicks);
-//////                System.out.println(element.elementName + " " + element.getNumParents());
-////                if (element.getNumParents() == 0)
-////                {
-////                    super.onScreenDraw(mouseX, mouseY, partialTicks);
-////
-//////                    element.onScreenDraw(mouseX, mouseY, partialTicks);
-////                }
-////            }
-////        }
-//
-//    }
+    @Override
+    protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
+    {
+        if (debug && hasChildren())
+        {
+            Color padColor = new Color("#36ff0000");
+            // Left
+            RenderUtils.drawRectangle(worldXPos(), worldYPos(), padding.getLeft(), getHeight(), padColor);
+            // Right
+            RenderUtils.drawRectangle(worldXPos() + getWidth() - padding.getRight(), worldYPos(), padding.getRight(), getHeight(), padColor);
+            // Top
+            RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), padding.getTop(), padColor);
+            // Bottom
+            RenderUtils.drawRectangle(worldXPos(), worldYPos() + getHeight() - padding.getBottom(), getWidth(), padding.getBottom(), padColor);
+        }
+    }
 }

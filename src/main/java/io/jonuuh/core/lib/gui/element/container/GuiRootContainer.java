@@ -38,7 +38,7 @@ public class GuiRootContainer extends GuiFlexContainer
     @Override
     protected void onInitGui(ScaledResolution scaledResolution)
     {
-//        System.out.printf("%s: (%s,%s) -> %s%n", elementName, screenWidth, screenHeight, scaledResolution.getScaleFactor());
+//        System.out.printf("%s: (%s,%s) -> %s%n", elementName, scaledResolution.getScaledWidth(), scaledResolution.getScaledHeight(), scaledResolution.getScaleFactor());
         setWidth(scaledResolution.getScaledWidth());
         setHeight(scaledResolution.getScaledHeight());
 
@@ -48,7 +48,7 @@ public class GuiRootContainer extends GuiFlexContainer
     @Override
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
+//        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), 3, new Color("#FFFFFF", 0.2F));
         super.onScreenDraw(mouseX, mouseY, partialTicks);
-//        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), innerRadius, new Color("#FFFFFF", 0.2F), true);
     }
 }

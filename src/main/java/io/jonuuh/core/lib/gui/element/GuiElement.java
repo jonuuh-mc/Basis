@@ -118,6 +118,7 @@ public abstract class GuiElement
 
         this.width = width;
         this.height = height;
+        this.padding = new Spacing(0);
 
         this.visible = true;
         this.enabled = true;

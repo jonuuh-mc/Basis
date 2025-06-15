@@ -16,6 +16,7 @@ import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexJustify;
 import io.jonuuh.core.lib.gui.element.sliders.GuiSingleSlider;
 import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.gui.properties.GuiEventType;
+import io.jonuuh.core.lib.gui.properties.Spacing;
 import io.jonuuh.core.lib.util.Color;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
@@ -65,10 +66,12 @@ public class GuiScreenImpl extends AbstractGuiScreen
         mainContent.setDirection(FlexDirection.COLUMN);
         mainContent.setJustifyContent(FlexJustify.AROUND);
         mainContent.setAlignItems(FlexAlign.CENTER);
+        mainContent.setPadding(new Spacing(10, 20, 0, 70));
 
 //        // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
         GuiFlexContainer mainFlex = new GuiFlexContainer("mainFlex", 0, 0, 450, 270);
         mainFlex.putColor(GuiColorType.BACKGROUND, new Color("4d4d4d", 0.75F));
+        mainFlex.setPadding(new Spacing(5, 50/*250*/, 10, 20));
         this.mainFlex = mainFlex;
 
         // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
@@ -123,6 +126,8 @@ public class GuiScreenImpl extends AbstractGuiScreen
         GuiDropdown alignItemDropdown = new GuiDropdown("alignDropdown", 0, 0, 75, 15, "START",
                 Arrays.asList("START", "END", "CENTER", "STRETCH"));
 
+        // TODO: MOUSE_DRAG events don't account for single clicks to move pointer around
+        //  either need two event behaviors assigned per slider or a better solution?
         growItemSlider.assignCustomPostEventBehavior(GuiEventType.MOUSE_DRAG,
                 element -> mainFlex.getFlexItem(currFocusedContainer).setGrow(((GuiSingleSlider) element).getValueInt()));
         shrinkItemSlider.assignCustomPostEventBehavior(GuiEventType.MOUSE_DRAG,
