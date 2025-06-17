@@ -59,8 +59,7 @@ public class GuiScreenImpl extends AbstractGuiScreen
                 GuiColorType.BASE, new Color("#BF1450A0"),
                 GuiColorType.BACKGROUND, new Color("#BF242424"));
 
-        GuiRootContainer rootContainer = new GuiRootContainer(this, new ScaledResolution(Minecraft.getMinecraft()),
-                0, colorMap);
+        GuiRootContainer rootContainer = new GuiRootContainer(this, new ScaledResolution(Minecraft.getMinecraft()), colorMap);
 
         GuiFlexContainer mainContent = new GuiFlexContainer("mainContent", 0, 0, 600, 400);
         mainContent.setDirection(FlexDirection.COLUMN);

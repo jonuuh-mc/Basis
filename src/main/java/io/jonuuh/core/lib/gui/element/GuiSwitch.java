@@ -57,9 +57,9 @@ public class GuiSwitch extends GuiElement
         Color trackColor = switchState ? getColor(GuiColorType.BASE) : getColor(GuiColorType.ACCENT2);
 
         // Track
-        RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), trackColor);
+        RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), trackColor);
         // Pointer
-        RenderUtils.drawRoundedRect(pointerX, worldYPos() + padding, pointerSize, pointerSize, getCornerRadius() - 1, getColor(GuiColorType.ACCENT1));
+        RenderUtils.drawRectangle(pointerX, worldYPos() + padding, pointerSize, pointerSize, getColor(GuiColorType.ACCENT1));
     }
 
     @Override

@@ -117,9 +117,6 @@ public abstract class GuiElement
     protected Spacing margin;
     protected Spacing padding;
 
-    /** Like the colorMap, should not be accessed directly, use getCornerRadius instead */
-    protected float cornerRadius;
-
     protected String tooltipStr;
 
     // TODO: use a ticker with onScreenTick instead for tooltips?
@@ -138,7 +135,6 @@ public abstract class GuiElement
 
         this.visible = true;
         this.enabled = true;
-        this.cornerRadius = -1F;
 
         this.debug = true;
 
@@ -214,25 +210,6 @@ public abstract class GuiElement
         }
 
         return new Color();
-    }
-
-    public float getCornerRadius()
-    {
-        if (cornerRadius != -1F)
-        {
-            return cornerRadius;
-        }
-        else if (hasParent())
-        {
-            return parent.getCornerRadius();
-        }
-        return 0F;
-    }
-
-    public GuiElement setCornerRadius(float cornerRadius)
-    {
-        this.cornerRadius = cornerRadius;
-        return this;
     }
 
     /**
@@ -531,7 +508,7 @@ public abstract class GuiElement
                 {
                     GL11.glEnable(GL11.GL_LINE_SMOOTH);
                     GL11.glLineWidth(0.8F);
-                    RenderUtils.drawRoundedRect(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(),
+                    RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), getWidth(), getHeight(),
                             isFocused() ? new Color("#00ff00") : new Color("#ff55ff"));
                     GL11.glLineWidth(1F);
                     GL11.glDisable(GL11.GL_LINE_SMOOTH);

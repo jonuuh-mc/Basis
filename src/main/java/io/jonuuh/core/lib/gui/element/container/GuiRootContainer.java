@@ -15,18 +15,17 @@ public class GuiRootContainer extends GuiFlexContainer
     /** The GuiScreen containing this GuiRootContainer, should be a 1:1 relationship */
     public final AbstractGuiScreen guiScreen;
 
-    public GuiRootContainer(AbstractGuiScreen guiScreen, ScaledResolution sr, float cornerRadius, Map<GuiColorType, Color> colorMap)
+    public GuiRootContainer(AbstractGuiScreen guiScreen, ScaledResolution sr, Map<GuiColorType, Color> colorMap)
     {
         super("ROOT", 0, 0, sr.getScaledWidth(), sr.getScaledHeight(), colorMap);
         this.guiScreen = guiScreen;
-        this.cornerRadius = cornerRadius;
         this.setJustifyContent(FlexJustify.CENTER);
         this.setAlignItems(FlexAlign.CENTER);
     }
 
-    public GuiRootContainer(AbstractGuiScreen guiScreen, ScaledResolution sr, float cornerRadius)
+    public GuiRootContainer(AbstractGuiScreen guiScreen, ScaledResolution sr)
     {
-        this(guiScreen, sr, cornerRadius, null);
+        this(guiScreen, sr, null);
     }
 
     @Override

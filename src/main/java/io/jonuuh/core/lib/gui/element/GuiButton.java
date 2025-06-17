@@ -51,7 +51,7 @@ public class GuiButton extends GuiElement
     @Override
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
-        RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), getColor(GuiColorType.BASE));
+        RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), getColor(GuiColorType.BASE));
 
         String buttonText = RenderUtils.trimStringToWidthWithEllipsis(buttonLabel, (int) getWidth());
 

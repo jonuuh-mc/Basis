@@ -364,6 +364,15 @@ public final class RenderUtils
         drawVertices(GL11.GL_TRIANGLE_STRIP, new float[][]{{x, y}, {x, y + height}, {x + width, y + height}, {x + width, y}, {x, y}}, color);
     }
 
+    public static void drawRectangle(int glMode, float x, float y, float width, float height, Color color)
+    {
+        width = Math.max(width, 0);
+        height = Math.max(height, 0);
+
+        // Order: top left, bottom left, bottom right, top right, back to top left
+        drawVertices(glMode, new float[][]{{x, y}, {x, y + height}, {x + width, y + height}, {x + width, y}}, color);
+    }
+
 //    public static void drawTooltip()
 //    {
 //        // TODO: ?

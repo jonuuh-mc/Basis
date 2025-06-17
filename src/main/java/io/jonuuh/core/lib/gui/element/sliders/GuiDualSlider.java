@@ -188,13 +188,13 @@ public class GuiDualSlider extends GuiElement
 //        float pOffset = pointerSize / 2F;
 
         // far left
-        RenderUtils.drawRoundedRect(worldXPos(), (worldYPos() + trackHeight), (leftPointerScreenPos - worldXPos()) /*- pOffset*/, trackHeight, getCornerRadius(), getColor(GuiColorType.ACCENT1));
+        RenderUtils.drawRectangle(worldXPos(), (worldYPos() + trackHeight), (leftPointerScreenPos - worldXPos()) /*- pOffset*/, trackHeight, getColor(GuiColorType.ACCENT1));
 
         // middle
-        RenderUtils.drawRoundedRect(leftPointerScreenPos /*- pOffset*/, (worldYPos() + trackHeight), (rightPointerScreenPos - leftPointerScreenPos) /*+ (pOffset * 2)*/, trackHeight, getCornerRadius(), getColor(GuiColorType.BASE));
+        RenderUtils.drawRectangle(leftPointerScreenPos /*- pOffset*/, (worldYPos() + trackHeight), (rightPointerScreenPos - leftPointerScreenPos) /*+ (pOffset * 2)*/, trackHeight, getColor(GuiColorType.BASE));
 
         // far right
-        RenderUtils.drawRoundedRect(rightPointerScreenPos /*+ pOffset*/, (worldYPos() + trackHeight), getWidth() - (rightPointerScreenPos - worldXPos()) /*- pOffset*/, trackHeight, getCornerRadius(), getColor(GuiColorType.ACCENT1));
+        RenderUtils.drawRectangle(rightPointerScreenPos /*+ pOffset*/, (worldYPos() + trackHeight), getWidth() - (rightPointerScreenPos - worldXPos()) /*- pOffset*/, trackHeight, getColor(GuiColorType.ACCENT1));
 
 
 //        // Draw track(s)

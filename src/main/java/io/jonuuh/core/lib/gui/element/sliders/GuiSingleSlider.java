@@ -171,9 +171,9 @@ public class GuiSingleSlider extends GuiElement
         float pointerScreenPos = getPointerScreenPos();
 
         // left
-        RenderUtils.drawRoundedRect(worldXPos(), trackY, (pointerScreenPos - worldXPos()), trackHeight, getCornerRadius(), getColor(GuiColorType.BASE));
+        RenderUtils.drawRectangle(worldXPos(), trackY, (pointerScreenPos - worldXPos()), trackHeight, getColor(GuiColorType.BASE));
         // right
-        RenderUtils.drawRoundedRect(pointerScreenPos, trackY, getWidth() - (pointerScreenPos - worldXPos()), trackHeight, getCornerRadius(), getColor(GuiColorType.ACCENT1));
+        RenderUtils.drawRectangle(pointerScreenPos, trackY, getWidth() - (pointerScreenPos - worldXPos()), trackHeight, getColor(GuiColorType.ACCENT1));
 
         drawPointer();
     }
@@ -185,9 +185,9 @@ public class GuiSingleSlider extends GuiElement
         float pointerScreenPos = getPointerScreenPos();
 
         // left
-        RenderUtils.drawRoundedRect(trackX, worldYPos(), trackWidth, (pointerScreenPos - worldYPos()), getCornerRadius(), getColor(GuiColorType.BASE));
+        RenderUtils.drawRectangle(trackX, worldYPos(), trackWidth, (pointerScreenPos - worldYPos()), getColor(GuiColorType.BASE));
         // right
-        RenderUtils.drawRoundedRect(trackX, pointerScreenPos, trackWidth, getHeight() - (pointerScreenPos - worldYPos()), getCornerRadius(), getColor(GuiColorType.ACCENT1));
+        RenderUtils.drawRectangle(trackX, pointerScreenPos, trackWidth, getHeight() - (pointerScreenPos - worldYPos()), getColor(GuiColorType.ACCENT1));
 
         drawPointer();
     }
