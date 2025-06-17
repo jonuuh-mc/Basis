@@ -42,16 +42,14 @@ public class GuiDropdown extends GuiFlexContainer
         header.setButtonLabel(headerText);
     }
 
-//    protected void setHeaderText(GuiElement element)
-//    {
-//        header.setButtonLabel(element.elementName);
-//        toggleOpen(null);
-//    }
-
     protected void toggleOpen(GuiElement element)
     {
-        header.setButtonLabel(((GuiButton) element).getButtonLabel());
-        dropdownContainer.setVisible(!dropdownContainer.isVisible());
+        if (handlePreCustomEvent())
+        {
+            header.setButtonLabel(((GuiButton) element).getButtonLabel());
+            dropdownContainer.setVisible(!dropdownContainer.isVisible());
+        }
+        handlePostCustomEvent();
     }
 
     @Override
@@ -62,11 +60,6 @@ public class GuiDropdown extends GuiFlexContainer
 
 //        float size = getWidth() / 3F;
 //        RenderUtils.drawTriangle(GL11.GL_POLYGON, worldXPos() + getWidth() - size, worldYPos() + getHeight() - size,
-//                size, size, getColor(GuiColorType.ACCENT1), 0);
-
-//        if (isOpen)
-//        {
-//
-//        }
+//                size, size, getColor(GuiColorType.ACCENT1), 0)
     }
 }

@@ -35,7 +35,7 @@ public class GuiButton extends GuiElement
     private void init(String buttonLabel, Consumer<GuiElement> mouseDownBehavior)
     {
         this.buttonLabel = buttonLabel;
-        assignCustomPostEventBehavior(GuiEventType.MOUSE_DOWN, mouseDownBehavior);
+        assignPostEventBehavior(GuiEventType.MOUSE_DOWN, mouseDownBehavior);
     }
 
     public String getButtonLabel()

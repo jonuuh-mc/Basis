@@ -48,7 +48,7 @@ public class GuiDualSlider extends GuiElement
 
     public void setValue(boolean isLeftPointer, double value)
     {
-        setNormalizedValue(isLeftPointer, MathUtils.normalize(value, min, max));
+        setNormalizedValue(isLeftPointer, MathUtils.clamp(MathUtils.normalize(value, min, max)));
     }
 
     public double[] getValues()
@@ -60,8 +60,8 @@ public class GuiDualSlider extends GuiElement
     {
         startValueLeft = Math.min(startValueLeft, startValueRight);
 
-        normalPointerValueLeft = MathUtils.clamp(MathUtils.normalize(startValueLeft, min, max));
-        normalPointerValueRight = MathUtils.clamp(MathUtils.normalize(startValueRight, min, max));
+        setValue(true, startValueLeft);
+        setValue(true, startValueRight);
     }
 
 //    public void setValues(double[] values)
@@ -77,14 +77,18 @@ public class GuiDualSlider extends GuiElement
 
     public void setNormalizedValue(boolean isLeftPointer, double normalValue)
     {
-        if (isLeftPointer)
+        if (handlePreCustomEvent())
         {
-            normalPointerValueLeft = clampBetweenAdjacents(true, normalValue);
+            if (isLeftPointer)
+            {
+                normalPointerValueLeft = clampBetweenAdjacents(true, normalValue);
+            }
+            else
+            {
+                normalPointerValueRight = clampBetweenAdjacents(false, normalValue);
+            }
         }
-        else
-        {
-            normalPointerValueRight = clampBetweenAdjacents(false, normalValue);
-        }
+        handlePostCustomEvent();
     }
 
     public DecimalFormat getDecimalFormat()

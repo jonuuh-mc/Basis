@@ -74,9 +74,13 @@ public class GuiSingleSlider extends GuiElement
 
     public void setNormalizedValue(double normalValue)
     {
-        double value = MathUtils.clamp(normalValue, 0, 1);
-        // If an integer slider, round proportional to the max value
-        normalPointerValue = isInteger ? (Math.round(value * max) / max) : value;
+        if (handlePreCustomEvent())
+        {
+            double value = MathUtils.clamp(normalValue, 0, 1);
+            // If an integer slider, round proportional to the max value
+            normalPointerValue = isInteger ? (Math.round(value * max) / max) : value;
+        }
+        handlePostCustomEvent();
     }
 
     // mouse position on the slider

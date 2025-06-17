@@ -49,21 +49,34 @@ public abstract class GuiElement
     protected Map<GuiColorType, Color> colorMap;
 
     /**
-     * A map of custom pre-event behavior lambdas.
+     * A map of pre-event behavior lambdas.
      * <p>
-     * Allows for 'injecting' into and potentially overriding an element's behavior for events dispatched by the GuiScreen.
+     * Allows for 'injecting' an arbitrary function call BEFORE this element's default behavior for an event.
+     * This function call should return a boolean: whether it should override the element's default behavior for this event.
+     * <p>
+     * All possible events are normally dispatched by the GuiScreen, EXCEPT FOR 'CUSTOM',
+     * which may be dispatched by the element itself, at a time which is defined by that element.
+     * <p>
+     * e.g. A GuiSingleSlider tries to call any assigned CUSTOM pre event behavior before its value is updated via
+     * other events: KEY_INPUT, MOUSE_SCROLL, SCREEN_DRAW
+     * (TODO: this design is so weird)
      * <p>
      * Keys are enums representing different events a GuiElement can act on, and values are functions which will
      * be executed (if they exist) before their associated event's default behavior.
-     * <p>
-     * A function returning true means it SHOULD override the default behavior, false means it should not.
      */
     protected Map<GuiEventType, Function<GuiElement, Boolean>> preEventBehaviors;
 
     /**
-     * A map of custom post-event behavior lambdas.
+     * A map of post-event behavior lambdas.
      * <p>
-     * Allows for 'injecting' into an element's behavior for events dispatched by the GuiScreen.
+     * Allows for 'injecting' an arbitrary function call AFTER this element's default behavior for an event.
+     * <p>
+     * All possible events are normally dispatched by the GuiScreen, EXCEPT FOR 'CUSTOM',
+     * which may be dispatched by the element itself, at a time which is defined by that element.
+     * <p>
+     * e.g. A GuiSingleSlider tries to call any assigned CUSTOM post event behavior after its value is updated via
+     * other events: KEY_INPUT, MOUSE_SCROLL, SCREEN_DRAW
+     * (TODO: this design is so weird)
      * <p>
      * Keys are enums representing different events a GuiElement can act on, and values are consumers which will
      * be executed (if they exist) after their associated event's default behavior.
@@ -412,49 +425,49 @@ public abstract class GuiElement
     }
 
     /**
-     * Assign some custom pre-event behavior to this element
+     * Assign some pre-event behavior to this element
      * <p>
      * The behavior should return a boolean where true means it should override the default behavior, false means it should not
      *
      * @param eventType An enum representing the event this behavior should be associated with
-     * @param behavior A custom pre-event behavior
+     * @param behavior A pre-event behavior
      * @see GuiElement#preEventBehaviors
      */
-    public void assignCustomPreEventBehavior(GuiEventType eventType, Function<GuiElement, Boolean> behavior)
+    public void assignPreEventBehavior(GuiEventType eventType, Function<GuiElement, Boolean> behavior)
     {
         preEventBehaviors.put(eventType, behavior);
     }
 
     /**
-     * Assign some custom post-event behavior to this element
+     * Assign some post-event behavior to this element
      *
      * @param eventType An enum representing the event this behavior should be associated with
-     * @param behavior A custom post-event behavior
+     * @param behavior A post-event behavior
      * @see GuiElement#postEventBehaviors
      */
-    public void assignCustomPostEventBehavior(GuiEventType eventType, Consumer<GuiElement> behavior)
+    public void assignPostEventBehavior(GuiEventType eventType, Consumer<GuiElement> behavior)
     {
         postEventBehaviors.put(eventType, behavior);
     }
 
     /**
-     * If it exists, apply the custom pre-event behavior to this element for some event type
+     * If it exists, apply the pre-event behavior to this element for some event type
      *
      * @param eventType An enum representing the event this behavior should be associated with
      * @return true if this behavior exists and should override the default behavior for this event, otherwise false
      */
-    protected boolean tryApplyCustomPreEventBehavior(GuiEventType eventType)
+    protected boolean tryApplyPreEventBehavior(GuiEventType eventType)
     {
         Function<GuiElement, Boolean> behavior = preEventBehaviors.get(eventType);
         return behavior != null && behavior.apply(this);
     }
 
     /**
-     * If it exists, apply the custom post-event behavior to this element for some event type
+     * If it exists, apply the post-event behavior to this element for some event type
      *
      * @param eventType An enum representing the event this behavior should be associated with
      */
-    protected void tryApplyCustomPostEventBehavior(GuiEventType eventType)
+    protected void tryApplyPostEventBehavior(GuiEventType eventType)
     {
         Consumer<GuiElement> behavior = postEventBehaviors.get(eventType);
         if (behavior != null)
@@ -465,7 +478,7 @@ public abstract class GuiElement
 
     public final void handleInitGuiEvent(ScaledResolution scaledResolution)
     {
-        boolean doDefaultBehavior = !tryApplyCustomPreEventBehavior(GuiEventType.INIT);
+        boolean doDefaultBehavior = !tryApplyPreEventBehavior(GuiEventType.INIT);
 
         if (doDefaultBehavior)
         {
@@ -473,7 +486,7 @@ public abstract class GuiElement
 
         onInitGui(scaledResolution);
 
-        tryApplyCustomPostEventBehavior(GuiEventType.INIT);
+        tryApplyPostEventBehavior(GuiEventType.INIT);
     }
 
     protected void onInitGui(ScaledResolution scaledResolution)
@@ -482,7 +495,7 @@ public abstract class GuiElement
 
     public final void handleCloseGuiEvent()
     {
-        boolean doDefaultBehavior = !tryApplyCustomPreEventBehavior(GuiEventType.CLOSE);
+        boolean doDefaultBehavior = !tryApplyPreEventBehavior(GuiEventType.CLOSE);
 
         if (doDefaultBehavior)
         {
@@ -490,7 +503,7 @@ public abstract class GuiElement
 
         onCloseGui();
 
-        tryApplyCustomPostEventBehavior(GuiEventType.CLOSE);
+        tryApplyPostEventBehavior(GuiEventType.CLOSE);
     }
 
     protected void onCloseGui()
@@ -499,7 +512,7 @@ public abstract class GuiElement
 
     public final void handleScreenDrawEvent(int mouseX, int mouseY, float partialTicks)
     {
-        boolean doDefaultBehavior = !tryApplyCustomPreEventBehavior(GuiEventType.SCREEN_DRAW);
+        boolean doDefaultBehavior = !tryApplyPreEventBehavior(GuiEventType.SCREEN_DRAW);
 
         if (doDefaultBehavior)
         {
@@ -532,14 +545,14 @@ public abstract class GuiElement
 
         onScreenDraw(mouseX, mouseY, partialTicks);
 
-        tryApplyCustomPostEventBehavior(GuiEventType.SCREEN_DRAW);
+        tryApplyPostEventBehavior(GuiEventType.SCREEN_DRAW);
     }
 
     protected abstract void onScreenDraw(int mouseX, int mouseY, float partialTicks);
 
     public final void handleScreenTickEvent()
     {
-        boolean doDefaultBehavior = !tryApplyCustomPreEventBehavior(GuiEventType.SCREEN_TICK);
+        boolean doDefaultBehavior = !tryApplyPreEventBehavior(GuiEventType.SCREEN_TICK);
 
         if (doDefaultBehavior)
         {
@@ -556,7 +569,7 @@ public abstract class GuiElement
 
         onScreenTick();
 
-        tryApplyCustomPostEventBehavior(GuiEventType.SCREEN_TICK);
+        tryApplyPostEventBehavior(GuiEventType.SCREEN_TICK);
     }
 
     protected void onScreenTick()
@@ -565,7 +578,7 @@ public abstract class GuiElement
 
     public final void handleMouseDownEvent(int mouseX, int mouseY)
     {
-        boolean doDefaultBehavior = !tryApplyCustomPreEventBehavior(GuiEventType.MOUSE_DOWN);
+        boolean doDefaultBehavior = !tryApplyPreEventBehavior(GuiEventType.MOUSE_DOWN);
 
         if (doDefaultBehavior)
         {
@@ -575,7 +588,7 @@ public abstract class GuiElement
 
         onMouseDown(mouseX, mouseY);
 
-        tryApplyCustomPostEventBehavior(GuiEventType.MOUSE_DOWN);
+        tryApplyPostEventBehavior(GuiEventType.MOUSE_DOWN);
     }
 
     protected void onMouseDown(int mouseX, int mouseY)
@@ -584,7 +597,7 @@ public abstract class GuiElement
 
     public final void handleMouseUpEvent(int mouseX, int mouseY)
     {
-        boolean doDefaultBehavior = !tryApplyCustomPreEventBehavior(GuiEventType.MOUSE_UP);
+        boolean doDefaultBehavior = !tryApplyPreEventBehavior(GuiEventType.MOUSE_UP);
 
         if (doDefaultBehavior)
         {
@@ -593,7 +606,7 @@ public abstract class GuiElement
 
         onMouseUp(mouseX, mouseY);
 
-        tryApplyCustomPostEventBehavior(GuiEventType.MOUSE_UP);
+        tryApplyPostEventBehavior(GuiEventType.MOUSE_UP);
     }
 
     protected void onMouseUp(int mouseX, int mouseY)
@@ -602,7 +615,7 @@ public abstract class GuiElement
 
     public final void handleMouseScrollEvent(int wheelDelta)
     {
-        boolean doDefaultBehavior = !tryApplyCustomPreEventBehavior(GuiEventType.MOUSE_SCROLL);
+        boolean doDefaultBehavior = !tryApplyPreEventBehavior(GuiEventType.MOUSE_SCROLL);
 
         if (doDefaultBehavior)
         {
@@ -610,7 +623,7 @@ public abstract class GuiElement
 
         onMouseScroll(wheelDelta);
 
-        tryApplyCustomPostEventBehavior(GuiEventType.MOUSE_SCROLL);
+        tryApplyPostEventBehavior(GuiEventType.MOUSE_SCROLL);
     }
 
     protected void onMouseScroll(int wheelDelta)
@@ -619,7 +632,7 @@ public abstract class GuiElement
 
     public final void handleMouseDragEvent(int mouseX, int mouseY, int clickedMouseButton, long msHeld)
     {
-        boolean doDefaultBehavior = tryApplyCustomPreEventBehavior(GuiEventType.MOUSE_DRAG);
+        boolean doDefaultBehavior = tryApplyPreEventBehavior(GuiEventType.MOUSE_DRAG);
 
         if (doDefaultBehavior)
         {
@@ -632,7 +645,7 @@ public abstract class GuiElement
 
         onMouseDrag(mouseX, mouseY, clickedMouseButton, msHeld);
 
-        tryApplyCustomPostEventBehavior(GuiEventType.MOUSE_DRAG);
+        tryApplyPostEventBehavior(GuiEventType.MOUSE_DRAG);
     }
 
     protected void onMouseDrag(int mouseX, int mouseY, int clickedMouseButton, long msHeld)
@@ -641,7 +654,7 @@ public abstract class GuiElement
 
     public final void handleKeyInputEvent(char typedChar, int keyCode)
     {
-        boolean doDefaultBehavior = tryApplyCustomPreEventBehavior(GuiEventType.KEY_INPUT);
+        boolean doDefaultBehavior = tryApplyPreEventBehavior(GuiEventType.KEY_INPUT);
 
         if (doDefaultBehavior)
         {
@@ -649,11 +662,21 @@ public abstract class GuiElement
 
         onKeyTyped(typedChar, keyCode);
 
-        tryApplyCustomPostEventBehavior(GuiEventType.KEY_INPUT);
+        tryApplyPostEventBehavior(GuiEventType.KEY_INPUT);
     }
 
     protected void onKeyTyped(char typedChar, int keyCode)
     {
+    }
+
+    protected boolean handlePreCustomEvent()
+    {
+        return !tryApplyPreEventBehavior(GuiEventType.CUSTOM);
+    }
+
+    protected void handlePostCustomEvent()
+    {
+        tryApplyPostEventBehavior(GuiEventType.CUSTOM);
     }
 
     protected void playClickSound(SoundHandler soundHandler)

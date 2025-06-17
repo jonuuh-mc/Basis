@@ -77,19 +77,19 @@ public class GuiScreenImpl extends AbstractGuiScreen
         // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
         GuiBaseContainer container1 = new GuiBaseContainer("container1", 0, 0, 125, 40);
         container1.putColor(GuiColorType.BACKGROUND, new Color("#BF1450A0"));
-        container1.assignCustomPostEventBehavior(GuiEventType.MOUSE_DOWN, this::updateCurrFocusedContainer);
+        container1.assignPostEventBehavior(GuiEventType.MOUSE_DOWN, this::updateCurrFocusedContainer);
 
         GuiBaseContainer container2 = new GuiBaseContainer("container2", 0, 0, 50, 100);
         container2.putColor(GuiColorType.BACKGROUND, new Color("a6a6a6", 0.5F));
-        container2.assignCustomPostEventBehavior(GuiEventType.MOUSE_DOWN, this::updateCurrFocusedContainer);
+        container2.assignPostEventBehavior(GuiEventType.MOUSE_DOWN, this::updateCurrFocusedContainer);
 
         GuiBaseContainer container3 = new GuiBaseContainer("container3", 0, 0, 100, 30);
         container3.putColor(GuiColorType.BACKGROUND, new Color("a6a6a6", 0.5F));
-        container3.assignCustomPostEventBehavior(GuiEventType.MOUSE_DOWN, this::updateCurrFocusedContainer);
+        container3.assignPostEventBehavior(GuiEventType.MOUSE_DOWN, this::updateCurrFocusedContainer);
 
         GuiBaseContainer container4 = new GuiBaseContainer("container4", 0, 0, 75, 50);
         container4.putColor(GuiColorType.BACKGROUND, new Color("a6a6a6", 0.5F));
-        container4.assignCustomPostEventBehavior(GuiEventType.MOUSE_DOWN, this::updateCurrFocusedContainer);
+        container4.assignPostEventBehavior(GuiEventType.MOUSE_DOWN, this::updateCurrFocusedContainer);
 
         currFocusedContainer = container1;
         this.mainFlex.addItems(new FlexItem(container1), new FlexItem(container2), new FlexItem(container3), new FlexItem(container4));
@@ -102,18 +102,14 @@ public class GuiScreenImpl extends AbstractGuiScreen
         // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
         GuiDropdown directionDropdown = new GuiDropdown("directionDropdown", 0, 0, 75, 15, "ROW",
                 Arrays.asList("ROW", "COLUMN", "ROW_REVERSE", "COLUMN_REVERSE"));
-        directionDropdown.assignCustomPostEventBehavior(GuiEventType.SCREEN_TICK,
-                element -> forceChangeFlexDirection((GuiDropdown) element, this.mainFlex));
-
         GuiDropdown justifyDropdown = new GuiDropdown("justifyDropdown", 0, 0, 75, 15, "START",
                 Arrays.asList("START", "END", "CENTER", "BETWEEN", "AROUND", "EVENLY"));
-        justifyDropdown.assignCustomPostEventBehavior(GuiEventType.SCREEN_TICK,
-                element -> forceChangeFlexJustify((GuiDropdown) element, this.mainFlex));
-
         GuiDropdown alignDropdown = new GuiDropdown("alignDropdown", 0, 0, 75, 15, "START",
                 Arrays.asList("START", "END", "CENTER", "STRETCH"));
-        alignDropdown.assignCustomPostEventBehavior(GuiEventType.SCREEN_TICK,
-                element -> forceChangeFlexAlign((GuiDropdown) element, this.mainFlex));
+
+        directionDropdown.assignPostEventBehavior(GuiEventType.CUSTOM, this::forceChangeMainFlexFlexDirection);
+        justifyDropdown.assignPostEventBehavior(GuiEventType.CUSTOM, this::forceChangeMainFlexFlexJustify);
+        alignDropdown.assignPostEventBehavior(GuiEventType.CUSTOM, this::forceChangeMainFlexFlexAlign);
 
         // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
         GuiFlexContainer itemControlFlex = new GuiFlexContainer("itemControlFlex", 0, 0, 125, 50);
@@ -123,17 +119,11 @@ public class GuiScreenImpl extends AbstractGuiScreen
 
         GuiSingleSlider growItemSlider = new GuiSingleSlider("growSlider", 0, 0, 100, 10, 0, 10, 0, false, true);
         GuiSingleSlider shrinkItemSlider = new GuiSingleSlider("shrinkSlider", 0, 0, 100, 10, 0, 10, 1, false, true);
-        GuiDropdown alignItemDropdown = new GuiDropdown("alignDropdown", 0, 0, 75, 15, "START",
-                Arrays.asList("START", "END", "CENTER", "STRETCH"));
+        GuiDropdown alignItemDropdown = new GuiDropdown("alignDropdown", 0, 0, 75, 15, "START", Arrays.asList("START", "END", "CENTER", "STRETCH"));
 
-        // TODO: MOUSE_DRAG events don't account for single clicks to move pointer around
-        //  either need two event behaviors assigned per slider or a better solution?
-        growItemSlider.assignCustomPostEventBehavior(GuiEventType.MOUSE_DRAG,
-                element -> mainFlex.getFlexItem(currFocusedContainer).setGrow(((GuiSingleSlider) element).getValueInt()));
-        shrinkItemSlider.assignCustomPostEventBehavior(GuiEventType.MOUSE_DRAG,
-                element -> mainFlex.getFlexItem(currFocusedContainer).setShrink(((GuiSingleSlider) element).getValueInt()));
-        alignItemDropdown.assignCustomPostEventBehavior(GuiEventType.SCREEN_TICK,
-                element -> mainFlex.getFlexItem(currFocusedContainer).setAlign(FlexAlign.valueOf(alignItemDropdown.getHeaderText())));
+        growItemSlider.assignPostEventBehavior(GuiEventType.CUSTOM, this::forceChangeFocusedContainerGrow);
+        shrinkItemSlider.assignPostEventBehavior(GuiEventType.CUSTOM, this::forceChangeFocusedContainerShrink);
+        alignItemDropdown.assignPostEventBehavior(GuiEventType.CUSTOM, this::forceChangeFocusedContainerFlexAlign);
 
         this.growItemSlider = growItemSlider;
         this.shrinkItemSlider = shrinkItemSlider;
@@ -162,7 +152,6 @@ public class GuiScreenImpl extends AbstractGuiScreen
         growItemSlider.setValue(item.getGrow());
         shrinkItemSlider.setValue(item.getShrink());
 
-
         if (item.getAlign() != null)
         {
             alignItemDropdown.setHeaderText(item.getAlign().toString());
@@ -173,21 +162,39 @@ public class GuiScreenImpl extends AbstractGuiScreen
         }
     }
 
-    private void forceChangeFlexDirection(GuiDropdown dropdown, GuiFlexContainer flexContainer)
+    private void forceChangeFocusedContainerFlexAlign(GuiElement element)
     {
-        flexContainer.setDirection(FlexDirection.valueOf(dropdown.getHeaderText()));
-        flexContainer.updateItemsLayout();
+        mainFlex.getFlexItem(currFocusedContainer).setAlign(FlexAlign.valueOf(((GuiDropdown) element).getHeaderText()));
+        mainFlex.updateItemsLayout();
     }
 
-    private void forceChangeFlexJustify(GuiDropdown dropdown, GuiFlexContainer flexContainer)
+    private void forceChangeFocusedContainerGrow(GuiElement element)
     {
-        flexContainer.setJustifyContent(FlexJustify.valueOf(dropdown.getHeaderText()));
-        flexContainer.updateItemsLayout();
+        mainFlex.getFlexItem(currFocusedContainer).setGrow(((GuiSingleSlider) element).getValueInt());
+        mainFlex.updateItemsLayout();
     }
 
-    private void forceChangeFlexAlign(GuiDropdown dropdown, GuiFlexContainer flexContainer)
+    private void forceChangeFocusedContainerShrink(GuiElement element)
     {
-        flexContainer.setAlignItems(FlexAlign.valueOf(dropdown.getHeaderText()));
-        flexContainer.updateItemsLayout();
+        mainFlex.getFlexItem(currFocusedContainer).setShrink(((GuiSingleSlider) element).getValueInt());
+        mainFlex.updateItemsLayout();
+    }
+
+    private void forceChangeMainFlexFlexDirection(GuiElement element)
+    {
+        mainFlex.setDirection(FlexDirection.valueOf(((GuiDropdown) element).getHeaderText()));
+        mainFlex.updateItemsLayout();
+    }
+
+    private void forceChangeMainFlexFlexJustify(GuiElement element)
+    {
+        mainFlex.setJustifyContent(FlexJustify.valueOf(((GuiDropdown) element).getHeaderText()));
+        mainFlex.updateItemsLayout();
+    }
+
+    private void forceChangeMainFlexFlexAlign(GuiElement element)
+    {
+        mainFlex.setAlignItems(FlexAlign.valueOf(((GuiDropdown) element).getHeaderText()));
+        mainFlex.updateItemsLayout();
     }
 }
