@@ -5,12 +5,14 @@ import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Keyboard;
 
 import java.text.DecimalFormat;
 
 public class GuiSingleSlider extends GuiElement
 {
+    protected static final ResourceLocation pointerResource = new ResourceLocation("core:textures/bar.png");
     protected final double min;
     protected final double max;
     protected final boolean isVertical;
@@ -188,13 +190,17 @@ public class GuiSingleSlider extends GuiElement
 
     protected void drawPointer()
     {
-        float offset = pointerSize / 4;
-        float size = isMovingTimer > 0 ? pointerSize + offset : pointerSize;
+        // TODO: figure this out
+//        pointerSize = 14;
+        float movingOffset = pointerSize / 4;
+        float size = isMovingTimer > 0 ? pointerSize + movingOffset : pointerSize;
+        float yOffset = (pointerSize - getHeight()) / 2;
 
-        float x = isVertical ? (isMovingTimer > 0 ? worldXPos() - (offset / 2) : worldXPos()) : getPointerScreenPos() - (size / 2);
-        float y = isVertical ? getPointerScreenPos() - (size / 2) : (isMovingTimer > 0 ? worldYPos() - (offset / 2) : worldYPos());
+        float x = /*isVertical ? (isMovingTimer > 0 ? worldXPos() - (offset / 2) : worldXPos()) :*/ getPointerScreenPos() - (size / 2);
+        float y = /*isVertical ? getPointerScreenPos() - (size / 2) :*/ (isMovingTimer > 0 ? worldYPos() - (movingOffset / 2) - yOffset : worldYPos() - yOffset);
 
-        RenderUtils.drawRoundedRect(x, y, size, size, getCornerRadius(), getColor(GuiColorType.BASE));
+        RenderUtils.drawTexturedRect(pointerResource, x, y, zLevel, size, size, getColor(GuiColorType.BASE));
+//        RenderUtils.drawRoundedRect(x, y, size, size, getCornerRadius(), getColor(GuiColorType.BASE));
     }
 
 //    protected void claimTooltipForPointer(boolean isLeftPointer)

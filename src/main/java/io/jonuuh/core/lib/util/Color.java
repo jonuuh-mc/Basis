@@ -208,6 +208,10 @@ public class Color
         return new Color(this.a, this.r, this.g, this.b);
     }
 
+    // TODO: r g b a as float accessors; GlStateManager only takes 4f :(
+    //  also setter r g b a methods which return a new color? not "set" but
+    //  something more clear to communicate that it creates a new
+
     /**
      * Gets this color's red component as an unsigned int
      *

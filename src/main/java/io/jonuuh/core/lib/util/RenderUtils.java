@@ -77,6 +77,54 @@ public final class RenderUtils
                 w * sr.getScaleFactor(), h * sr.getScaleFactor());
     }
 
+    /**
+     * Used for scaling objects in place.
+     * <p>
+     * AFTER pushing a new matrix to the GL11 stack, call this method, then the draw object
+     */
+    public static void scaleCurrentMatrixAroundObject(float objectCenterX, float objectCenterY, float scaleX, float scaleY)
+    {
+        // Move current matrix origin to the object's center, so any scaling will effectively not change the object's visual position
+        GL11.glTranslatef(objectCenterX, objectCenterY, 0);
+        // Scale the matrix
+        GL11.glScalef(scaleX, scaleY, 0);
+        // Move current matrix origin back to original position
+        GL11.glTranslatef(-objectCenterX, -objectCenterY, 0);
+    }
+
+    /**
+     * Used for rotating objects in place.
+     * <p>
+     * Rotates the current matrix by the given angle around a vector given by vecX,vecY,vecZ
+     * <p>
+     * AFTER pushing a new matrix to the GL11 stack, call this method, then the draw object
+     */
+    public static void rotateCurrentMatrixAroundObject(float objectCenterX, float objectCenterY, float angle, float vecX, float vecY, float vecZ)
+    {
+        // Move current matrix origin to the object's center, so any rotation will effectively not change the object's visual position
+        GL11.glTranslatef(objectCenterX, objectCenterY, 0);
+        // Rotate the matrix
+        GL11.glRotatef(angle, vecX, vecY, vecZ);
+        // Move current matrix origin back to original position
+        GL11.glTranslatef(-objectCenterX, -objectCenterY, 0);
+    }
+
+    public static void drawTexturedRect(ResourceLocation texture, float x, float y, int z, float width, float height, Color color)
+    {
+        GL11.glColor4ub(color.r, color.g, color.b, color.a);
+        mc.getTextureManager().bindTexture(texture);
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer wr = tessellator.getWorldRenderer();
+
+        wr.begin(7, DefaultVertexFormats.POSITION_TEX);
+        wr.pos(x, y + height, z).tex(0, 1).endVertex(); // bottom left
+        wr.pos(x + width, y + height, z).tex(1, 1).endVertex(); // bottom right
+        wr.pos(x + width, y, z).tex(1, 0).endVertex(); // top right
+        wr.pos(x, y, z).tex(0, 0).endVertex(); // top left
+        tessellator.draw();
+        GL11.glColor4f(1, 1, 1, 1);
+    }
+
 
     /**
      * Draws a nine-sliced rectangle with the given texture.
@@ -86,31 +134,31 @@ public final class RenderUtils
      *            SOURCE (texture)
      * ========================================
      *    srcCornerSize
-     *     |  ↓     ↓
-     *     |→ ┌─────┬────────────┐ -
-     *     |→ │     │            │ | texHeight
-     *        ├─────┘            │ |
-     *        │                  │ |
-     *        │                  │ |
-     *        └──────────────────┘ -
-     *        |-----texWidth-----|
+     *     |  v     v
+     *     |> |=====|============| ^
+     *     |  |     |            | | texHeight
+     *     |> |=====|            | |
+     *        |                  | |
+     *        |                  | |
+     *        |==================| V
+     *        <-----texWidth----->
      * ========================================
      *
      *
      *       DESTINATION (9-slice rectangle)
      * ============================================
      *        x
-     *        ↓ ---width-----|
-     *    y → ┌──┬────────┬──┐ -
-     *        ├──┼────────┼──┤ |
-     *        │  │        │  │ | height
-     *        │  │        │  │ |
-     *        │  │        │  │ |
-     *        │  │        │  │ |
-     *        ├──┼────────┼──┤ |
-     *        └──┴────────┴──┘ -
-     *        ┌──┬──┬──┬──┬──┐
-     *         1  2  3  4  5  → dstCornerRatio = 5
+     *        v----width----->
+     *    y > |==|========|==| ^
+     *        |==|========|==| |
+     *        |  |        |  | | height
+     *        |  |        |  | |
+     *        |  |        |  | |
+     *        |  |        |  | |
+     *        |==|========|==| |
+     *        |==|========|==| v
+     *        ^--^--^--^--^--^
+     *         1  2  3  4  5  -> dstCornerRatio = 5
      * ============================================
      *
      * }</pre>
@@ -128,12 +176,14 @@ public final class RenderUtils
      * (Uses the minimum between the height and width)
      */
     public static void drawNineSliceTexturedRect(ResourceLocation texture, float x, float y, int z, float width, float height,
-                                                 int texWidth, int texHeight, int srcCornerSize, int dstCornerRatio)
+                                                 int texWidth, int texHeight, int srcCornerSize, int dstCornerRatio, Color color)
     {
         dstCornerRatio = Math.max(dstCornerRatio, 3);
 
         // 400 / 10
         float dstCornerSize = Math.min(width / dstCornerRatio, height / dstCornerRatio);
+//        System.out.println(width + " " + height + " " + dstCornerSize);
+        dstCornerSize = Math.max(dstCornerSize, 10);
 
         double s1 = MathUtils.normalize(srcCornerSize, 0, Math.min(texWidth, texHeight));
         double s2 = (1 - s1);
@@ -165,6 +215,8 @@ public final class RenderUtils
 //        drawLine2D(x1L, y3B, x4L, y3B);
 //        System.out.println(GL11.glGetTexImage());
 
+        // TODO: use GlStateManager here instead? only part of this function that doesn't use 'native' mc rendering code
+        GL11.glColor4ub(color.r, color.g, color.b, color.a);
         mc.getTextureManager().bindTexture(texture);
         Tessellator tessellator = Tessellator.getInstance();
         WorldRenderer wr = tessellator.getWorldRenderer();
@@ -243,6 +295,8 @@ public final class RenderUtils
         wr.pos(x4L, y2B, z).tex(1, s2).endVertex(); // top right
         wr.pos(x3L, y2B, z).tex(s2, s2).endVertex(); // top left
         tessellator.draw();
+
+        GL11.glColor4f(1, 1, 1, 1);
     }
 
     public static void drawLine2D(double x1, double y1, double x2, double y2)
@@ -267,13 +321,6 @@ public final class RenderUtils
         GL11.glColor4ub(color.r, color.g, color.b, color.a);
         GL11.glPushMatrix();
 
-//        if (rotationAngle != 0)
-//        {
-//            GL11.glTranslatef(vertices[0][0], vertices[0][1], 0.0F); // translate to object's origin
-//            GL11.glRotatef(rotationAngle, 0.0F, 0.0F, 1.0F);
-//            GL11.glTranslatef(-vertices[0][0], -vertices[0][1], 0.0F);
-//        }
-
         // Enable transparency
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -296,39 +343,25 @@ public final class RenderUtils
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    public static void drawTriangle(int glMode, float x, float y, float width, float height, Color color, float rotationAngle)
+    public static void drawTriangle(float x, float y, float width, float height, Color color)
     {
         width = Math.max(width, 0);
         height = Math.max(height, 0);
-        float hWidth = width / 2F;
-        float hHeight = height / 2F;
 
         GL11.glPushMatrix();
 
-//        if (rotationAngle != 0)
-//        {
-//            GL11.glTranslatef(x + hWidth, y + hHeight, 0.0F); // translate to object's origin
-//            GL11.glRotatef(rotationAngle, 0.0F, 0.0F, 1.0F);
-//            GL11.glTranslatef(-x - hWidth, -y - hHeight, 0.0F);
-//        }
-
         // Order: top left, bottom left, bottom right, top right
-        drawVertices(glMode, new float[][]{{x, y}, {x + (width / 2F), y + height}, {x + width, y}}, color);
+        drawVertices(GL11.GL_TRIANGLE_STRIP, new float[][]{{x, y}, {x + (width / 2F), y + height}, {x + width, y}}, color);
         GL11.glPopMatrix();
-
-//        GL11.glEnable(GL11.GL_LINE_SMOOTH);
-//        GL11.glLineWidth(1F);
-//        drawVertices(GL11.GL_LINE_LOOP, new float[][]{{x, y}, {x + (width / 2F), y + height}, {x + width, y}}, color, rotationAngle);
-//        GL11.glDisable(GL11.GL_LINE_SMOOTH);
     }
 
-    public static void drawRectangle(int glMode, float x, float y, float width, float height, Color color)
+    public static void drawRectangle(float x, float y, float width, float height, Color color)
     {
         width = Math.max(width, 0);
         height = Math.max(height, 0);
 
-        // Order: top left, bottom left, bottom right, top right
-        drawVertices(glMode, new float[][]{{x, y}, {x, y + height}, {x + width, y + height}, {x + width, y}}, color);
+        // Order: top left, bottom left, bottom right, top right, back to top left
+        drawVertices(GL11.GL_TRIANGLE_STRIP, new float[][]{{x, y}, {x, y + height}, {x + width, y + height}, {x + width, y}, {x, y}}, color);
     }
 
 //    public static void drawTooltip()

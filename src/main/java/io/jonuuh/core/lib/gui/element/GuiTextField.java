@@ -8,7 +8,6 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ChatAllowedCharacters;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
 
 public class GuiTextField extends GuiElement
 {
@@ -172,7 +171,7 @@ public class GuiTextField extends GuiElement
             setSelectionPos(getTextBelowMouseX(mouseX).length());
         }
 
-        RenderUtils.drawRectangle(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), new Color("#BF242424"));
+        RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), new Color("#BF242424"));
 
         if (hasSelection())
         {
@@ -181,7 +180,7 @@ public class GuiTextField extends GuiElement
 
         if (Display.isActive() && isFocused() && (cursorFlashCounter % 20 < 10 || isTyping))
         {
-            RenderUtils.drawRectangle(GL11.GL_POLYGON, getCursorScreenPos(), worldYPos() - 2, 1, fontRenderer.FONT_HEIGHT + 2, new Color("#00ff00")/*.setA(0.5F)*/);
+            RenderUtils.drawRectangle(getCursorScreenPos(), worldYPos() - 2, 1, fontRenderer.FONT_HEIGHT + 2, new Color("#00ff00")/*.setA(0.5F)*/);
         }
 
         fontRenderer.drawString(text, worldXPos(), worldYPos(), -1, false);
@@ -194,7 +193,7 @@ public class GuiTextField extends GuiElement
         float rectX = isSelectionForward() ? cursorX + 1 : cursorX - rectWidth;
 //        System.out.println("cursorPos: " + cursorPos + ", selectionPos: " + selectionPos);
 
-        RenderUtils.drawRectangle(GL11.GL_POLYGON, rectX, worldYPos(), rectWidth, fontRenderer.FONT_HEIGHT - 1, new Color("#BF009ac2")); // 3399FF
+        RenderUtils.drawRectangle(rectX, worldYPos(), rectWidth, fontRenderer.FONT_HEIGHT - 1, new Color("#BF009ac2")); // 3399FF
     }
 
     public void onMouseDown(int mouseX, int mouseY)

@@ -24,11 +24,21 @@ public abstract class GuiElement
 {
     /** A reference to the static minecraft instance */
     public static final Minecraft mc;
-    /** A resource pointing to the default mouse down sound */
-    public static final ResourceLocation resourceClickSound;
 
     public static final float DEFAULT_WIDTH = 100;
     public static final float DEFAULT_HEIGHT = 20;
+
+    /** A resource pointing to the default mouse down sound */
+    protected static final ResourceLocation resourceClickSound;
+    protected static final ResourceLocation resourceGenericBackgroundTex;
+
+    static
+    {
+        mc = Minecraft.getMinecraft();
+        // TODO: implement similar feature to colorMap? propagate up tree until finding a parent that has this defined?
+        resourceClickSound = new ResourceLocation("core:click");
+        resourceGenericBackgroundTex = new ResourceLocation("core:textures/background_generic.png");
+    }
 
     /** A readable name qualifying this element TODO: no enforcement of this being unique */
     public final String elementName;
@@ -101,13 +111,6 @@ public abstract class GuiElement
 
     // TODO: use a ticker with onScreenTick instead for tooltips?
     protected int hoverTimeCounter;
-
-    static
-    {
-        mc = Minecraft.getMinecraft();
-        // TODO: implement similar feature to colorMap? propagate up tree until finding a parent that has this defined?
-        resourceClickSound = new ResourceLocation("core:click");
-    }
 
     protected GuiElement(String elementName, float localXPos, float localYPos, float width, float height)
     {
@@ -505,6 +508,11 @@ public abstract class GuiElement
                 hovered = isPointWithinBounds(mouseX, mouseY);
 
                 onScreenDraw(mouseX, mouseY, partialTicks);
+
+                if (!enabled)
+                {
+                    RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), new Color("#aa181818"));
+                }
 
                 if (debug)
                 {

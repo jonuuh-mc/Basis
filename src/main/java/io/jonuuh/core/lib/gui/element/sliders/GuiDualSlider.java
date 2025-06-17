@@ -5,12 +5,14 @@ import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import java.text.DecimalFormat;
 
 public class GuiDualSlider extends GuiElement
 {
+    protected static final ResourceLocation pointerResource = new ResourceLocation("core:textures/pointer.png");
     protected final double min;
     protected final double max;
     protected final boolean isVertical;
@@ -252,11 +254,15 @@ public class GuiDualSlider extends GuiElement
 
         if (isLeftPointer)
         {
-            RenderUtils.drawTriangle(GL11.GL_POLYGON, x /*- (pointerSize / 2F)*/, y, pointerSize, pointerSize, getColor(GuiColorType.BASE), -90);
+            RenderUtils.drawTexturedRect(pointerResource, x, y, zLevel, pointerSize, pointerSize, getColor(GuiColorType.BASE));
         }
         else
         {
-            RenderUtils.drawTriangle(GL11.GL_POLYGON, x /*+ (pointerSize / 2F)*/, y, pointerSize, pointerSize, getColor(GuiColorType.BASE), 90);
+            GL11.glPushMatrix();
+            RenderUtils.rotateCurrentMatrixAroundObject(x + (pointerSize / 2), y + (pointerSize / 2),
+                    180, 0, 0, 1);
+            RenderUtils.drawTexturedRect(pointerResource, x, y, zLevel, pointerSize, pointerSize, getColor(GuiColorType.BASE));
+            GL11.glPopMatrix();
         }
     }
 
@@ -275,45 +281,4 @@ public class GuiDualSlider extends GuiElement
 
         return mousePosSliderVal < normalPointerValueLeft;
     }
-
-//    protected void claimTooltipForPointer(boolean isLeftPointer)
-//    {
-//        this.tooltipStr = decimalFormat.format(getValue(isLeftPointer));
-//        int strWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(tooltipStr) - 1;
-//
-//        if (isVertical)
-//        {
-//            this.tooltip.posX = xPos - 7 - strWidth;
-//            this.tooltip.posY = getPointerScreenPos(isLeftPointer) /*- (strWidth / 2F)*/;
-//        }
-//        else
-//        {
-//            this.tooltip.posX = getPointerScreenPos(isLeftPointer) - (strWidth / 2F);
-//        }
-//
-////        GuiTooltip.getInstance().color = colors.get(pointerIndex);
-//
-////        this.tooltipStr = decimalFormat.format(getValue(pointerIndex));
-////        GuiTooltip.claim(this);
-////
-////        int strWidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(tooltipStr) - 1;
-////
-////        if (isVertical)
-////        {
-////            GuiTooltip.getInstance().posX = xPos - 7 - strWidth;
-////            GuiTooltip.getInstance().posY = getPointerScreenPos(pointerIndex) /*- (strWidth / 2F)*/;
-////        }
-////        else
-////        {
-////            GuiTooltip.getInstance().posX = getPointerScreenPos(pointerIndex) - (strWidth / 2F);
-////        }
-////
-////        GuiTooltip.getInstance().color = colors.get(pointerIndex);
-//    }
-
-//    @Override
-//    public void claimHoverTooltip(int mouseX, int mouseY)
-//    {
-//        claimTooltipForPointer(getClosestPointerToMouse(mouseX, mouseY));
-//    }
 }

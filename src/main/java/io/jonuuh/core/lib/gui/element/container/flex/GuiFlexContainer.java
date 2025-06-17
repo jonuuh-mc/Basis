@@ -170,8 +170,8 @@ public class GuiFlexContainer extends GuiContainer
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
         RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), getColor(GuiColorType.BACKGROUND));
-//        RenderUtils.drawNineSliceTexturedRect(new ResourceLocation("core:background.png"),
-//                worldXPos(), worldYPos(), zLevel - 90, getWidth(), getHeight(), 52, 52, 12, 6);
+//        RenderUtils.drawNineSliceTexturedRect(resourceGenericBackgroundTex,
+//                worldXPos(), worldYPos(), zLevel - 90, getWidth(), getHeight(), 52, 52, 12, 12);
 
         if (debug)
         {

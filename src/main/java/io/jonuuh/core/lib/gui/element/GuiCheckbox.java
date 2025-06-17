@@ -1,15 +1,12 @@
 package io.jonuuh.core.lib.gui.element;
 
 import io.jonuuh.core.lib.gui.properties.GuiColorType;
-import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
 
 public class GuiCheckbox extends GuiElement
 {
-    public static final ResourceLocation checkmarkResource = new ResourceLocation("core:checkmark.png");
+    protected static final ResourceLocation checkmarkResource = new ResourceLocation("core:textures/check.png");
     protected boolean isChecked;
 
     public GuiCheckbox(String elementName, float xPos, float yPos, float size, boolean isChecked)
@@ -46,26 +43,17 @@ public class GuiCheckbox extends GuiElement
     @Override
     protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
-        Color boxColor = isChecked ? getColor(GuiColorType.BASE) : getColor(GuiColorType.ACCENT1);
-        RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), boxColor);
+//        Color boxColor = isChecked ? getColor(GuiColorType.BASE) : getColor(GuiColorType.ACCENT1);
+//        RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), boxColor);
+
+        RenderUtils.drawNineSliceTexturedRect(resourceGenericBackgroundTex,
+                worldXPos(), worldYPos(), /*0*/zLevel /*- 3*/, getWidth(), getHeight(),
+                52, 52, 12, 8, getColor(GuiColorType.ACCENT1));
 
         if (isChecked)
         {
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-
-            GL11.glPushMatrix();
-            GL11.glTranslatef(worldXPos(), worldYPos(), 0);
-            GL11.glScalef(getWidth() / 256, getHeight() / 256, 0);
-            GL11.glTranslatef(-worldXPos(), -worldYPos(), 0);
-
-            mc.getTextureManager().bindTexture(checkmarkResource);
-
-            // TODO: finally remembered the problem with positions being floats
-            //  need to make custom draw texture method? shouldn't be too bad
-            AbstractGuiScreen.drawModalRectWithCustomSizedTexture((int) worldXPos(), (int) worldYPos(), 0, 0, 256, 256, 256, 256);
-            GL11.glPopMatrix();
+            RenderUtils.drawTexturedRect(checkmarkResource, worldXPos(), worldYPos(), /*0*/zLevel, getWidth(), getHeight(), getColor(GuiColorType.BASE));
         }
-
     }
 
     @Override
