@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.gui.AbstractGuiScreen;
 import io.jonuuh.core.lib.gui.element.GuiElement;
-import io.jonuuh.core.lib.gui.element.container.GuiBaseContainer;
+import io.jonuuh.core.lib.gui.element.container.GuiBasicContainer;
 import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.gui.element.container.GuiDropdown;
 import io.jonuuh.core.lib.gui.element.container.GuiRootContainer;
@@ -74,19 +74,19 @@ public class GuiScreenImpl extends AbstractGuiScreen
         this.mainFlex = mainFlex;
 
         // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
-        GuiBaseContainer container1 = new GuiBaseContainer("container1", 0, 0, 125, 40);
+        GuiBasicContainer container1 = new GuiBasicContainer("container1", 0, 0, 125, 40);
         container1.putColor(GuiColorType.BACKGROUND, new Color("#BF1450A0"));
         container1.assignPostEventBehavior(GuiEventType.MOUSE_DOWN, this::updateCurrFocusedContainer);
 
-        GuiBaseContainer container2 = new GuiBaseContainer("container2", 0, 0, 50, 100);
+        GuiBasicContainer container2 = new GuiBasicContainer("container2", 0, 0, 50, 100);
         container2.putColor(GuiColorType.BACKGROUND, new Color("a6a6a6", 0.5F));
         container2.assignPostEventBehavior(GuiEventType.MOUSE_DOWN, this::updateCurrFocusedContainer);
 
-        GuiBaseContainer container3 = new GuiBaseContainer("container3", 0, 0, 100, 30);
+        GuiBasicContainer container3 = new GuiBasicContainer("container3", 0, 0, 100, 30);
         container3.putColor(GuiColorType.BACKGROUND, new Color("a6a6a6", 0.5F));
         container3.assignPostEventBehavior(GuiEventType.MOUSE_DOWN, this::updateCurrFocusedContainer);
 
-        GuiBaseContainer container4 = new GuiBaseContainer("container4", 0, 0, 75, 50);
+        GuiBasicContainer container4 = new GuiBasicContainer("container4", 0, 0, 75, 50);
         container4.putColor(GuiColorType.BACKGROUND, new Color("a6a6a6", 0.5F));
         container4.assignPostEventBehavior(GuiEventType.MOUSE_DOWN, this::updateCurrFocusedContainer);
 
