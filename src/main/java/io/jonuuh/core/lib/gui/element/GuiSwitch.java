@@ -3,19 +3,13 @@ package io.jonuuh.core.lib.gui.element;
 import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
-import net.minecraft.client.gui.ScaledResolution;
-import org.lwjgl.input.Keyboard;
 
-public class GuiSwitch extends GuiElement
+public class GuiSwitch extends GuiToggle
 {
-    protected float pointerSize;
-    protected boolean switchState;
-
-    // TODO: make vertical option? subclass?
+    // TODO: make vertical option
     public GuiSwitch(String elementName, float xPos, float yPos, float width, float height, boolean switchState)
     {
-        super(elementName, xPos, yPos, Math.max(height, width), Math.min(Math.max(height, width), height)); // height should never be > width, width should never be < height
-        this.switchState = switchState;
+        super(elementName, xPos, yPos, width, height, switchState);
     }
 
     public GuiSwitch(String elementName, float xPos, float yPos, boolean switchState)
@@ -28,54 +22,29 @@ public class GuiSwitch extends GuiElement
         this(elementName, xPos, yPos, false);
     }
 
-    public boolean getSwitchState()
+    public float getPointerSize()
     {
-        return switchState;
-    }
-
-    public void setSwitchState(boolean switchState)
-    {
-        this.switchState = switchState;
-    }
-
-    public void flip()
-    {
-        setSwitchState(!switchState);
+        return getHeight() - 2F;
     }
 
     @Override
-    protected void onInitGui(ScaledResolution scaledResolution)
+    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
-        pointerSize = getHeight() - 2F;
-    }
+        if (!isVisible())
+        {
+            return;
+        }
 
-    @Override
-    protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
-    {
-        float padding = ((getHeight() - pointerSize) / 2F);
-        float pointerX = switchState ? (worldXPos() + getWidth() - pointerSize - padding) : worldXPos() + padding;
-        Color trackColor = switchState ? getColor(GuiColorType.BASE) : getColor(GuiColorType.ACCENT2);
+        super.onScreenDraw(mouseX, mouseY, partialTicks);
+
+        float padding = ((getHeight() - getPointerSize()) / 2F);
+        float pointerX = isToggled() ? (worldXPos() + getWidth() - getPointerSize() - padding) : worldXPos() + padding;
+        Color trackColor = isToggled() ? getColor(GuiColorType.BASE) : getColor(GuiColorType.ACCENT2);
 
         // Track
         RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), trackColor);
         // Pointer
-        RenderUtils.drawRectangle(pointerX, worldYPos() + padding, pointerSize, pointerSize, getColor(GuiColorType.ACCENT1));
-    }
-
-    @Override
-    public void onMouseDown(int mouseX, int mouseY)
-    {
-        flip();
-    }
-
-    @Override
-    protected void onKeyTyped(char typedChar, int keyCode)
-    {
-        if (keyCode == Keyboard.KEY_RETURN)
-        {
-            flip();
-            playClickSound(mc.getSoundHandler());
-        }
+        RenderUtils.drawRectangle(pointerX, worldYPos() + padding, getPointerSize(), getPointerSize(), getColor(GuiColorType.ACCENT1));
     }
 }
 

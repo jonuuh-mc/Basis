@@ -4,15 +4,13 @@ import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.util.ResourceLocation;
 
-public class GuiCheckbox extends GuiElement
+public class GuiCheckbox extends GuiToggle
 {
     protected static final ResourceLocation checkmarkResource = new ResourceLocation("core:textures/check.png");
-    protected boolean isChecked;
 
     public GuiCheckbox(String elementName, float xPos, float yPos, float size, boolean isChecked)
     {
-        super(elementName, xPos, yPos, size, size);
-        this.isChecked = isChecked;
+        super(elementName, xPos, yPos, size, size, isChecked);
     }
 
     public GuiCheckbox(String elementName, float xPos, float yPos, boolean isChecked)
@@ -25,40 +23,25 @@ public class GuiCheckbox extends GuiElement
         this(elementName, xPos, yPos, false);
     }
 
-    public boolean isChecked()
-    {
-        return isChecked;
-    }
-
-    public void setIsChecked(boolean isChecked)
-    {
-        this.isChecked = isChecked;
-    }
-
-    public void flip()
-    {
-        setIsChecked(!isChecked);
-    }
-
     @Override
-    protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
+    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
+        if (!isVisible())
+        {
+            return;
+        }
+        super.onScreenDraw(mouseX, mouseY, partialTicks);
+
 //        Color boxColor = isChecked ? getColor(GuiColorType.BASE) : getColor(GuiColorType.ACCENT1);
 //        RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), boxColor);
 
         RenderUtils.drawNineSliceTexturedRect(resourceGenericBackgroundTex,
-                worldXPos(), worldYPos(), /*0*/zLevel /*- 3*/, getWidth(), getHeight(),
+                worldXPos(), worldYPos(), /*0*/getZLevel() /*- 3*/, getWidth(), getHeight(),
                 52, 52, 12, 8, getColor(GuiColorType.ACCENT1));
 
-        if (isChecked)
+        if (isToggled())
         {
-            RenderUtils.drawTexturedRect(checkmarkResource, worldXPos(), worldYPos(), /*0*/zLevel, getWidth(), getHeight(), getColor(GuiColorType.BASE));
+            RenderUtils.drawTexturedRect(checkmarkResource, worldXPos(), worldYPos(), /*0*/getZLevel(), getWidth(), getHeight(), getColor(GuiColorType.BASE));
         }
-    }
-
-    @Override
-    public void onMouseDown(int mouseX, int mouseY)
-    {
-        flip();
     }
 }
