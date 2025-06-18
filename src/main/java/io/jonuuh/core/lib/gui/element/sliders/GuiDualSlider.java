@@ -1,190 +1,126 @@
 package io.jonuuh.core.lib.gui.element.sliders;
 
-import io.jonuuh.core.lib.gui.element.GuiElement;
+import io.jonuuh.core.lib.gui.event.input.MouseDownEvent;
+import io.jonuuh.core.lib.gui.event.input.MouseScrollEvent;
 import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
-import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
-import java.text.DecimalFormat;
-
-public class GuiDualSlider extends GuiElement
+public class GuiDualSlider extends AbstractSlider
 {
     protected static final ResourceLocation pointerResource = new ResourceLocation("core:textures/pointer.png");
-    protected final double min;
-    protected final double max;
-    protected final boolean isVertical;
-    protected double normalPointerValueLeft;
-    protected double normalPointerValueRight;
+    protected float normalValueRight;
 
-    protected DecimalFormat decimalFormat;
     protected boolean isLastHeldPointerLeft;
-    protected float pointerSize;
 
-    public GuiDualSlider(String elementName, float xPos, float yPos, float width, float height, double min, double max, double startValueLeft, double startValueRight, boolean isVertical)
+    public GuiDualSlider(String elementName, float xPos, float yPos, float width, float height, float min, float max, float startValueLeft, float startValueRight, boolean isVertical, boolean isInteger)
     {
-        super(elementName, xPos, yPos, width, height);
-        this.min = min;
-        this.max = max;
-
-        this.isVertical = isVertical;
-
-        this.decimalFormat = new DecimalFormat("#.###");
-
-        setValues(startValueLeft, startValueRight);
+        super(elementName, xPos, yPos, width, height, min, max, startValueLeft, isVertical, isInteger);
+        setRightValue(startValueRight);
     }
 
-    public GuiDualSlider(String elementName, float xPos, float yPos, double min, double max, double startValueLeft, double startValueRight)
+    public GuiDualSlider(String elementName, float xPos, float yPos, float min, float max, float startValueLeft, float startValueRight)
     {
-        this(elementName, xPos, yPos, DEFAULT_WIDTH, DEFAULT_HEIGHT, min, max, startValueLeft, startValueRight, false);
+        this(elementName, xPos, yPos, DEFAULT_WIDTH, DEFAULT_HEIGHT, min, max, startValueLeft, startValueRight, false, false);
     }
 
-    public double getValue(boolean isLeftPointer)
+    public float getRightValue()
     {
-        return MathUtils.denormalize(getNormalizedValue(isLeftPointer), min, max);
+        return (float) MathUtils.denormalize(getRightNormalizedValue(), min, max);
     }
 
-    public void setValue(boolean isLeftPointer, double value)
+    public void setRightValue(float value)
     {
-        setNormalizedValue(isLeftPointer, MathUtils.clamp(MathUtils.normalize(value, min, max)));
+        setRightNormalizedValue((float) MathUtils.clamp(MathUtils.normalize(value, min, max)));
     }
 
-    public double[] getValues()
+    public float getRightNormalizedValue()
     {
-        return new double[]{getValue(true), getValue(false)};
+        return normalValueRight;
     }
 
-    public void setValues(double startValueLeft, double startValueRight)
-    {
-        startValueLeft = Math.min(startValueLeft, startValueRight);
-
-        setValue(true, startValueLeft);
-        setValue(true, startValueRight);
-    }
-
-//    public void setValues(double[] values)
+//    public float getLeftNormalizedValue()
 //    {
-//        normalPointerValueLeft = MathUtils.clamp(MathUtils.normalize(values[0], min, max));
-//        normalPointerValueRight = MathUtils.clamp(MathUtils.normalize(values[1], min, max));
+//        return getNormalizedValue();
 //    }
 
-    public double getNormalizedValue(boolean isLeftPointer)
+    public void setRightNormalizedValue(float normalValue)
     {
-        return isLeftPointer ? normalPointerValueLeft : normalPointerValueRight;
+        float value = clampBetweenAdjacents(false, normalValue);
+        // If an integer slider, round proportional to the max value
+        normalValueRight = isInteger ? (Math.round(value * max) / max) : value;
+        // handlePostCustomEvent();
     }
 
-    public void setNormalizedValue(boolean isLeftPointer, double normalValue)
+    @Override
+    public void setNormalizedValue(float normalValue)
     {
-        if (handlePreCustomEvent())
+        super.setNormalizedValue(clampBetweenAdjacents(true, normalValue));
+        // handlePostCustomEvent();
+    }
+
+    @Override
+    public void onMouseDown(MouseDownEvent event)
+    {
+        super.onMouseDown(event);
+        isLastHeldPointerLeft = getClosestPointerToMouse(event.mouseX, event.mouseY);
+    }
+
+    @Override
+    public void onMouseScroll(MouseScrollEvent event)
+    {
+        isMovingTimer = 10;
+        float offset = (float) MathUtils.normalize(event.wheelDelta, min, max);
+
+        if (isLastHeldPointerLeft)
         {
-            if (isLeftPointer)
-            {
-                normalPointerValueLeft = clampBetweenAdjacents(true, normalValue);
-            }
-            else
-            {
-                normalPointerValueRight = clampBetweenAdjacents(false, normalValue);
-            }
-        }
-        handlePostCustomEvent();
-    }
-
-    public DecimalFormat getDecimalFormat()
-    {
-        return decimalFormat;
-    }
-
-    public void setDecimalFormat(DecimalFormat decimalFormat)
-    {
-        this.decimalFormat = decimalFormat;
-    }
-
-    // what prevents sliders from passing each other
-    protected double clampBetweenAdjacents(boolean isLeftPointer, double normalValue)
-    {
-        double minValue = !isLeftPointer ? (normalPointerValueLeft) : 0;
-        double maxValue = isLeftPointer ? (normalPointerValueRight) : 1;
-
-        return MathUtils.clamp(normalValue, minValue, maxValue);
-    }
-
-    // mouse position on the slider
-    protected double getSliderValueAtMousePos(int mouseX, int mouseY)
-    {
-        return isVertical
-                ? (mouseY - worldYPos()) / getHeight()
-                : (mouseX - worldXPos()) / getWidth();
-    }
-
-    // x/y screen position of the center of a pointer
-    protected float getPointerScreenPos(boolean isLeftPointer)
-    {
-//        if (isVertical)
-//        {
-//            RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, xPos, center, 3, 3, new Color("#00ff00"));
-//        }
-//        else
-//        {
-//            RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, center, yPos, 3, 3, new Color("#00ff00"));
-//        }
-        return isVertical
-                ? (float) (worldYPos() + (getNormalizedValue(isLeftPointer) * getHeight()))
-                : (float) (worldXPos() + (getNormalizedValue(isLeftPointer) * getWidth()));
-    }
-
-    @Override
-    protected void onInitGui(ScaledResolution scaledResolution)
-    {
-        pointerSize = isVertical ? getWidth() : getHeight();
-    }
-
-    @Override
-    public void onMouseDown(int mouseX, int mouseY)
-    {
-        isLastHeldPointerLeft = getClosestPointerToMouse(mouseX, mouseY);
-    }
-
-    @Override
-    public void onMouseDrag(int mouseX, int mouseY, int clickedMouseButton, long msHeld)
-    {
-        // TODO: move stuff from onScreenDraw here
-    }
-
-    @Override
-    protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
-    {
-        if (isVertical)
-        {
-//            drawVerticalSlider();
+            setNormalizedValue(getNormalizedValue() + offset);
         }
         else
         {
-            drawHorizontalSlider();
-        }
-
-        if (mouseDown)
-        {
-//                System.out.println(Arrays.toString(normalPointerValues));
-            setNormalizedValue(isLastHeldPointerLeft, getSliderValueAtMousePos(mouseX, mouseY));
-
-            // TODO: don't check for pre-claim? assumes no slider overlap (drag two sliders once)
-//            claimTooltipForPointer(lastHeldPointer);
+            setRightNormalizedValue(getRightNormalizedValue() + offset);
         }
     }
 
+//    @Override
+//    public void onMouseDrag(int mouseX, int mouseY, int clickedMouseButton, long msHeld)
+//    {
+//        // TODO: move stuff from onScreenDraw here?
+//    }
+
+    @Override
+    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
+    {
+        super.onScreenDraw(mouseX, mouseY, partialTicks);
+
+        if (isMouseDown())
+        {
+            float value = getNormalValueAtScreenPos(mouseX, mouseY);
+
+            if (isLastHeldPointerLeft)
+            {
+                setNormalizedValue(value);
+            }
+            else
+            {
+                setRightNormalizedValue(value);
+            }
+        }
+    }
+
+    @Override
     protected void drawHorizontalSlider()
     {
         float trackHeight = (getHeight() / 3F);
 
-        float leftPointerScreenPos = getPointerScreenPos(true);
-        float rightPointerScreenPos = getPointerScreenPos(false);
+        float leftPointerScreenPos = getScreenPosAtNormalValue(getNormalizedValue());
+        float rightPointerScreenPos = getScreenPosAtNormalValue(getRightNormalizedValue());
 
         // Left side track for all but first pointer
 //        float x = /*(i == 0) ?*/ xPos /*: getPointerScreenPos(i - 1)*/;
 //        float w = /*(i == 0) ? */ (leftPointerScreenPos - xPos) /*: (currPointerCenter - getPointerScreenPos(i - 1))*/;
-
 //        float pOffset = pointerSize / 2F;
 
         // far left
@@ -196,34 +132,13 @@ public class GuiDualSlider extends GuiElement
         // far right
         RenderUtils.drawRectangle(rightPointerScreenPos /*+ pOffset*/, (worldYPos() + trackHeight), getWidth() - (rightPointerScreenPos - worldXPos()) /*- pOffset*/, trackHeight, getColor(GuiColorType.ACCENT1));
 
-
-//        // Draw track(s)
-//        for (int i = 0; i < normalPointerValues.length; i++)
-//        {
-//            float currPointerCenter = getPointerScreenPos(i);
-//
-//            // Right side track for last pointer
-//            if (i == normalPointerValues.length - 1)
-//            {
-//                float x = currPointerCenter;
-//                float w = getWidth() - (currPointerCenter - xPos);
-//
-//                RenderUtils.drawRoundedRect(GL11.GL_POLYGON, x, yPos + trackHeight, w, trackHeight, parent.getOuterRadius(), parent.getColorMap().get("ACCENT"), true);
-//            }
-//
-//            // Left side track for all but first pointer
-//            float x = (i == 0) ? xPos : getPointerScreenPos(i - 1);
-//            float w = (i == 0) ? (currPointerCenter - xPos) : (currPointerCenter - getPointerScreenPos(i - 1));
-//
-//            RenderUtils.drawRoundedRect(GL11.GL_POLYGON, x, yPos + trackHeight, w, trackHeight, parent.getOuterRadius(), parent.getBaseColor(), true);
-//        }
-
         drawPointer(true);
         drawPointer(false);
     }
 
-//    protected void drawVerticalSlider()
-//    {
+    // TODO:
+    protected void drawVerticalSlider()
+    {
 //        float trackWidth = (getWidth() / 3F);
 //
 //        // Draw track(s)
@@ -249,40 +164,50 @@ public class GuiDualSlider extends GuiElement
 //
 //        drawPointer(true);
 //        drawPointer(false);
-//    }
+    }
 
     protected void drawPointer(boolean isLeftPointer)
     {
-        float x = isVertical ? worldXPos() : getPointerScreenPos(isLeftPointer) - (pointerSize / 2F);
-        float y = isVertical ? getPointerScreenPos(isLeftPointer) - (pointerSize / 2F) : worldYPos();
+        float screenPos = getScreenPosAtNormalValue(isLeftPointer ? getNormalizedValue() : getRightNormalizedValue());
+        float x = isVertical ? worldXPos() : screenPos - (getPointerSize() / 2F);
+        float y = isVertical ? screenPos - (getPointerSize() / 2F) : worldYPos();
 
         if (isLeftPointer)
         {
-            RenderUtils.drawTexturedRect(pointerResource, x, y, zLevel, pointerSize, pointerSize, getColor(GuiColorType.BASE));
+            RenderUtils.drawTexturedRect(pointerResource, x, y, getZLevel(), getPointerSize(), getPointerSize(), getColor(GuiColorType.BASE));
         }
         else
         {
             GL11.glPushMatrix();
-            RenderUtils.rotateCurrentMatrixAroundObject(x + (pointerSize / 2), y + (pointerSize / 2),
+            RenderUtils.rotateCurrentMatrixAroundObject(x + (getPointerSize() / 2), y + (getPointerSize() / 2),
                     180, 0, 0, 1);
-            RenderUtils.drawTexturedRect(pointerResource, x, y, zLevel, pointerSize, pointerSize, getColor(GuiColorType.BASE));
+            RenderUtils.drawTexturedRect(pointerResource, x, y, getZLevel(), getPointerSize(), getPointerSize(), getColor(GuiColorType.BASE));
             GL11.glPopMatrix();
         }
+    }
+
+    // what prevents sliders from passing each other
+    protected float clampBetweenAdjacents(boolean isLeftPointer, double normalValue)
+    {
+        double minValue = !isLeftPointer ? (getNormalizedValue()) : 0;
+        double maxValue = isLeftPointer ? (getRightNormalizedValue()) : 1;
+
+        return (float) MathUtils.clamp(normalValue, minValue, maxValue);
     }
 
     // return true = isLeftPointer
     protected boolean getClosestPointerToMouse(int mouseX, int mouseY)
     {
-        double mousePosSliderVal = getSliderValueAtMousePos(mouseX, mouseY);
+        double mousePosSliderVal = getNormalValueAtScreenPos(mouseX, mouseY);
 
-        double leftDistance = Math.abs(normalPointerValueLeft - mousePosSliderVal);
-        double rightDistance = Math.abs(normalPointerValueRight - mousePosSliderVal);
+        double leftDistance = Math.abs(getNormalizedValue() - mousePosSliderVal);
+        double rightDistance = Math.abs(getRightNormalizedValue() - mousePosSliderVal);
 
         if (leftDistance != rightDistance)
         {
             return rightDistance > leftDistance;
         }
 
-        return mousePosSliderVal < normalPointerValueLeft;
+        return mousePosSliderVal < getNormalizedValue();
     }
 }

@@ -1,135 +1,127 @@
-//package io.jonuuh.core.lib.gui.elements.sliders;
-//
-//import io.jonuuh.core.lib.gui.elements.GuiScrollContainer;
-//import io.jonuuh.core.lib.gui.elements.interactable.GuiInteractableElement;
-//import io.jonuuh.core.lib.util.MathUtils;
-//import io.jonuuh.core.lib.util.RenderUtils;
-//import org.lwjgl.opengl.GL11;
-//
-//public class GuiScrollSlider extends GuiInteractableElement
-//{
-//    protected final double min;
-//    protected final double max;
-//    protected final double slidingWindowWidth;
-//    protected double slidingWindowTop;
-//    protected double grabPosValue;
-//    protected double lastSliderValue = -1;
-//    protected double startSliderValue;
-//
-//    public GuiScrollSlider(GuiScrollContainer parent, String elementName, int xPos, int yPos, int width, int height, double min, double max, double startValue)
-//    {
-//        super(parent, elementName, xPos, yPos, width, height);
-//        this.min = min;
-//        this.max = max;
-//
-//        setValue(startValue);
-//        this.slidingWindowWidth = (float) (height / max);
-//    }
-//
-//    public GuiScrollSlider(GuiScrollContainer parent, String elementName, int xPos, int yPos, double min, double max, double startValue)
-//    {
-//        this(parent, elementName, xPos, yPos, 200, 16, min, max, startValue);
-//    }
-//
-//    public double getValue()
-//    {
-//        return MathUtils.denormalize(getNormalizedValue(), min, max);
-//    }
-//
-//    public void setValue(double value)
-//    {
-//        setNormalizedValue(MathUtils.normalize(value, min, max));
-//    }
-//
-//    public int getValueInt()
-//    {
-//        return (int) getValue();
-//    }
-//
-//    public double getNormalizedValue()
-//    {
-//        return slidingWindowTop;
-//    }
-//
-//    public void setNormalizedValue(double normalValue)
-//    {
-//        slidingWindowTop = MathUtils.clamp(normalValue, 0, 1 - slidingWindowWidth);
-//    }
-//
-//    // mouse position on the slider
-//    protected double getSliderValueAtMousePos(int mouseY)
-//    {
-//        return (mouseY - yPos) / (double) height;
-//    }
-//
-//    // x/y screen position of normal slider value
-//    protected float getScreenPosAtNormalValue(double normalValue)
-//    {
-//        return (float) (yPos + (normalValue * height));
-//    }
-//
-//    public void onMouseScroll(int wheelDelta)
-//    {
-////        System.out.println(wheelDelta);
-//        setNormalizedValue(getNormalizedValue() + MathUtils.normalize(wheelDelta * 6, min, max));
-//    }
-//
-//    public void onMouseDrag(int mouseX, int mouseY, int clickedMouseButton, long msHeld)
-//    {
-//        double valueAtMouse = getSliderValueAtMousePos(mouseY);
-//
-////        System.out.println(lastSliderValue + " " + valueAtMouse);
-//
-//        // TODO: fix mouseDown logic (track recursively in container?)
-//        if (mouseDown && lastSliderValue != valueAtMouse)
-//        {
-//            double distance = valueAtMouse - grabPosValue;
-//
-////            System.out.println(startSliderValue + " " + grabPosValue + " " + distance);
-//            setNormalizedValue(startSliderValue + distance);
-//
-//            lastSliderValue = valueAtMouse;
-//        }
-//    }
-//
+package io.jonuuh.core.lib.gui.element.sliders;
+
+import io.jonuuh.core.lib.gui.event.input.MouseDownEvent;
+import io.jonuuh.core.lib.gui.event.input.MouseDragEvent;
+import io.jonuuh.core.lib.gui.event.input.MouseScrollEvent;
+import io.jonuuh.core.lib.gui.listener.input.MouseDragListener;
+import io.jonuuh.core.lib.gui.properties.GuiColorType;
+import io.jonuuh.core.lib.util.Color;
+import io.jonuuh.core.lib.util.MathUtils;
+import io.jonuuh.core.lib.util.RenderUtils;
+
+public class GuiScrollSlider extends AbstractSlider implements MouseDragListener
+{
+    /** A normalized value from 0-1: how long (height if vertical, width if horizontal) the scrollbar is */
+    protected float scrollBarLength;
+    /** A normalized value from 0-1: where on the slider the mouse was last pressed down */
+    protected float grabPosValue;
+    /** A normalized value from 0-1: what the normalValue of the slider was when mouse was last pressed down */
+    protected float startSliderValue;
+
+    protected float lastValue;
+
+    public GuiScrollSlider(String elementName, float xPos, float yPos, float width, float height, float totalScrollingLength, boolean isVertical, boolean isInteger)
+    {
+        super(elementName, xPos, yPos, width, height, 0, totalScrollingLength, 0, isVertical, isInteger);
+        updateSlidingWindowLength();
+    }
+
+    public GuiScrollSlider(String elementName, float xPos, float yPos, float width, float height, float totalScrollingLength)
+    {
+        this(elementName, xPos, yPos, width, height, totalScrollingLength, true, false);
+    }
+
+    /**
+     * A normalized value from 0-1: where on the slider the start (top if vertical, left if horizontal) of the scroll bar is
+     */
+    @Override
+    public float getNormalizedValue()
+    {
+        return normalValue;
+    }
+
+    public void setNormalizedValue(float normalValue)
+    {
+        this.lastValue = getNormalizedValue();
+        super.setNormalizedValue((float) MathUtils.clamp(normalValue, 0, 1 - scrollBarLength));
+//        handlePostCustomEvent();
+    }
+
+    public float getLastChange()
+    {
+        return getValue() - (float) MathUtils.denormalize(lastValue, min, max);
+    }
+
+    public void updateSlidingWindowLength()
+    {
+        this.scrollBarLength = isVertical ? getHeight() / max : getWidth() / max;
+    }
+
+    @Override
+    public void onMouseScroll(MouseScrollEvent event)
+    {
+        isMovingTimer = 10;
+        setNormalizedValue(getNormalizedValue() + (float) (MathUtils.normalize(event.wheelDelta * 10, min, max)));
+    }
+
+    @Override
+    public void onMouseDrag(MouseDragEvent event)
+    {
+        float valueAtMouse = getNormalValueAtScreenPos(event.mouseX, event.mouseY);
+        float distance = valueAtMouse - grabPosValue;
+        setNormalizedValue(startSliderValue + distance);
+    }
+
+    @Override
+    public void onMouseDown(MouseDownEvent event)
+    {
+        super.onMouseDown(event);
+
+        grabPosValue = getNormalValueAtScreenPos(event.mouseX, event.mouseY);
+
+        if (grabPosValue < getNormalizedValue() || grabPosValue > getNormalizedValue() + scrollBarLength)
+        {
+            setNormalizedValue(grabPosValue - (scrollBarLength / 2F));
+        }
+
+        startSliderValue = getNormalizedValue();
+    }
+
 //    @Override
-//    public void onMousePress(int mouseX, int mouseY)
+//    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
 //    {
-//        super.onMousePress(mouseX, mouseY);
-//        grabPosValue = getSliderValueAtMousePos(mouseY);
 //
-////        System.out.println("PRESS: " + grabPosValue + " " + startSliderValue + " " + getNormalizedValue());
-//
-//        if(grabPosValue < getNormalizedValue() || grabPosValue > getNormalizedValue() + slidingWindowWidth)
-//        {
-//            setNormalizedValue(grabPosValue - (slidingWindowWidth / 2F));
-//        }
-//
-//        startSliderValue = getNormalizedValue();
-////        System.out.println(getNormalizedValue());
 //    }
-//
-//    @Override
-//    protected void drawElement(int mouseX, int mouseY, float partialTicks)
-//    {
-//        drawSlider();
-//    }
-//
-//    protected void drawSlider()
-//    {
-//        float trackWidth = (width / 3F);
-//        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, (xPos + trackWidth), yPos, trackWidth, height,
-//                parent.getOuterRadius(), parent.getColorMap().get("ACCENT"), true);
-//
-//        drawPointer();
-//    }
-//
-//    protected void drawPointer()
-//    {
-//        float screenPosWindowTop = getScreenPosAtNormalValue(getNormalizedValue());
-//        float screenPosWindowBottom = getScreenPosAtNormalValue(getNormalizedValue() + slidingWindowWidth);
-//
-//        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, xPos, screenPosWindowTop, width, screenPosWindowBottom - screenPosWindowTop,
-//                parent.getInnerRadius(), parent.getBaseColor().copy().setA(0.5F), true);
-//    }
-//}
+
+    @Override
+    protected void drawVerticalSlider()
+    {
+        float trackWidth = (getWidth() / 3F);
+        RenderUtils.drawRectangle(worldXPos() + trackWidth, worldYPos(), trackWidth, getHeight(), getColor(GuiColorType.ACCENT1));
+        drawPointer();
+    }
+
+    @Override
+    protected void drawHorizontalSlider()
+    {
+        float trackHeight = (getHeight() / 3F);
+        RenderUtils.drawRectangle(worldXPos(), worldYPos() + trackHeight, getWidth(), trackHeight, getColor(GuiColorType.ACCENT1));
+        drawPointer();
+    }
+
+    protected void drawPointer()
+    {
+        float screenPosWindowStart = getScreenPosAtNormalValue(getNormalizedValue());
+        float screenPosWindowEnd = getScreenPosAtNormalValue(getNormalizedValue() + scrollBarLength);
+        Color test = new Color("#aaff00ff");
+
+        if (isVertical)
+        {
+            RenderUtils.drawRectangle(worldXPos(), screenPosWindowStart, getWidth(), screenPosWindowEnd - screenPosWindowStart, test);
+        }
+        else
+        {
+            RenderUtils.drawRectangle(screenPosWindowStart, worldYPos(), screenPosWindowEnd - screenPosWindowStart, getHeight(), test);
+        }
+    }
+}
