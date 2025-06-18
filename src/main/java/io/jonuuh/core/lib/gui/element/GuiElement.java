@@ -378,6 +378,11 @@ public abstract class GuiElement
         action.accept(this);
     }
 
+    public void propagateEvent(GuiEvent event)
+    {
+        event.tryDispatchTo(this);
+    }
+
     public void collectMatchingElements(List<GuiElement> collector, Predicate<GuiElement> predicate)
     {
         if (predicate.test(this))

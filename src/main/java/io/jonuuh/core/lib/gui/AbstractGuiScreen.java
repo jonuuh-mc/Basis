@@ -76,7 +76,7 @@ public abstract class AbstractGuiScreen extends GuiScreen
     public void initGui()
     {
         Keyboard.enableRepeatEvents(true);
-        rootContainer.performAction(element -> element.handleInitGuiEvent(new ScaledResolution(mc)));
+        rootContainer.propagateEvent(new InitGuiEvent(new ScaledResolution(mc)));
     }
 
     /**
@@ -90,7 +90,7 @@ public abstract class AbstractGuiScreen extends GuiScreen
     {
         Keyboard.enableRepeatEvents(false);
         currentFocus = null;
-        rootContainer.performAction(GuiElement::handleCloseGuiEvent);
+        rootContainer.propagateEvent(new CloseGuiEvent());
     }
 
     /**
@@ -100,7 +100,7 @@ public abstract class AbstractGuiScreen extends GuiScreen
     @Override
     public void updateScreen()
     {
-        rootContainer.performAction(GuiElement::handleScreenTickEvent);
+        rootContainer.propagateEvent(new ScreenTickEvent());
     }
 
     /**
@@ -110,7 +110,7 @@ public abstract class AbstractGuiScreen extends GuiScreen
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
-        rootContainer.performAction(element -> element.handleScreenDrawEvent(mouseX, mouseY, partialTicks));
+        rootContainer.onScreenDraw(mouseX, mouseY, partialTicks);
     }
 
     /**

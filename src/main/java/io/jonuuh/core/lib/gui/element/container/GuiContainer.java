@@ -1,6 +1,7 @@
 package io.jonuuh.core.lib.gui.element.container;
 
 import io.jonuuh.core.lib.gui.element.GuiElement;
+import io.jonuuh.core.lib.gui.event.GuiEvent;
 import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
@@ -11,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public abstract class GuiContainer extends GuiElement
 {
@@ -203,24 +205,24 @@ public abstract class GuiContainer extends GuiElement
     }
 
     @Override
-    protected void playClickSound(SoundHandler soundHandler)
+    public void propagateEvent(GuiEvent event)
     {
+        super.propagateEvent(event);
+
+        for (GuiElement child : children)
+        {
+            child.propagateEvent(event);
+        }
     }
 
     @Override
-    protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
+    public void collectMatchingElements(List<GuiElement> collector, Predicate<GuiElement> predicate)
     {
-        if (debug && hasChildren())
+        super.collectMatchingElements(collector, predicate);
+
+        for (GuiElement child : children)
         {
-            Color padColor = new Color("#36ff0000");
-            // Left
-            RenderUtils.drawRectangle(worldXPos(), worldYPos(), padding.getLeft(), getHeight(), padColor);
-            // Right
-            RenderUtils.drawRectangle(worldXPos() + getWidth() - padding.getRight(), worldYPos(), padding.getRight(), getHeight(), padColor);
-            // Top
-            RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), padding.getTop(), padColor);
-            // Bottom
-            RenderUtils.drawRectangle(worldXPos(), worldYPos() + getHeight() - padding.getBottom(), getWidth(), padding.getBottom(), padColor);
+            child.collectMatchingElements(collector, predicate);
         }
     }
 }
