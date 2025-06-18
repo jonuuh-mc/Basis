@@ -41,8 +41,14 @@ public class GuiLabel extends GuiElement
     }
 
     @Override
-    protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
+    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
+        if (!isVisible())
+        {
+            return;
+        }
+        super.onScreenDraw(mouseX, mouseY, partialTicks);
+
         textXPos = worldXPos();
         textYPos = worldYPos();
 

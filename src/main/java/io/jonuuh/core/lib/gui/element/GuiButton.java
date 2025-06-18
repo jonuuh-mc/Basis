@@ -1,41 +1,39 @@
 package io.jonuuh.core.lib.gui.element;
 
+import io.jonuuh.core.lib.gui.event.GuiEvent;
+import io.jonuuh.core.lib.gui.event.PostEventBehaviorHost;
+import io.jonuuh.core.lib.gui.event.input.MouseDownEvent;
+import io.jonuuh.core.lib.gui.listener.input.MouseClickListener;
 import io.jonuuh.core.lib.gui.properties.GuiColorType;
-import io.jonuuh.core.lib.gui.properties.GuiEventType;
 import io.jonuuh.core.lib.util.RenderUtils;
-import org.lwjgl.input.Keyboard;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
-public class GuiButton extends GuiElement
+public class GuiButton extends GuiElement implements MouseClickListener, PostEventBehaviorHost
 {
-    protected String buttonLabel;
+    private final Map<Class<? extends GuiEvent>, Consumer<GuiElement>> postBehaviors;
+    private boolean enabled;
+    private boolean mouseDown;
+    private String buttonLabel;
 
     public GuiButton(String elementName, float xPos, float yPos, float width, float height, String buttonLabel, Consumer<GuiElement> mouseDownBehavior)
     {
         super(elementName, xPos, yPos, width, height);
-        init(buttonLabel, mouseDownBehavior);
+        this.buttonLabel = buttonLabel;
+        this.postBehaviors = new HashMap<>();
+        assignPostEventBehavior(MouseDownEvent.class, mouseDownBehavior);
     }
 
     public GuiButton(String elementName, float xPos, float yPos, float width, float height, Consumer<GuiElement> mouseDownBehavior)
     {
-        super(elementName, xPos, yPos, width, height);
-        init("", mouseDownBehavior);
+        this(elementName, xPos, yPos, width, height, "", mouseDownBehavior);
     }
 
     public GuiButton(String elementName, float xPos, float yPos, Consumer<GuiElement> mouseDownBehavior)
     {
-        super(elementName, xPos, yPos);
-        init("", mouseDownBehavior);
-    }
-
-    // TODO: completely insane design; want to call the separate super()s in constructors
-    //  to avoid re-hardcoding default fields, but not set all the subclass fields in every constructor.
-    //  this is a strange workaround
-    private void init(String buttonLabel, Consumer<GuiElement> mouseDownBehavior)
-    {
-        this.buttonLabel = buttonLabel;
-        assignPostEventBehavior(GuiEventType.MOUSE_DOWN, mouseDownBehavior);
+        this(elementName, xPos, yPos, DEFAULT_WIDTH, DEFAULT_HEIGHT, "", mouseDownBehavior);
     }
 
     public String getButtonLabel()
@@ -49,8 +47,44 @@ public class GuiButton extends GuiElement
     }
 
     @Override
-    protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
+    public boolean isEnabled()
     {
+        return enabled;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
+    }
+
+    @Override
+    public boolean isMouseDown()
+    {
+        return mouseDown;
+    }
+
+    @Override
+    public void setMouseDown(boolean mouseDown)
+    {
+        this.mouseDown = mouseDown;
+    }
+
+    @Override
+    public Map<Class<? extends GuiEvent>, Consumer<GuiElement>> getPostEventBehaviors()
+    {
+        return postBehaviors;
+    }
+
+    @Override
+    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
+    {
+        if (!isVisible())
+        {
+            return;
+        }
+        super.onScreenDraw(mouseX, mouseY, partialTicks);
+
         RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), getColor(GuiColorType.BASE));
 
         String buttonText = RenderUtils.trimStringToWidthWithEllipsis(buttonLabel, (int) getWidth());
@@ -59,27 +93,10 @@ public class GuiButton extends GuiElement
                 worldYPos() + (getHeight() / 2) - ((float) mc.fontRendererObj.FONT_HEIGHT / 2), getColor(GuiColorType.ACCENT1).toPackedARGB(), true);
     }
 
-//    @Override
-//    public void onMouseDown(int mouseX, int mouseY)
-//    {
-//        setLocalYPos(getLocalYPos() + 1);
-//    }
-//
-//    @Override
-//    public void onMouseUp(int mouseX, int mouseY)
-//    {
-//        setLocalYPos(getLocalYPos() - 1);
-//    }
-
     @Override
-    protected void onKeyTyped(char typedChar, int keyCode)
+    public void onMouseDown(MouseDownEvent event)
     {
-        if (keyCode == Keyboard.KEY_RETURN /*|| keyCode == Keyboard.KEY_SPACE*/)
-        {
-            // TODO:
-//            tryApplyCustomEventBehavior(GuiEventType.MOUSE_DOWN);
-//            yPos += 1;
-//            playClickSound(mc.getSoundHandler());
-        }
+        MouseClickListener.super.onMouseDown(event);
+        tryApplyPostEventBehavior(event.getClass());
     }
 }
