@@ -44,17 +44,21 @@ public class GuiDropdown extends GuiFlexContainer
 
     protected void toggleOpen(GuiElement element)
     {
-        if (handlePreCustomEvent())
-        {
-            header.setButtonLabel(((GuiButton) element).getButtonLabel());
-            dropdownContainer.setVisible(!dropdownContainer.isVisible());
-        }
-        handlePostCustomEvent();
+//        if (handlePreCustomEvent())
+//        {
+        header.setButtonLabel(((GuiButton) element).getButtonLabel());
+        dropdownContainer.setVisible(!dropdownContainer.isVisible());
+//        }
+//        handlePostCustomEvent();
     }
 
     @Override
-    protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
+    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
+        if (!isVisible())
+        {
+            return;
+        }
         super.onScreenDraw(mouseX, mouseY, partialTicks);
 //        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), innerRadius, getColor(GuiColorType.BACKGROUND), true);
 
