@@ -29,15 +29,19 @@ public class FlexItem
 
     // TODO: impl. this in GuiFlexContainer
     /** Order of this element among the children along the main axis */
-    private int order;
-    /** Part of how much weight this element has when the items along the main axis are grown */
+    private Integer order;
+    /**
+     * Part of how much weight this element has when the items along the main axis are grown.
+     * A value of 0 is default and means this element will not grow to fill free space
+     */
     private int grow;
-    /** Part of how much weight this element has when the items along the main axis are shrunk */
+    /** Part of how much weight this element has when the items along the main axis are shrunk.
+     * A value of 1 is default, a value of 0 means this element will not shrink when there is negative free space */
     private int shrink;
     /** How this item should be aligned along the cross axis */
     private FlexAlign alignSelf;
 
-    public FlexItem(GuiElement element, float minWidth, float maxWidth, float minHeight, float maxHeight, int order, int grow, int shrink, FlexAlign alignSelf)
+    public FlexItem(GuiElement element, float minWidth, float maxWidth, float minHeight, float maxHeight, Integer order, int grow, int shrink, FlexAlign alignSelf)
     {
         this.element = element;
 
@@ -57,29 +61,19 @@ public class FlexItem
 
     public FlexItem(GuiElement element, float minWidth, float maxWidth, float minHeight, float maxHeight)
     {
-        this(element, minWidth, maxWidth, minHeight, maxHeight, 0, 0, 1, null);
+        this(element, minWidth, maxWidth, minHeight, maxHeight, null, 0, 1, null);
     }
 
-    public FlexItem(GuiElement element, int order, int grow, int shrink, FlexAlign alignSelf)
+    public FlexItem(GuiElement element, Integer order, int grow, int shrink, FlexAlign alignSelf)
     {
-        this(element, 0, Integer.MAX_VALUE, 0, Integer.MAX_VALUE, order, grow, shrink, alignSelf);
+        this(element, 5, Integer.MAX_VALUE, 5, Integer.MAX_VALUE, order, grow, shrink, alignSelf);
     }
 
     public FlexItem(GuiElement element)
     {
         // TODO: need to figure out good defaults for min/maxes
-        this(element, 0, Integer.MAX_VALUE, 0, Integer.MAX_VALUE);
+        this(element, 5, Integer.MAX_VALUE, 5, Integer.MAX_VALUE);
     }
-
-//    public FlexItem(float minWidth, float maxWidth)
-//    {
-//        this(minWidth, maxWidth, 0, 0);
-//    }
-//
-//    public FlexItem(float minHeight, float maxHeight)
-//    {
-//        this(0, 0, minHeight, maxHeight);
-//    }
 
     public GuiElement getElement()
     {
@@ -140,12 +134,12 @@ public class FlexItem
         return this;
     }
 
-    public int getOrder()
+    public Integer getOrder()
     {
         return order;
     }
 
-    public FlexItem setOrder(int order)
+    public FlexItem setOrder(Integer order)
     {
         this.order = order;
         return this;
