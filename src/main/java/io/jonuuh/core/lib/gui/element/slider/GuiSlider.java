@@ -153,8 +153,8 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
     protected float getNormalValueAtScreenPos(int xPos, int yPos)
     {
         return isVertical
-                ? (xPos - worldYPos()) / getHeight()
-                : (yPos - worldXPos()) / getWidth();
+                ? (yPos - worldYPos()) / getHeight()
+                : (xPos - worldXPos()) / getWidth();
     }
 
     /**
