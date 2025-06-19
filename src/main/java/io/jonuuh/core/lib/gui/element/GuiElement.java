@@ -3,6 +3,7 @@ package io.jonuuh.core.lib.gui.element;
 import io.jonuuh.core.lib.gui.AbstractGuiScreen;
 import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.gui.element.container.GuiRootContainer;
+import io.jonuuh.core.lib.gui.event.GuiEvent;
 import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.gui.properties.Spacing;
 import io.jonuuh.core.lib.util.Color;
@@ -69,26 +70,29 @@ public abstract class GuiElement
 
     protected boolean debug;
 
-    protected GuiElement(String elementName, float localXPos, float localYPos, float width, float height)
+    protected GuiElement(AbstractBuilder<?, ?> builder)
     {
-        this.elementName = elementName;
+        this.elementName = builder.elementName;
 
-        this.localXPos = localXPos;
-        this.localYPos = localYPos;
+        this.localXPos = builder.localXPos;
+        this.localYPos = builder.localYPos;
 
-        this.width = width;
-        this.height = height;
-        this.padding = new Spacing(0);
+        this.width = builder.width;
+        this.height = builder.height;
 
-        this.visible = true;
+        this.padding = builder.padding;
+        this.margin = builder.margin;
+
+        this.visible = builder.visible;
+
+        this.colorMap = builder.colorMap;
+
         this.debug = true;
 
-        this.colorMap = new HashMap<>();
-    }
-
-    protected GuiElement(String elementName, float localXPos, float localYPos)
-    {
-        this(elementName, localXPos, localYPos, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        if (builder.parent != null)
+        {
+            setParent(builder.parent);
+        }
     }
 
     public GuiContainer getParent()
@@ -97,12 +101,31 @@ public abstract class GuiElement
     }
 
     /**
-     * Use {@link GuiContainer#addChild(GuiElement)} instead?
-     * TODO: can't make this protected unless this & container are in same class; factory, bridge, accessor, visitor, something?
+     * Set the parent of this GuiElement, handling any relationships between this element and the parent
+     *
+     * @param parent {@link GuiElement#parent}
      */
     public void setParent(GuiContainer parent)
     {
+        // Temporarily hold previous parent, doesn't matter if it was null (should usually be the case)
+        GuiContainer prevParent = this.parent;
+
+        // Assign new parent
         this.parent = parent;
+
+        // If this function was called independently rather than being called via
+        // GuiContainer#removeChild(), make the parent aware that this is no longer its child
+        if (prevParent != null && prevParent.hasChild(this))
+        {
+            prevParent.removeChild(this);
+        }
+
+        // If this function was called independently rather than being called via
+        // GuiContainer#addChild(), make the parent aware that this is now its child
+        if (parent != null && !parent.hasChild(this))
+        {
+            parent.addChild(this);
+        }
     }
 
     public boolean hasParent()

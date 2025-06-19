@@ -18,22 +18,17 @@ public class GuiButton extends GuiElement implements MouseClickListener, PostEve
     private boolean mouseDown;
     private String buttonLabel;
 
-    public GuiButton(String elementName, float xPos, float yPos, float width, float height, String buttonLabel, Consumer<GuiElement> mouseDownBehavior)
+    public GuiButton(Builder builder)
     {
-        super(elementName, xPos, yPos, width, height);
-        this.buttonLabel = buttonLabel;
+        super(builder);
+        this.enabled = builder.enabled;
+        this.buttonLabel = builder.buttonText;
         this.postBehaviors = new HashMap<>();
-        assignPostEventBehavior(MouseDownEvent.class, mouseDownBehavior);
-    }
 
-    public GuiButton(String elementName, float xPos, float yPos, float width, float height, Consumer<GuiElement> mouseDownBehavior)
-    {
-        this(elementName, xPos, yPos, width, height, "", mouseDownBehavior);
-    }
-
-    public GuiButton(String elementName, float xPos, float yPos, Consumer<GuiElement> mouseDownBehavior)
-    {
-        this(elementName, xPos, yPos, DEFAULT_WIDTH, DEFAULT_HEIGHT, "", mouseDownBehavior);
+        if (builder.mouseDownBehavior != null)
+        {
+            assignPostEventBehavior(MouseDownEvent.class, builder.mouseDownBehavior);
+        }
     }
 
     public String getButtonLabel()

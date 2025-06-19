@@ -12,18 +12,12 @@ public class GuiDualSlider extends GuiSlider
 {
     protected static final ResourceLocation pointerResource = new ResourceLocation("core:textures/pointer.png");
     protected float normalValueRight;
-
     protected boolean isLastHeldPointerLeft;
 
-    public GuiDualSlider(String elementName, float xPos, float yPos, float width, float height, float min, float max, float startValueLeft, float startValueRight, boolean isVertical, boolean isInteger)
+    public GuiDualSlider(Builder builder)
     {
-        super(elementName, xPos, yPos, width, height, min, max, startValueLeft, isVertical, isInteger);
-        setRightValue(startValueRight);
-    }
-
-    public GuiDualSlider(String elementName, float xPos, float yPos, float min, float max, float startValueLeft, float startValueRight)
-    {
-        this(elementName, xPos, yPos, DEFAULT_WIDTH, DEFAULT_HEIGHT, min, max, startValueLeft, startValueRight, false, false);
+        super(builder);
+        setRightValue(builder.startValueRight);
     }
 
     public float getRightValue()

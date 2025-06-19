@@ -5,27 +5,16 @@ import io.jonuuh.core.lib.gui.element.container.flex.GuiFlexContainer;
 import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexAlign;
 import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexJustify;
 import io.jonuuh.core.lib.gui.event.lifecycle.InitGuiEvent;
-import io.jonuuh.core.lib.gui.properties.GuiColorType;
-import io.jonuuh.core.lib.util.Color;
-
-import java.util.Map;
 
 public class GuiRootContainer extends GuiFlexContainer
 {
     /** The GuiScreen containing this GuiRootContainer, should be a 1:1 relationship */
     public final AbstractGuiScreen guiScreen;
 
-    public GuiRootContainer(AbstractGuiScreen guiScreen, Map<GuiColorType, Color> colorMap)
+    public GuiRootContainer(Builder builder)
     {
-        super("ROOT", 0, 0, 0, 0, colorMap);
-        this.guiScreen = guiScreen;
-        this.setJustifyContent(FlexJustify.CENTER);
-        this.setAlignItems(FlexAlign.CENTER);
-    }
-
-    public GuiRootContainer(AbstractGuiScreen guiScreen)
-    {
-        this(guiScreen, null);
+        super(builder);
+        this.guiScreen = builder.guiScreen;
     }
 
     @Override

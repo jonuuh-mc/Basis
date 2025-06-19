@@ -7,19 +7,9 @@ import io.jonuuh.core.lib.util.RenderUtils;
 public class GuiSwitch extends GuiToggle
 {
     // TODO: make vertical option
-    public GuiSwitch(String elementName, float xPos, float yPos, float width, float height, boolean switchState)
+    public GuiSwitch(Builder builder)
     {
-        super(elementName, xPos, yPos, width, height, switchState);
-    }
-
-    public GuiSwitch(String elementName, float xPos, float yPos, boolean switchState)
-    {
-        this(elementName, xPos, yPos, DEFAULT_HEIGHT * 2, DEFAULT_HEIGHT, switchState);
-    }
-
-    public GuiSwitch(String elementName, float xPos, float yPos)
-    {
-        this(elementName, xPos, yPos, false);
+        super(builder);
     }
 
     public float getPointerSize()

@@ -14,22 +14,26 @@ import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.util.EnumChatFormatting;
 import org.lwjgl.opengl.GL11;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 
 public class GuiFlexContainer extends GuiContainer implements InitGuiListener
 {
     private final FlexBehavior flexBehavior;
 
-    public GuiFlexContainer(String elementName, float xPos, float yPos, float width, float height, Map<GuiColorType, Color> colorMap)
+    protected GuiFlexContainer(AbstractBuilder<?, ?> builder)
     {
-        super(elementName, xPos, yPos, width, height, colorMap);
+        super(builder);
         this.flexBehavior = new FlexBehavior(this);
+        flexBehavior.setDirection(builder.direction).setJustifyContent(builder.justify).setAlignItems(builder.align);
+        flexBehavior.addItems(builder.flexItems);
     }
 
-    public GuiFlexContainer(String elementName, float xPos, float yPos, float width, float height)
+    public GuiFlexContainer(Builder builder)
     {
-        this(elementName, xPos, yPos, width, height, null);
+        this((AbstractBuilder<?, ?>) builder);
     }
 
     // TODO: just for debugging and experimenting, probably should not be exposed

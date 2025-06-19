@@ -6,30 +6,45 @@ import io.jonuuh.core.lib.gui.element.container.flex.FlexItem;
 import io.jonuuh.core.lib.gui.element.container.flex.GuiFlexContainer;
 import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexDirection;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class GuiDropdown extends GuiFlexContainer
 {
-    protected GuiFlexContainer dropdownContainer;
+    protected GuiFlexContainer optionsContainer;
     protected GuiButton header;
 
-    public GuiDropdown(String elementName, int xPos, int yPos, int width, int height, String prompt, Collection<String> options)
+    public GuiDropdown(Builder builder)
     {
-        super(elementName, xPos, yPos, width, height);
+        super(builder);
+        this.enabled = builder.enabled;
         this.setDirection(FlexDirection.COLUMN);
 
-        this.header = new GuiButton(elementName + "$header", 0, 0, width, height, prompt, this::toggleOpen);
+        this.header = new GuiButton.Builder(this.elementName + "$header")
+                .size(this.getWidth(), this.getHeight())
+                .buttonText(builder.prompt)
+                .build();
         addItem(new FlexItem(header/*, 0, width, height, height*/).setShrink(0));
 
-        this.dropdownContainer = new GuiFlexContainer(elementName + "$option-container",
-                0, height, width, height * options.size()).setDirection(FlexDirection.COLUMN);
-        for (String option : options)
-        {
-            dropdownContainer.addItem(new FlexItem(new GuiButton(option, 0, 0, width, height, option, this::toggleOpen)));
-        }
-        dropdownContainer.setVisible(false);
+        this.optionsContainer = new GuiFlexContainer.Builder(elementName + "$option-container")
+                .localPosition(0, getHeight())
+                .size(getWidth(), getHeight() * builder.options.size())
+                .visible(false)
+                .direction(FlexDirection.COLUMN)
+                .build();
 
-        addItem(new FlexItem(dropdownContainer).setShrink(0));
+        for (String option : builder.options)
+        {
+            GuiButton button = new GuiButton.Builder(option)
+                    .size(this.getWidth(), this.getHeight())
+                    .visible(false)
+                    .buttonText(option)
+                    .build();
+            optionsContainer.addItem(new FlexItem(button));
+        }
+//        optionsContainer.setVisible(false);
+
+        addItem(new FlexItem(optionsContainer).setShrink(0));
     }
 
     public String getHeaderText()

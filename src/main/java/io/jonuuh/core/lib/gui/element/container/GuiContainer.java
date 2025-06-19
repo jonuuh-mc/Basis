@@ -8,6 +8,7 @@ import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.audio.SoundHandler;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -16,23 +17,14 @@ import java.util.function.Predicate;
 
 public abstract class GuiContainer extends GuiElement
 {
-    // TODO: make this a map again?
     protected final List<GuiElement> children;
 
-    protected GuiContainer(String elementName, float xPos, float yPos, float width, float height, Map<GuiColorType, Color> colorMap)
+    protected GuiContainer(AbstractBuilder<?, ?> builder)
     {
-        super(elementName, xPos, yPos, width, height);
+        super(builder);
+
         this.children = new ArrayList<>();
-
-        if (colorMap != null)
-        {
-            this.colorMap = colorMap;
-        }
-    }
-
-    protected GuiContainer(String elementName, float xPos, float yPos, float width, float height)
-    {
-        this(elementName, xPos, yPos, width, height, null);
+        addChildren(builder.children);
     }
 
     public List<GuiElement> getChildren()
@@ -70,17 +62,19 @@ public abstract class GuiContainer extends GuiElement
 
     public void addChild(GuiElement child)
     {
-        if (child instanceof GuiRootContainer)
+        if (children.contains(child))
         {
-            throw new IllegalArgumentException();
+            return;
         }
 
-//        if (child.getParent() != this)
-//        {
-        child.setParent(this);
-//        }
-
         children.add(child);
+
+        // If this function was called independently rather than being called via
+        // GuiElement#setParent(), make the child aware that this is now its parent
+        if (this != child.getParent())
+        {
+            child.setParent(this);
+        }
 
         child.setInheritedXPos(this.worldXPos());
         child.setInheritedYPos(this.worldYPos());
@@ -92,10 +86,23 @@ public abstract class GuiContainer extends GuiElement
 
         // TODO: make setZLevel overridden in container similarly to setInheritedPos? would that solve this problem?
         this.performAction(element -> element.setZLevel(element.getNumParents()));
+    }
 
+    public void removeChild(GuiElement child)
+    {
+        if (!children.contains(child))
+        {
+            return;
+        }
 
-//        boolean southBounds = (element.localYPos())
-        // TODO: add handling for bounds of element being outside its parent? snap to relevant to inner parent edge?
+        children.remove(child);
+
+        // If this function was called independently rather than being called via
+        // GuiElement#setParent(), make the child aware that it no longer has a parent
+        if (this == child.getParent())
+        {
+            child.setParent(null);
+        }
     }
 
     public void addChildren(Collection<GuiElement> children)

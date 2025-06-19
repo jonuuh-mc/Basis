@@ -13,32 +13,29 @@ import java.text.DecimalFormat;
 
 abstract class GuiSlider extends GuiElement implements MouseClickListener, MouseScrollListener, ScreenTickListener
 {
+    /** The minimum value of this slider (not normalized; readable value) */
     protected final float min;
+    /** The maximum value of this slider (not normalized; readable value) */
     protected final float max;
     protected final boolean isVertical;
     protected final boolean isInteger;
+    protected final DecimalFormat decimalFormat;
     protected float normalValue;
-    protected DecimalFormat decimalFormat;
     protected int isMovingTimer;
 
     private boolean enabled;
     private boolean mouseDown;
 
-    protected AbstractSlider(String elementName, float localXPos, float localYPos, float width, float height, float min, float max, float startValue, boolean isVertical, boolean isInteger)
+    protected GuiSlider(AbstractBuilder<?, ?> builder)
     {
-        super(elementName, localXPos, localYPos, width, height);
-        this.min = min;
-        this.max = max;
-        this.isVertical = isVertical;
-        this.isInteger = isInteger;
-        setValue(startValue);
-
-        this.decimalFormat = new DecimalFormat("#.###");
-    }
-
-    protected AbstractSlider(String elementName, float localXPos, float localYPos, float min, float max, float startValue, boolean isVertical, boolean isInteger)
-    {
-        this(elementName, localXPos, localYPos, DEFAULT_WIDTH, DEFAULT_HEIGHT, min, max, startValue, isVertical, isInteger);
+        super(builder);
+        this.min = builder.min;
+        this.max = builder.max;
+        this.isVertical = builder.isVertical;
+        this.isInteger = builder.isInteger;
+        this.decimalFormat = builder.decimalFormat;
+        this.enabled = builder.enabled;
+        setValue(builder.startValue);
     }
 
     public float getValue()
@@ -91,16 +88,6 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
     public void setMouseDown(boolean mouseDown)
     {
         this.mouseDown = mouseDown;
-    }
-
-    public DecimalFormat getDecimalFormat()
-    {
-        return decimalFormat;
-    }
-
-    public void setDecimalFormat(DecimalFormat decimalFormat)
-    {
-        this.decimalFormat = decimalFormat;
     }
 
     protected float getPointerSize()

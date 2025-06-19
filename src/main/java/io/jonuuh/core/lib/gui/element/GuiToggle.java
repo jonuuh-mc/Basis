@@ -12,25 +12,16 @@ import java.util.function.Consumer;
 public abstract class GuiToggle extends GuiElement implements MouseClickListener, PostEventBehaviorHost
 {
     private final Map<Class<? extends GuiEvent>, Consumer<GuiElement>> postBehaviors;
+    private boolean isToggled;
     private boolean enabled;
     private boolean mouseDown;
-    private boolean isToggled;
 
-    protected GuiToggle(String elementName, float localXPos, float localYPos, float width, float height, boolean isToggled)
+    protected GuiToggle(AbstractBuilder<?, ?> builder)
     {
-        super(elementName, localXPos, localYPos, width, height);
-        this.isToggled = isToggled;
+        super(builder);
         this.postBehaviors = new HashMap<>();
-    }
-
-    protected GuiToggle(String elementName, float localXPos, float localYPos, boolean isToggled)
-    {
-        this(elementName, localXPos, localYPos, DEFAULT_WIDTH, DEFAULT_HEIGHT, isToggled);
-    }
-
-    protected GuiToggle(String elementName, float xPos, float yPos)
-    {
-        this(elementName, xPos, yPos, false);
+        this.isToggled = builder.isToggled;
+        this.enabled = builder.enabled;
     }
 
     public boolean isToggled()

@@ -8,14 +8,9 @@ public class GuiSingleSlider extends GuiSlider
 {
     protected static final ResourceLocation pointerResource = new ResourceLocation("core:textures/bar.png");
 
-    public GuiSingleSlider(String elementName, float xPos, float yPos, float width, float height, float min, float max, float startValue, boolean isVertical, boolean isInteger)
+    public GuiSingleSlider(Builder builder)
     {
-        super(elementName, xPos, yPos, width, height, min, max, startValue, isVertical, isInteger);
-    }
-
-    public GuiSingleSlider(String elementName, float xPos, float yPos, float min, float max, float startValue)
-    {
-        this(elementName, xPos, yPos, DEFAULT_WIDTH, DEFAULT_HEIGHT, min, max, startValue, false, false);
+        super(builder);
     }
 
     @Override

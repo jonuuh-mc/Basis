@@ -8,19 +8,9 @@ public class GuiCheckbox extends GuiToggle
 {
     protected static final ResourceLocation checkmarkResource = new ResourceLocation("core:textures/check.png");
 
-    public GuiCheckbox(String elementName, float xPos, float yPos, float size, boolean isChecked)
+    public GuiCheckbox(Builder builder)
     {
-        super(elementName, xPos, yPos, size, size, isChecked);
-    }
-
-    public GuiCheckbox(String elementName, float xPos, float yPos, boolean isChecked)
-    {
-        this(elementName, xPos, yPos, DEFAULT_HEIGHT, isChecked);
-    }
-
-    public GuiCheckbox(String elementName, float xPos, float yPos)
-    {
-        this(elementName, xPos, yPos, false);
+        super(builder);
     }
 
     @Override

@@ -17,18 +17,13 @@ public class GuiScrollSlider extends GuiSlider implements MouseDragListener
     protected float grabPosValue;
     /** A normalized value from 0-1: what the normalValue of the slider was when mouse was last pressed down */
     protected float startSliderValue;
-
+    /** A normalized value from 0-1: what the normalValue of the slider was before it was last changed */
     protected float lastValue;
 
-    public GuiScrollSlider(String elementName, float xPos, float yPos, float width, float height, float totalScrollingLength, boolean isVertical, boolean isInteger)
+    public GuiScrollSlider(Builder builder)
     {
-        super(elementName, xPos, yPos, width, height, 0, totalScrollingLength, 0, isVertical, isInteger);
-        updateSlidingWindowLength();
-    }
-
-    public GuiScrollSlider(String elementName, float xPos, float yPos, float width, float height, float totalScrollingLength)
-    {
-        this(elementName, xPos, yPos, width, height, totalScrollingLength, true, false);
+        super(builder);
+        updateScrollBarLength();
     }
 
     /**
@@ -52,7 +47,7 @@ public class GuiScrollSlider extends GuiSlider implements MouseDragListener
         return getValue() - (float) MathUtils.denormalize(lastValue, min, max);
     }
 
-    public void updateSlidingWindowLength()
+    public void updateScrollBarLength()
     {
         this.scrollBarLength = isVertical ? getHeight() / max : getWidth() / max;
     }

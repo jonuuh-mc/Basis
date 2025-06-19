@@ -14,19 +14,12 @@ public class GuiLabel extends GuiElement
     protected float textXPos;
     protected float textYPos;
 
-    public GuiLabel(String elementName, float xPos, float yPos, float width, float height, String text)
+    public GuiLabel(Builder builder)
     {
-        super(elementName, xPos, yPos, width, height);
+        super(builder);
         this.fontRenderer = mc.fontRendererObj;
-        this.text = text;
+        this.text = builder.text;
         centerStrInWidth = centerStrInHeight = true;
-    }
-
-    public GuiLabel(String elementName, float xPos, float yPos, String text)
-    {
-        super(elementName, xPos, yPos);
-        this.fontRenderer = mc.fontRendererObj;
-        this.text = text;
     }
 
     public String getText()
