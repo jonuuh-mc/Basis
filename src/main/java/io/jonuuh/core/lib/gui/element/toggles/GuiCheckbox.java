@@ -1,4 +1,4 @@
-package io.jonuuh.core.lib.gui.element;
+package io.jonuuh.core.lib.gui.element.toggles;
 
 import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.util.RenderUtils;

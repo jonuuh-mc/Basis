@@ -6,6 +6,7 @@ import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexAlign;
 import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexJustify;
 import io.jonuuh.core.lib.gui.event.lifecycle.InitGuiEvent;
 
+// TODO: optional flexBehavior via builder instead of extending GuiFlexContainer?
 public class GuiRootContainer extends GuiFlexContainer
 {
     /** The GuiScreen containing this GuiRootContainer, should be a 1:1 relationship */

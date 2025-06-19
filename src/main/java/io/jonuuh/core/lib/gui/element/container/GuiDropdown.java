@@ -14,6 +14,8 @@ public class GuiDropdown extends GuiFlexContainer
     protected GuiFlexContainer optionsContainer;
     protected GuiButton header;
 
+    // TODO: just make this one container instead of nested containers and dynamically add/remove children or make them visible/invisible?
+    //  also should make flex alg account for invisible elements? add boolean in flexcontainer whether to ignore invisibles?
     public GuiDropdown(Builder builder)
     {
         super(builder);
@@ -26,6 +28,11 @@ public class GuiDropdown extends GuiFlexContainer
                 .build();
         addItem(new FlexItem(header/*, 0, width, height, height*/).setShrink(0));
 
+        // TODO: about .visible(false): would probably need to both make GuiElement constructor call the overridden setVisible()
+        //  as well as add children before this in order for this to automatically propagate to child buttons?
+        //  - on second thought this should just never work since GuiElement constructor will ALWAYS be called before GuiContainer constructor,
+        //    and there is rightfully no way to add children to a GuiContainer before calling GuiElement constructor
+        //  - instead just call .visible(false) here and when creating each button down below
         this.optionsContainer = new GuiFlexContainer.Builder(elementName + "$option-container")
                 .localPosition(0, getHeight())
                 .size(getWidth(), getHeight() * builder.options.size())

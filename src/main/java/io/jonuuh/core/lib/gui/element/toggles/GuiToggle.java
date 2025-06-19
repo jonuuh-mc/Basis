@@ -1,5 +1,6 @@
-package io.jonuuh.core.lib.gui.element;
+package io.jonuuh.core.lib.gui.element.toggles;
 
+import io.jonuuh.core.lib.gui.element.GuiElement;
 import io.jonuuh.core.lib.gui.event.GuiEvent;
 import io.jonuuh.core.lib.gui.event.PostEventBehaviorHost;
 import io.jonuuh.core.lib.gui.event.input.MouseDownEvent;
