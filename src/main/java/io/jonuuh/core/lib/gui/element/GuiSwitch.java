@@ -46,5 +46,27 @@ public class GuiSwitch extends GuiToggle
         // Pointer
         RenderUtils.drawRectangle(pointerX, worldYPos() + padding, getPointerSize(), getPointerSize(), getColor(GuiColorType.ACCENT1));
     }
+
+    public static class Builder extends GuiToggle.AbstractBuilder<Builder, GuiSwitch>
+    {
+        public Builder(String elementName)
+        {
+            super(elementName);
+            this.width = DEFAULT_HEIGHT * 2;
+            this.height = DEFAULT_HEIGHT;
+        }
+
+        @Override
+        protected Builder self()
+        {
+            return this;
+        }
+
+        @Override
+        public GuiSwitch build()
+        {
+            return new GuiSwitch(this);
+        }
+    }
 }
 

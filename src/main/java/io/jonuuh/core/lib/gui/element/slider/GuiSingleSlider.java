@@ -1,10 +1,10 @@
-package io.jonuuh.core.lib.gui.element.sliders;
+package io.jonuuh.core.lib.gui.element.slider;
 
 import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.util.ResourceLocation;
 
-public class GuiSingleSlider extends AbstractSlider
+public class GuiSingleSlider extends GuiSlider
 {
     protected static final ResourceLocation pointerResource = new ResourceLocation("core:textures/bar.png");
 
@@ -71,5 +71,25 @@ public class GuiSingleSlider extends AbstractSlider
         float y = /*isVertical ? getPointerScreenPos() - (size / 2) :*/ (isMovingTimer > 0 ? worldYPos() - (movingOffset / 2) - yOffset : worldYPos() - yOffset);
 
         RenderUtils.drawTexturedRect(pointerResource, x, y, getZLevel(), size, size, getColor(GuiColorType.BASE));
+    }
+
+    public static class Builder extends GuiSlider.AbstractBuilder<Builder, GuiSingleSlider>
+    {
+        public Builder(String elementName)
+        {
+            super(elementName);
+        }
+
+        @Override
+        protected Builder self()
+        {
+            return this;
+        }
+
+        @Override
+        public GuiSingleSlider build()
+        {
+            return new GuiSingleSlider(this);
+        }
     }
 }

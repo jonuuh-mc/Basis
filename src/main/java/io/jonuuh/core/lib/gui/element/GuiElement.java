@@ -396,4 +396,105 @@ public abstract class GuiElement
     {
         return this.getClass().getSimpleName() + "{" + "elementName='" + elementName + '\'' + ", parent=" + parent + '}';
     }
+
+    /**
+     * An abstract GuiElement builder.
+     * <p>
+     * <a href="https://medium.com/@AbhineyKumar/why-use-the-curiously-recurring-template-pattern-crtp-in-java-a9a192022849">Curiously recurring template pattern</a>
+     *
+     * @param <T> The type of this builder
+     * @param <R> The type of object being built
+     */
+    protected static abstract class AbstractBuilder<T extends AbstractBuilder<T, R>, R extends GuiElement>
+    {
+        protected final String elementName;
+
+        protected GuiContainer parent = null;
+        protected Map<GuiColorType, Color> colorMap = new HashMap<>();
+
+        protected float localXPos, localYPos = 0;
+        protected float width = DEFAULT_WIDTH;
+        protected float height = DEFAULT_HEIGHT;
+
+        //        public int zLevel = 0;
+        protected boolean visible = true;
+
+        protected Spacing margin, padding = new Spacing(0);
+
+        protected AbstractBuilder(String elementName)
+        {
+            this.elementName = elementName;
+        }
+
+        /**
+         * Set the position of this element builder within its parent; (0,0) would be the top left corner of the parent
+         *
+         * @param localXPos X position relative to this element's parent
+         * @param localYPos Y position relative to this element's parent
+         * @return This builder
+         */
+        public T localPosition(float localXPos, float localYPos)
+        {
+            this.localXPos = localXPos;
+            this.localYPos = localYPos;
+            return self();
+        }
+
+        public T size(float width, float height)
+        {
+            this.width = width;
+            this.height = height;
+            return self();
+        }
+
+//        public T zLevel(int zLevel)
+//        {
+//            this.zLevel = zLevel;
+//            return self();
+//        }
+
+        public T visible(boolean visible)
+        {
+            this.visible = visible;
+            return self();
+        }
+
+        public T margin(Spacing margin)
+        {
+            this.margin = margin;
+            return self();
+        }
+
+        public T padding(Spacing padding)
+        {
+            this.padding = padding;
+            return self();
+        }
+
+        public T color(GuiColorType type, Color color)
+        {
+            this.colorMap.put(type, color);
+            return self();
+        }
+
+        public T parent(GuiContainer parent)
+        {
+            this.parent = parent;
+            return self();
+        }
+
+        /**
+         * Each concrete subclass builder must implement this to make method chaining properly typed
+         *
+         * @return This Builder
+         */
+        protected abstract T self();
+
+        /**
+         * Build this object
+         *
+         * @return The built object
+         */
+        public abstract R build();
+    }
 }

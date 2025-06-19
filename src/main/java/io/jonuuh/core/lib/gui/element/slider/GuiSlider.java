@@ -1,4 +1,4 @@
-package io.jonuuh.core.lib.gui.element.sliders;
+package io.jonuuh.core.lib.gui.element.slider;
 
 import io.jonuuh.core.lib.gui.element.GuiElement;
 import io.jonuuh.core.lib.gui.event.input.MouseDownEvent;
@@ -11,7 +11,7 @@ import io.jonuuh.core.lib.util.MathUtils;
 
 import java.text.DecimalFormat;
 
-abstract class AbstractSlider extends GuiElement implements MouseClickListener, MouseScrollListener, ScreenTickListener
+abstract class GuiSlider extends GuiElement implements MouseClickListener, MouseScrollListener, ScreenTickListener
 {
     protected final float min;
     protected final float max;
@@ -178,5 +178,58 @@ abstract class AbstractSlider extends GuiElement implements MouseClickListener, 
         return isVertical
                 ? (worldYPos() + (normalValue * getHeight()))
                 : (worldXPos() + (normalValue * getWidth()));
+    }
+
+    public static abstract class AbstractBuilder<T extends GuiSlider.AbstractBuilder<T, R>, R extends GuiSlider> extends GuiElement.AbstractBuilder<T, R>
+    {
+        protected float min = 0;
+        protected float max = 100;
+        protected float startValue = 0;
+        protected boolean isVertical = false;
+        protected boolean isInteger = false;
+        protected DecimalFormat decimalFormat = new DecimalFormat("#.##");
+        protected boolean enabled = true;
+
+        protected AbstractBuilder(String elementName)
+        {
+            super(elementName);
+        }
+
+        public T bounds(float min, float max)
+        {
+            this.min = min;
+            this.max = max;
+            return self();
+        }
+
+        public T startValue(float startValue)
+        {
+            this.startValue = startValue;
+            return self();
+        }
+
+        public T vertical(boolean isVertical)
+        {
+            this.isVertical = isVertical;
+            return self();
+        }
+
+        public T integer(boolean isInteger)
+        {
+            this.isInteger = isInteger;
+            return self();
+        }
+
+        public T decimalFormat(DecimalFormat decimalFormat)
+        {
+            this.decimalFormat = decimalFormat;
+            return self();
+        }
+
+        public T enabled(boolean enabled)
+        {
+            this.enabled = enabled;
+            return self();
+        }
     }
 }

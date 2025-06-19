@@ -29,4 +29,24 @@ public class GuiBasicContainer extends GuiContainer
 
         RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), getColor(GuiColorType.BACKGROUND));
     }
+
+    public static class Builder extends GuiContainer.AbstractBuilder<Builder, GuiBasicContainer>
+    {
+        public Builder(String elementName)
+        {
+            super(elementName);
+        }
+
+        @Override
+        protected Builder self()
+        {
+            return this;
+        }
+
+        @Override
+        public GuiBasicContainer build()
+        {
+            return new GuiBasicContainer(this);
+        }
+    }
 }

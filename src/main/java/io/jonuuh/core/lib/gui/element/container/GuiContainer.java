@@ -225,4 +225,45 @@ public abstract class GuiContainer extends GuiElement
             child.collectMatchingElements(collector, predicate);
         }
     }
+
+    protected static abstract class AbstractBuilder<T extends AbstractBuilder<T, R>, R extends GuiContainer> extends GuiElement.AbstractBuilder<T, R>
+    {
+        protected final List<GuiElement> children = new ArrayList<>();
+        protected boolean shouldScissor = false;
+
+        protected AbstractBuilder(String elementName)
+        {
+            super(elementName);
+        }
+
+        public T colorMap(Map<GuiColorType, Color> colorMap)
+        {
+            this.colorMap = colorMap;
+            return self();
+        }
+
+        public T scissor(boolean shouldScissor)
+        {
+            this.shouldScissor = shouldScissor;
+            return self();
+        }
+
+        public T child(GuiElement child)
+        {
+            this.children.add(child);
+            return self();
+        }
+
+        public T children(Collection<GuiElement> children)
+        {
+            this.children.addAll(children);
+            return self();
+        }
+
+        public T children(GuiElement... children)
+        {
+            this.children.addAll(Arrays.asList(children));
+            return self();
+        }
+    }
 }

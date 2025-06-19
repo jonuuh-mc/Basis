@@ -1,4 +1,4 @@
-package io.jonuuh.core.lib.gui.element.sliders;
+package io.jonuuh.core.lib.gui.element.slider;
 
 import io.jonuuh.core.lib.gui.event.input.MouseDownEvent;
 import io.jonuuh.core.lib.gui.event.input.MouseScrollEvent;
@@ -8,7 +8,7 @@ import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
-public class GuiDualSlider extends AbstractSlider
+public class GuiDualSlider extends GuiSlider
 {
     protected static final ResourceLocation pointerResource = new ResourceLocation("core:textures/pointer.png");
     protected float normalValueRight;
@@ -209,5 +209,33 @@ public class GuiDualSlider extends AbstractSlider
         }
 
         return mousePosSliderVal < getNormalizedValue();
+    }
+
+    public static class Builder extends GuiSlider.AbstractBuilder<Builder, GuiDualSlider>
+    {
+        protected float startValueRight;
+
+        public Builder(String elementName)
+        {
+            super(elementName);
+        }
+
+        public Builder startValueRight(float startValueRight)
+        {
+            this.startValueRight = startValueRight;
+            return self();
+        }
+
+        @Override
+        protected Builder self()
+        {
+            return this;
+        }
+
+        @Override
+        public GuiDualSlider build()
+        {
+            return new GuiDualSlider(this);
+        }
     }
 }

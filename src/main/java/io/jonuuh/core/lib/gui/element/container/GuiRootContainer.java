@@ -52,4 +52,29 @@ public class GuiRootContainer extends GuiFlexContainer
         super.onScreenDraw(mouseX, mouseY, partialTicks);
 //        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), 3, new Color("#FFFFFF", 0.2F));
     }
+
+    public static class Builder extends GuiFlexContainer.AbstractBuilder<Builder, GuiRootContainer>
+    {
+        protected final AbstractGuiScreen guiScreen;
+
+        public Builder(AbstractGuiScreen guiScreen)
+        {
+            super("ROOT");
+            this.guiScreen = guiScreen;
+            this.justify = FlexJustify.CENTER;
+            this.align = FlexAlign.CENTER;
+        }
+
+        @Override
+        protected Builder self()
+        {
+            return this;
+        }
+
+        @Override
+        public GuiRootContainer build()
+        {
+            return new GuiRootContainer(this);
+        }
+    }
 }

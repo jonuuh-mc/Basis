@@ -44,4 +44,25 @@ public class GuiCheckbox extends GuiToggle
             RenderUtils.drawTexturedRect(checkmarkResource, worldXPos(), worldYPos(), /*0*/getZLevel(), getWidth(), getHeight(), getColor(GuiColorType.BASE));
         }
     }
+
+    public static class Builder extends GuiToggle.AbstractBuilder<Builder, GuiCheckbox>
+    {
+        public Builder(String elementName)
+        {
+            super(elementName);
+            this.width = this.height = DEFAULT_HEIGHT;
+        }
+
+        @Override
+        protected Builder self()
+        {
+            return this;
+        }
+
+        @Override
+        public GuiCheckbox build()
+        {
+            return new GuiCheckbox(this);
+        }
+    }
 }

@@ -85,4 +85,27 @@ public abstract class GuiToggle extends GuiElement implements MouseClickListener
         toggle();
         tryApplyPostEventBehavior(event.getClass());
     }
+
+    protected static abstract class AbstractBuilder<T extends GuiToggle.AbstractBuilder<T, R>, R extends GuiToggle> extends GuiElement.AbstractBuilder<T, R>
+    {
+        protected boolean isToggled = false;
+        protected boolean enabled = true;
+
+        protected AbstractBuilder(String elementName)
+        {
+            super(elementName);
+        }
+
+        public T toggled(boolean toggled)
+        {
+            this.isToggled = toggled;
+            return self();
+        }
+
+        public T enabled(boolean enabled)
+        {
+            this.enabled = enabled;
+            return self();
+        }
+    }
 }

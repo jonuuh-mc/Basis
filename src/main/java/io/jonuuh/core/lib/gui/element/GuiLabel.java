@@ -72,4 +72,32 @@ public class GuiLabel extends GuiElement
 
         fontRenderer.drawString(text, textXPos, textYPos, getColor(GuiColorType.BASE).toPackedARGB(), true);
     }
+
+    public static class Builder extends GuiElement.AbstractBuilder<Builder, GuiLabel>
+    {
+        protected String text;
+
+        public Builder(String elementName)
+        {
+            super(elementName);
+        }
+
+        public Builder text(String text)
+        {
+            this.text = text;
+            return self();
+        }
+
+        @Override
+        protected Builder self()
+        {
+            return this;
+        }
+
+        @Override
+        public GuiLabel build()
+        {
+            return new GuiLabel(this);
+        }
+    }
 }

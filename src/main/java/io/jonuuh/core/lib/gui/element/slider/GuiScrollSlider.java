@@ -1,4 +1,4 @@
-package io.jonuuh.core.lib.gui.element.sliders;
+package io.jonuuh.core.lib.gui.element.slider;
 
 import io.jonuuh.core.lib.gui.event.input.MouseDownEvent;
 import io.jonuuh.core.lib.gui.event.input.MouseDragEvent;
@@ -9,7 +9,7 @@ import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
 
-public class GuiScrollSlider extends AbstractSlider implements MouseDragListener
+public class GuiScrollSlider extends GuiSlider implements MouseDragListener
 {
     /** A normalized value from 0-1: how long (height if vertical, width if horizontal) the scrollbar is */
     protected float scrollBarLength;
@@ -122,6 +122,26 @@ public class GuiScrollSlider extends AbstractSlider implements MouseDragListener
         else
         {
             RenderUtils.drawRectangle(screenPosWindowStart, worldYPos(), screenPosWindowEnd - screenPosWindowStart, getHeight(), test);
+        }
+    }
+
+    public static class Builder extends GuiSlider.AbstractBuilder<Builder, GuiScrollSlider>
+    {
+        public Builder(String elementName)
+        {
+            super(elementName);
+        }
+
+        @Override
+        protected Builder self()
+        {
+            return this;
+        }
+
+        @Override
+        public GuiScrollSlider build()
+        {
+            return new GuiScrollSlider(this);
         }
     }
 }

@@ -66,4 +66,46 @@ public class GuiDropdown extends GuiFlexContainer
 //        RenderUtils.drawTriangle(GL11.GL_POLYGON, worldXPos() + getWidth() - size, worldYPos() + getHeight() - size,
 //                size, size, getColor(GuiColorType.ACCENT1), 0)
     }
+
+    public static class Builder extends GuiFlexContainer.AbstractBuilder<Builder, GuiDropdown>
+    {
+        protected String prompt = "Dropdown";
+        protected Collection<String> options = new ArrayList<>();
+        protected boolean enabled = true;
+
+        public Builder(String elementName)
+        {
+            super(elementName);
+        }
+
+        public Builder prompt(String prompt)
+        {
+            this.prompt = prompt;
+            return self();
+        }
+
+        public Builder options(Collection<String> options)
+        {
+            this.options = options;
+            return self();
+        }
+
+        public Builder enabled(boolean enabled)
+        {
+            this.enabled = enabled;
+            return self();
+        }
+
+        @Override
+        protected Builder self()
+        {
+            return this;
+        }
+
+        @Override
+        public GuiDropdown build()
+        {
+            return new GuiDropdown(this);
+        }
+    }
 }

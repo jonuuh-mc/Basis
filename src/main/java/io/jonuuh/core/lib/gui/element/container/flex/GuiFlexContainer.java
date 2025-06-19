@@ -176,4 +176,73 @@ public class GuiFlexContainer extends GuiContainer implements InitGuiListener
         RenderUtils.drawVertices(GL11.GL_POLYGON, new float[][]{{headX, headY}, headEdge1, headEdge2}, color);
         RenderUtils.drawVertices(GL11.GL_LINE_STRIP, new float[][]{{tailX, tailY}, {headX, headY}}, color);
     }
+
+    protected static abstract class AbstractBuilder<T extends AbstractBuilder<T, R>, R extends GuiFlexContainer> extends GuiContainer.AbstractBuilder<T, R>
+    {
+        protected final List<FlexItem> flexItems = new ArrayList<>();
+        protected FlexDirection direction = FlexDirection.ROW;
+        protected FlexJustify justify = FlexJustify.START;
+        protected FlexAlign align = FlexAlign.START;
+
+        protected AbstractBuilder(String name)
+        {
+            super(name);
+        }
+
+        public T direction(FlexDirection direction)
+        {
+            this.direction = direction;
+            return self();
+        }
+
+        public T justify(FlexJustify justify)
+        {
+            this.justify = justify;
+            return self();
+        }
+
+        public T align(FlexAlign align)
+        {
+            this.align = align;
+            return self();
+        }
+
+        public T item(FlexItem item)
+        {
+            this.flexItems.add(item);
+            return self();
+        }
+
+        public T items(Collection<FlexItem> items)
+        {
+            this.flexItems.addAll(items);
+            return self();
+        }
+
+        public T items(FlexItem... items)
+        {
+            this.flexItems.addAll(Arrays.asList(items));
+            return self();
+        }
+    }
+
+    public static class Builder extends AbstractBuilder<Builder, GuiFlexContainer>
+    {
+        public Builder(String name)
+        {
+            super(name);
+        }
+
+        @Override
+        protected Builder self()
+        {
+            return this;
+        }
+
+        @Override
+        public GuiFlexContainer build()
+        {
+            return new GuiFlexContainer(this);
+        }
+    }
 }

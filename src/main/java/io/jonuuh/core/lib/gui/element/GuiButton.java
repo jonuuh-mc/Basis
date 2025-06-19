@@ -99,4 +99,46 @@ public class GuiButton extends GuiElement implements MouseClickListener, PostEve
         MouseClickListener.super.onMouseDown(event);
         tryApplyPostEventBehavior(event.getClass());
     }
+
+    public static class Builder extends GuiElement.AbstractBuilder<Builder, GuiButton>
+    {
+        protected String buttonText = "";
+        protected Consumer<GuiElement> mouseDownBehavior = null;
+        protected boolean enabled = true;
+
+        public Builder(String elementName)
+        {
+            super(elementName);
+        }
+
+        public Builder buttonText(String buttonText)
+        {
+            this.buttonText = buttonText;
+            return self();
+        }
+
+        public Builder mouseDownBehavior(Consumer<GuiElement> mouseDownBehavior)
+        {
+            this.mouseDownBehavior = mouseDownBehavior;
+            return self();
+        }
+
+        public Builder enabled(boolean enabled)
+        {
+            this.enabled = enabled;
+            return self();
+        }
+
+        @Override
+        protected Builder self()
+        {
+            return this;
+        }
+
+        @Override
+        public GuiButton build()
+        {
+            return new GuiButton(this);
+        }
+    }
 }
