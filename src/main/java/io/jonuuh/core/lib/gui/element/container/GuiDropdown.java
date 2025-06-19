@@ -1,7 +1,6 @@
 package io.jonuuh.core.lib.gui.element.container;
 
-import io.jonuuh.core.lib.gui.element.GuiButton;
-import io.jonuuh.core.lib.gui.element.GuiElement;
+import io.jonuuh.core.lib.gui.element.button.GuiLabeledButton;
 import io.jonuuh.core.lib.gui.element.container.flex.FlexItem;
 import io.jonuuh.core.lib.gui.element.container.flex.GuiFlexContainer;
 import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexDirection;
@@ -12,7 +11,7 @@ import java.util.Collection;
 public class GuiDropdown extends GuiFlexContainer
 {
     protected GuiFlexContainer optionsContainer;
-    protected GuiButton header;
+    protected GuiLabeledButton header;
 
     // TODO: just make this one container instead of nested containers and dynamically add/remove children or make them visible/invisible?
     //  also should make flex alg account for invisible elements? add boolean in flexcontainer whether to ignore invisibles?
@@ -22,9 +21,9 @@ public class GuiDropdown extends GuiFlexContainer
         this.enabled = builder.enabled;
         this.setDirection(FlexDirection.COLUMN);
 
-        this.header = new GuiButton.Builder(this.elementName + "$header")
+        this.header = new GuiLabeledButton.Builder(this.elementName + "$header")
                 .size(this.getWidth(), this.getHeight())
-                .buttonText(builder.prompt)
+                .label(builder.prompt)
                 .build();
         addItem(new FlexItem(header/*, 0, width, height, height*/).setShrink(0));
 
@@ -42,10 +41,10 @@ public class GuiDropdown extends GuiFlexContainer
 
         for (String option : builder.options)
         {
-            GuiButton button = new GuiButton.Builder(option)
+            GuiLabeledButton button = new GuiLabeledButton.Builder(option)
                     .size(this.getWidth(), this.getHeight())
                     .visible(false)
-                    .buttonText(option)
+                    .label(option)
                     .build();
             optionsContainer.addItem(new FlexItem(button));
         }
@@ -56,12 +55,12 @@ public class GuiDropdown extends GuiFlexContainer
 
     public String getHeaderText()
     {
-        return header.getButtonLabel();
+        return header.getLabel();
     }
 
     public void setHeaderText(String headerText)
     {
-        header.setButtonLabel(headerText);
+        header.setLabel(headerText);
     }
 
     protected void toggleOpen(GuiElement element)
