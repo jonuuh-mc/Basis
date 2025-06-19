@@ -435,14 +435,15 @@ public abstract class GuiElement
         protected GuiContainer parent = null;
         protected Map<GuiColorType, Color> colorMap = new HashMap<>();
 
-        protected float localXPos, localYPos = 0;
+        protected float localXPos, localYPos;
         protected float width = DEFAULT_WIDTH;
         protected float height = DEFAULT_HEIGHT;
 
         //        public int zLevel = 0;
         protected boolean visible = true;
 
-        protected Spacing margin, padding = new Spacing(0);
+        protected Spacing margin = new Spacing(0);
+        protected Spacing padding = new Spacing(0);
 
         protected AbstractBuilder(String elementName)
         {
