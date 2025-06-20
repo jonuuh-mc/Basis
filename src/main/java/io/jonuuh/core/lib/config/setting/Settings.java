@@ -11,7 +11,6 @@ import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.config.setting.types.single.DoubleSetting;
 import io.jonuuh.core.lib.config.setting.types.single.IntSetting;
 import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
-import io.jonuuh.core.lib.util.Log4JLogger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -161,8 +160,7 @@ public final class Settings
         }
         catch (ClassCastException e)
         {
-            // TODO: test this
-            Log4JLogger.INSTANCE.error("'{}' is not a BoolSetting! Returning a new BoolSetting", settingKey.toString(), e);
+            System.out.printf("'%s' is not a BoolSetting! Returning a new BoolSetting (%s) %n", settingKey.toString(), e);
             return new BoolSetting();
         }
     }
@@ -175,7 +173,7 @@ public final class Settings
         }
         catch (ClassCastException e)
         {
-            Log4JLogger.INSTANCE.error("'{}' is not a DoubleSetting! Returning a new DoubleSetting", settingKey.toString(), e);
+            System.out.printf("'%s' is not a DoubleSetting! Returning a new DoubleSetting (%s) %n", settingKey.toString(), e);
             return new DoubleSetting();
         }
     }
@@ -188,7 +186,7 @@ public final class Settings
         }
         catch (ClassCastException e)
         {
-            Log4JLogger.INSTANCE.error("'{}' is not a IntSetting! Returning a new IntSetting", settingKey.toString(), e);
+            System.out.printf("'%s' is not a IntSetting! Returning a new IntSetting (%s) %n", settingKey.toString(), e);
             return new IntSetting();
         }
     }
@@ -201,7 +199,7 @@ public final class Settings
         }
         catch (ClassCastException e)
         {
-            Log4JLogger.INSTANCE.error("'{}' is not a StringSetting! Returning a new StringSetting", settingKey.toString(), e);
+            System.out.printf("'%s' is not a StringSetting! Returning a new StringSetting (%s) %n", settingKey.toString(), e);
             return new StringSetting();
         }
     }
@@ -214,7 +212,7 @@ public final class Settings
         }
         catch (ClassCastException e)
         {
-            Log4JLogger.INSTANCE.error("'{}' is not a BoolArrSetting! Returning a new BoolArrSetting", settingKey.toString(), e);
+            System.out.printf("'%s' is not a BoolArrSetting! Returning a new BoolArrSetting (%s) %n", settingKey.toString(), e);
             return new BoolArrSetting();
         }
     }
@@ -227,7 +225,7 @@ public final class Settings
         }
         catch (ClassCastException e)
         {
-            Log4JLogger.INSTANCE.error("'{}' is not a DoubleArrSetting! Returning a new DoubleArrSetting", settingKey.toString(), e);
+            System.out.printf("'%s' is not a DoubleArrSetting! Returning a new DoubleArrSetting (%s) %n", settingKey.toString(), e);
             return new DoubleArrSetting();
         }
     }
@@ -240,7 +238,7 @@ public final class Settings
         }
         catch (ClassCastException e)
         {
-            Log4JLogger.INSTANCE.error("'{}' is not a IntArrSetting! Returning a new IntArrSetting", settingKey.toString(), e);
+            System.out.printf("'%s' is not a IntArrSetting! Returning a new IntArrSetting (%s) %n", settingKey.toString(), e);
             return new IntArrSetting();
         }
     }
@@ -253,7 +251,7 @@ public final class Settings
         }
         catch (ClassCastException e)
         {
-            Log4JLogger.INSTANCE.error("'{}' is not a StringArrSetting! Returning a new StringArrSetting", settingKey.toString(), e);
+            System.out.printf("'%s' is not a StringArrSetting! Returning a new StringArrSetting (%s) %n", settingKey.toString(), e);
             return new StringArrSetting();
         }
     }
