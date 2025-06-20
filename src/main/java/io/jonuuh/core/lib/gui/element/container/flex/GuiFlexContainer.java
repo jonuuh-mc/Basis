@@ -105,7 +105,6 @@ public class GuiFlexContainer extends GuiContainer implements InitGuiListener
         {
             return;
         }
-        super.onScreenDraw(mouseX, mouseY, partialTicks);
 
         RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), getColor(GuiColorType.BACKGROUND));
 //        RenderUtils.drawNineSliceTexturedRect(resourceGenericBackgroundTex,
