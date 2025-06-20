@@ -26,6 +26,7 @@ public class MouseDragEvent extends GuiTargetedEvent
         if (element instanceof MouseDragListener)
         {
             ((MouseDragListener) element).onMouseDrag(this);
+            lastCapture = element;
         }
     }
 }

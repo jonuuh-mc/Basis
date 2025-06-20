@@ -22,6 +22,7 @@ public class MouseUpEvent extends GuiTargetedEvent
         if (element instanceof MouseClickListener)
         {
             ((MouseClickListener) element).onMouseUp(this);
+            lastCapture = element;
         }
     }
 }

@@ -168,12 +168,16 @@ public abstract class AbstractGuiScreen extends GuiScreen
 
         if (!clickable.isEmpty())
         {
-            // TODO: should currentFocus be an InputListener?
-            currentFocus = CollectionUtils.getMax(clickable, Comparator.comparingInt(GuiElement::getZLevel));
+            // TODO: if the clickable elements contains a scroll slider, reverse order to get min z level instead?
+            //  desired behavior may be that when a click is performed on two overlapping scroll sliders from a parent container and its child container,
+            //  the parent container's scroll slider wins (parent scroll slider z level would be lower than the child scroll slider if zLevel=numParents)
+            GuiElement mouseDownTarget = CollectionUtils.getMax(clickable, Comparator.comparingInt(GuiElement::getZLevel));
 
+            MouseDownEvent event = new MouseDownEvent(mouseDownTarget, mouseX, mouseY);
+            dispatchTargetedEvent(event);
+
+            currentFocus = event.getLastCapture();
             System.out.println("greatestZElement: " + currentFocus);
-
-            dispatchTargetedEvent(new MouseDownEvent(currentFocus, mouseX, mouseY));
         }
     }
 
