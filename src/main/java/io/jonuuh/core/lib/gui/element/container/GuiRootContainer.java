@@ -25,6 +25,12 @@ public class GuiRootContainer extends GuiFlexContainer
     }
 
     @Override
+    protected boolean shouldScissor()
+    {
+        return false;
+    }
+
+    @Override
     public void onInitGui(InitGuiEvent event)
     {
         setWidth(event.sr.getScaledWidth());

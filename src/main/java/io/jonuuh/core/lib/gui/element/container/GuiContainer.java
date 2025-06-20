@@ -5,7 +5,7 @@ import io.jonuuh.core.lib.gui.event.GuiEvent;
 import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
-import net.minecraft.client.audio.SoundHandler;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,12 +18,13 @@ import java.util.function.Predicate;
 public abstract class GuiContainer extends GuiElement
 {
     protected final List<GuiElement> children;
+    protected boolean shouldScissor;
 
     protected GuiContainer(AbstractBuilder<?, ?> builder)
     {
         super(builder);
-
         this.children = new ArrayList<>();
+        this.shouldScissor = builder.shouldScissor;
         addChildren(builder.children);
     }
 
@@ -60,6 +61,11 @@ public abstract class GuiContainer extends GuiElement
         return elements;
     }
 
+    protected boolean shouldScissor()
+    {
+        return shouldScissor && hasChildren();
+    }
+
     public void addChild(GuiElement child)
     {
         if (children.contains(child))
@@ -78,7 +84,9 @@ public abstract class GuiContainer extends GuiElement
 
         child.setInheritedXPos(this.worldXPos());
         child.setInheritedYPos(this.worldYPos());
-
+        // TODO: optionally inherit different properties? could make some sort of child properties object which is set
+        //  through the child() method of the container builder?
+//        child.setVisible(this.isVisible());
 
         // TODO: inefficient? fix for zLevel being broken if adding a child to a container,
         //  then adding that container as a child to another container (zlevel of first child wouldn't be
@@ -178,15 +186,81 @@ public abstract class GuiContainer extends GuiElement
     }
 
     @Override
-    public GuiElement getGreatestZLevelHovered(GuiElement currGreatest)
+    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
-        currGreatest = super.getGreatestZLevelHovered(currGreatest);
+        if (!isVisible())
+        {
+            return;
+        }
+        // Handle screen draw for this element
+        super.onScreenDraw(mouseX, mouseY, partialTicks);
+//        if (debug && hasChildren())
+//        {
+//            Color padColor = new Color("#36ff0000");
+//            // Left
+//            RenderUtils.drawRectangle(worldXPos(), worldYPos(), getPadding().getLeft(), getHeight(), padColor);
+//            // Right
+//            RenderUtils.drawRectangle(worldXPos() + getWidth() - getPadding().getRight(), worldYPos(), getPadding().getRight(), getHeight(), padColor);
+//            // Top
+//            RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getPadding().getTop(), padColor);
+//            // Bottom
+//            RenderUtils.drawRectangle(worldXPos(), worldYPos() + getHeight() - getPadding().getBottom(), getWidth(), getPadding().getBottom(), padColor);
+//        }
+
+        boolean scissoring = false;
+
+        if (this.shouldScissor())
+        {
+            int greatestLeft = (int) getGreatestLeftBound();
+            int leastRight = (int) getLeastRightBound();
+
+            int greatestTopBound = (int) getGreatestTopBound();
+            int leastBottom = (int) getLeastBottomBound();
+
+            if (greatestLeft < leastRight && greatestTopBound < leastBottom)
+            {
+                int boundWidth = leastRight - greatestLeft;
+                int boundHeight = leastBottom - greatestTopBound;
+
+                GL11.glPushMatrix();
+                GL11.glEnable(GL11.GL_SCISSOR_TEST);
+                RenderUtils.drawRectangle(greatestLeft, greatestTopBound, boundWidth, boundHeight, new Color("#220000ff"));
+                RenderUtils.scissorFromTopLeft(greatestLeft, greatestTopBound, boundWidth, boundHeight);
+                scissoring = true;
+            }
+        }
 
         for (GuiElement child : children)
         {
-            currGreatest = child.getGreatestZLevelHovered(currGreatest);
+            // Continue propagating the screen draw event to any additional children
+            child.onScreenDraw(mouseX, mouseY, partialTicks);
         }
-        return currGreatest;
+
+        if (scissoring)
+        {
+            GL11.glDisable(GL11.GL_SCISSOR_TEST);
+            GL11.glPopMatrix();
+        }
+    }
+
+    protected float getGreatestLeftBound()
+    {
+        return hasParent() ? Math.max(parent.getGreatestLeftBound(), this.getLeftBound()) : this.getLeftBound();
+    }
+
+    protected float getLeastRightBound()
+    {
+        return hasParent() ? Math.min(parent.getLeastRightBound(), this.getRightBound()) : this.getRightBound();
+    }
+
+    protected float getGreatestTopBound()
+    {
+        return hasParent() ? Math.max(parent.getGreatestTopBound(), this.getTopBound()) : this.getTopBound();
+    }
+
+    protected float getLeastBottomBound()
+    {
+        return hasParent() ? Math.min(parent.getLeastBottomBound(), this.getBottomBound()) : this.getBottomBound();
     }
 
     /**
