@@ -20,6 +20,7 @@ public class MouseScrollEvent extends GuiTargetedEvent
         if (element instanceof MouseScrollListener)
         {
             ((MouseScrollListener) element).onMouseScroll(this);
+            lastCapture = element;
         }
     }
 }

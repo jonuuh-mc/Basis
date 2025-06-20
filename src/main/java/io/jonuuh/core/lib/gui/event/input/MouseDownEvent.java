@@ -22,6 +22,7 @@ public class MouseDownEvent extends GuiTargetedEvent
         if (element instanceof MouseClickListener)
         {
             ((MouseClickListener) element).onMouseDown(this);
+            lastCapture = element;
         }
     }
 }

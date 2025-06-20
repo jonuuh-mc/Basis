@@ -22,6 +22,7 @@ public class KeyInputEvent extends GuiTargetedEvent
         if (element instanceof KeyInputListener)
         {
             ((KeyInputListener) element).onKeyTyped(this);
+            lastCapture = element;
         }
     }
 }
