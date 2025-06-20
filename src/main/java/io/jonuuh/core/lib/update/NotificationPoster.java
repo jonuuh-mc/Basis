@@ -4,8 +4,9 @@ import com.google.gson.JsonObject;
 import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
-import io.jonuuh.core.lib.util.logging.ChatLogger;
 import io.jonuuh.core.lib.util.StaticAssetUtils;
+import io.jonuuh.core.lib.util.logging.ChatLogger;
+import io.jonuuh.core.lib.util.logging.Level;
 import net.minecraft.client.Minecraft;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
@@ -30,14 +31,16 @@ final class NotificationPoster
     private final String trueLatestVersionStr;
     private final StringSetting lastLatestVersionSetting;
     private final BoolSetting repeatNotifySetting;
+    public final ChatLogger chatLogger;
 
-    NotificationPoster(String modID, String modName, Settings updateSettings, JsonObject jsonObject, String latestVersionStr)
+    NotificationPoster(String modID, String modName, Settings updateSettings, JsonObject jsonObject, String latestVersionStr, ChatLogger chatLogger)
     {
         this.modID = modID;
         this.modName = modName;
         this.updateSettings = updateSettings;
         this.jsonObject = jsonObject;
         this.trueLatestVersionStr = latestVersionStr;
+        this.chatLogger = chatLogger;
 
         this.lastLatestVersionSetting = updateSettings.getStringSetting(UpdateSettingKey.LAST_LATEST_VERSION);
         this.repeatNotifySetting = updateSettings.getBoolSetting(UpdateSettingKey.REPEAT_NOTIFY);
@@ -87,7 +90,7 @@ final class NotificationPoster
             return;
         }
 
-        ChatLogger.INSTANCE.addFancyLogsBox(createNotificationContent(), modName);
+        chatLogger.addFancyLogsBox(Level.INFO.intLevel, createNotificationContent(), modName);
         MinecraftForge.EVENT_BUS.unregister(this);
     }
 

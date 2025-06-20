@@ -1,11 +1,12 @@
 package io.jonuuh.core.lib.update;
 
 import com.google.gson.JsonObject;
-import io.jonuuh.core.lib.config.SettingsConfigurationAdapter;
+import io.jonuuh.core.lib.config.ConfigManager;
 import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
 import io.jonuuh.core.lib.util.StaticAssetUtils;
+import io.jonuuh.core.lib.util.logging.ChatLogger;
 
 public final class UpdateHandler
 {
@@ -13,7 +14,7 @@ public final class UpdateHandler
     public final String latestVersionStr;
     public final boolean isUpdateAvailable;
 
-    public UpdateHandler(String modID, String modName, String currentVersionStr, JsonObject jsonObject)
+    public UpdateHandler(String modID, String modName, String currentVersionStr, JsonObject jsonObject, ChatLogger chatLogger)
     {
         if (jsonObject == null)
         {
@@ -34,9 +35,9 @@ public final class UpdateHandler
             Settings updateSettings = new Settings(configurationCategory);
             updateSettings.put(UpdateSettingKey.LAST_LATEST_VERSION, new StringSetting(currentVersionStr));
             updateSettings.put(UpdateSettingKey.REPEAT_NOTIFY, new BoolSetting(true));
-            SettingsConfigurationAdapter.INSTANCE.putAndLoadSettings(updateSettings);
+            ConfigManager.getAdapter(modID).putAndLoadSettings(updateSettings);
 
-            new NotificationPoster(modID, modName, updateSettings, jsonObject, latestVersionStr);
+            new NotificationPoster(modID, modName, updateSettings, jsonObject, latestVersionStr, chatLogger);
         }
     }
 }

@@ -1,6 +1,7 @@
 package io.jonuuh.core.lib.util.hypixel;
 
-import io.jonuuh.core.lib.util.ChatLogger;
+import io.jonuuh.core.lib.util.logging.ChatLogger;
+import io.jonuuh.core.lib.util.logging.Level;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
@@ -17,6 +18,7 @@ import java.util.regex.Pattern;
 public class HypixelPartyEventPoster
 {
     private final Minecraft mc;
+    private final ChatLogger chatLogger;
     //    private final Pattern playerSentChatPattern;
     private boolean isHypixel;
     private boolean justConnected;
@@ -32,10 +34,11 @@ public class HypixelPartyEventPoster
 //    private final Pattern partyWithPattern = Pattern.compile("You'll be partying with: (" + playerNameRegex + "(, )?)+");
 //    private final Pattern joinedPattern = Pattern.compile(playerNameRegex + " joined the party.");
 
-    public HypixelPartyEventPoster()
+    public HypixelPartyEventPoster(ChatLogger chatLogger)
     {
         this.mc = Minecraft.getMinecraft();
         this.partyMembersBuffer = new ArrayList<>();
+        this.chatLogger = chatLogger;
 //        this.playerSentChatPattern = Pattern.compile(".* ?\\w{3,16}: .*"); // TODO: who the hell knows how many edge cases this has
     }
 
@@ -142,7 +145,7 @@ public class HypixelPartyEventPoster
                 String[] playerNames = playerNamesStr.contains(" \u25cf") ? playerNamesStr.split(" \u25cf") : new String[]{playerNamesStr};
                 playerNames = Arrays.stream(playerNames).map(String::trim).toArray(String[]::new);
 
-                ChatLogger.INSTANCE.addLog(playerNamesStr + " /// " + Arrays.toString(playerNames));
+                chatLogger.addLog(Level.DEBUG.intLevel, playerNamesStr + " /// " + Arrays.toString(playerNames));
 
                 partyMembersBuffer.addAll(Arrays.asList(playerNames));
                 waitingForPartyListChat = false;
@@ -181,7 +184,7 @@ public class HypixelPartyEventPoster
             {
                 String playerNamesStr = msg.substring("You'll be partying with: ".length());
                 String[] playerNames = playerNamesStr.contains(", ") ? playerNamesStr.split(", ") : new String[]{playerNamesStr};
-                ChatLogger.INSTANCE.addLog("partying with: " + Arrays.toString(playerNames));
+                chatLogger.addLog(Level.DEBUG.intLevel, "partying with: " + Arrays.toString(playerNames));
 //                if (playerNamesStr.contains(", "))
 //                {
 //                    playerNames = playerNamesStr.split(", ");
@@ -225,7 +228,7 @@ public class HypixelPartyEventPoster
         }
         catch (Exception e)
         {
-            ChatLogger.INSTANCE.addLog("EXCEPTION ON CHAT RECEIVED: " + e.toString());
+            chatLogger.addLog(Level.DEBUG.intLevel, "EXCEPTION ON CHAT RECEIVED: " + e.toString());
             e.printStackTrace();
         }
     }
