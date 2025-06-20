@@ -4,8 +4,7 @@ import com.google.gson.JsonObject;
 import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
-import io.jonuuh.core.lib.util.ChatLogger;
-import io.jonuuh.core.lib.util.Log4JLogger;
+import io.jonuuh.core.lib.util.logging.ChatLogger;
 import io.jonuuh.core.lib.util.StaticAssetUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.event.ClickEvent;
@@ -134,7 +133,7 @@ final class NotificationPoster
         }
         catch (IllegalArgumentException e)
         {
-            Log4JLogger.INSTANCE.error("Update changelog is not valid base64");
+            System.out.println("Update changelog is not valid base64");
             return encodedChangelog;
         }
     }
