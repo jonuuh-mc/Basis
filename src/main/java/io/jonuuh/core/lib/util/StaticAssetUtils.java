@@ -44,7 +44,7 @@ public final class StaticAssetUtils
 
         if (versionStr == null)
         {
-            Log4JLogger.INSTANCE.error("Failed to parse {} from JsonObject ({})", member, jsonObject.toString());
+            System.out.printf("Failed to parse %s from JsonObject (%s)%n", member, jsonObject.toString());
         }
         return versionStr;
     }
@@ -62,7 +62,7 @@ public final class StaticAssetUtils
 
         if (jsonObject == null)
         {
-            Log4JLogger.INSTANCE.error("Failed to parse static asset ({}) as json object", assetPath);
+            System.out.printf("Failed to parse static asset (%s) as json object%n", assetPath);
         }
 
         return jsonObject;
@@ -96,12 +96,12 @@ public final class StaticAssetUtils
         }
         catch (IOException exception)
         {
-            Log4JLogger.INSTANCE.error("Failed to connect to {}", url, exception);
+            System.out.printf("Failed to connect to %s: %s%n", url, exception.getMessage());
         }
 
         if (asset == null)
         {
-            Log4JLogger.INSTANCE.error("Failed to access static asset ({}) via github api", assetPath);
+            System.out.printf("Failed to access static asset (%s) via github api%n", assetPath);
         }
         return asset;
     }
@@ -122,7 +122,7 @@ public final class StaticAssetUtils
         }
         catch (IOException exception)
         {
-            Log4JLogger.INSTANCE.error("Failed to parse content for {}", httpsURLConnection.getURL().toString(), exception);
+            System.out.printf("Failed to parse content for %s: %s%n", httpsURLConnection.getURL().toString(), exception.getMessage());
             return null;
         }
     }

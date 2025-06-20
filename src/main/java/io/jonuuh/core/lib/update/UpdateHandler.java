@@ -5,7 +5,6 @@ import io.jonuuh.core.lib.config.SettingsConfigurationAdapter;
 import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.config.setting.types.single.BoolSetting;
 import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
-import io.jonuuh.core.lib.util.Log4JLogger;
 import io.jonuuh.core.lib.util.StaticAssetUtils;
 
 public final class UpdateHandler
@@ -18,7 +17,7 @@ public final class UpdateHandler
     {
         if (jsonObject == null)
         {
-            Log4JLogger.INSTANCE.error("Null JsonObject while creating UpdateHandler");
+            System.out.println("Null JsonObject while creating UpdateHandler");
             latestVersionStr = null;
             isUpdateAvailable = false;
             return;
@@ -29,7 +28,6 @@ public final class UpdateHandler
 
         String s = "isUpdateAvailable = " + isUpdateAvailable + "; (current:" + currentVersionStr + ") " +
                 (isUpdateAvailable ? "<" : ">=") + " (latest:" + latestVersionStr + ")";
-        Log4JLogger.INSTANCE.info(s);
 
         if (true || isUpdateAvailable) // TODO:
         {

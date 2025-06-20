@@ -1,7 +1,5 @@
 package io.jonuuh.core.lib.update;
 
-import io.jonuuh.core.lib.util.Log4JLogger;
-
 final class Version implements Comparable<Version>
 {
     private int[] parts = new int[3];
@@ -10,7 +8,7 @@ final class Version implements Comparable<Version>
     {
         if (versionStr == null || !versionStr.matches("^[0-9]+\\.[0-9]+\\.[0-9]+$"))
         {
-            Log4JLogger.INSTANCE.error("Semver string '{}' is invalid", versionStr);
+            System.out.printf("Semver string '%s' is invalid%n", versionStr);
             parts = new int[]{-1, -1, -1};
             return;
         }
