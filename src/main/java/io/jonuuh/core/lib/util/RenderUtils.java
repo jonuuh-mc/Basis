@@ -112,6 +112,10 @@ public final class RenderUtils
     public static void drawTexturedRect(ResourceLocation texture, float x, float y, int z, float width, float height, Color color)
     {
         GL11.glColor4ub(color.r, color.g, color.b, color.a);
+        // Enable transparency
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
         mc.getTextureManager().bindTexture(texture);
         Tessellator tessellator = Tessellator.getInstance();
         WorldRenderer wr = tessellator.getWorldRenderer();
@@ -122,7 +126,10 @@ public final class RenderUtils
         wr.pos(x + width, y, z).tex(1, 0).endVertex(); // top right
         wr.pos(x, y, z).tex(0, 0).endVertex(); // top left
         tessellator.draw();
+
         GL11.glColor4f(1, 1, 1, 1);
+        // Disable transparency
+        GL11.glDisable(GL11.GL_BLEND);
     }
 
 
@@ -217,6 +224,10 @@ public final class RenderUtils
 
         // TODO: use GlStateManager here instead? only part of this function that doesn't use 'native' mc rendering code
         GL11.glColor4ub(color.r, color.g, color.b, color.a);
+        // Enable transparency
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
         mc.getTextureManager().bindTexture(texture);
         Tessellator tessellator = Tessellator.getInstance();
         WorldRenderer wr = tessellator.getWorldRenderer();
@@ -296,7 +307,10 @@ public final class RenderUtils
         wr.pos(x3L, y2B, z).tex(s2, s2).endVertex(); // top left
         tessellator.draw();
 
+        // Reset color state to default white
         GL11.glColor4f(1, 1, 1, 1);
+        // Disable transparency
+        GL11.glDisable(GL11.GL_BLEND);
     }
 
     public static void drawLine2D(double x1, double y1, double x2, double y2)
