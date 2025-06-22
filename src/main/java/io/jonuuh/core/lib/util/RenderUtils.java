@@ -166,7 +166,6 @@ public final class RenderUtils
      *        ^--^--^--^--^--^
      *         1  2  3  4  5  -> dstCornerRatio = 5
      * ============================================
-     *
      * }</pre>
      *
      * @param texture The texture used to draw the rectangle
@@ -178,19 +177,17 @@ public final class RenderUtils
      * @param texWidth Width of the texture
      * @param texHeight Height of the texture
      * @param srcCornerSize How many pixels from the corner of the texture should be shown in any corner of the drawn rectangle
-     * @param dstCornerRatio How much of the width or height of the rect should be allocated for the size of any corner in the drawn rectangle
-     * (Uses the minimum between the height and width)
+     * @param dstCornerRatio How much of the width or height of the rect (1/dstCornerRatio) should be allocated for the size
+     * of any corner in the drawn rectangle (Uses the minimum between the height and width)
      */
     public static void drawNineSliceTexturedRect(ResourceLocation texture, float x, float y, int z, float width, float height,
-                                                 int texWidth, int texHeight, int srcCornerSize, int dstCornerRatio, Color color)
+                                                 int texWidth, int texHeight, int srcCornerSize, float dstCornerRatio, Color color)
     {
-        dstCornerRatio = Math.max(dstCornerRatio, 3);
+        // Prevent ratio from going any lower than 2. A rectangle can of course only have 2 corners so if both corners
+        // take up more than half of the rectangle there would be overflow
+        dstCornerRatio = Math.max(dstCornerRatio, 2);
 
-        // 400 / 10
         float dstCornerSize = Math.min(width / dstCornerRatio, height / dstCornerRatio);
-//        System.out.println(width + " " + height + " " + dstCornerSize);
-        dstCornerSize = Math.max(dstCornerSize, 10);
-
         double s1 = MathUtils.normalize(srcCornerSize, 0, Math.min(texWidth, texHeight));
         double s2 = (1 - s1);
 
@@ -332,28 +329,26 @@ public final class RenderUtils
     public static void drawVertices(int glMode, float[][] vertices, Color color)
     {
         GL11.glColor4ub(color.r, color.g, color.b, color.a);
-        GL11.glPushMatrix();
-
         // Enable transparency
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         GL11.glDisable(GL11.GL_TEXTURE_2D);
 
+        GL11.glPushMatrix();
         GL11.glBegin(glMode);
         for (float[] vertex : vertices)
         {
             GL11.glVertex2f(vertex[0], vertex[1]);
         }
         GL11.glEnd();
+        GL11.glPopMatrix();
 
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-
         // Disable transparency
         GL11.glDisable(GL11.GL_BLEND);
-
-        GL11.glPopMatrix();
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        // Reset color state to default white
+        GL11.glColor4f(1, 1, 1, 1);
     }
 
     public static void drawTriangle(float x, float y, float width, float height, Color color)
