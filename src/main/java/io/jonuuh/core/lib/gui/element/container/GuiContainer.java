@@ -19,12 +19,15 @@ public abstract class GuiContainer extends GuiElement
 {
     protected final List<GuiElement> children;
     protected boolean shouldScissor;
+    protected ScissorBox scissorBox;
+    private boolean enabled = true; // TODO:
 
     protected GuiContainer(AbstractBuilder<?, ?> builder)
     {
         super(builder);
         this.children = new ArrayList<>();
         this.shouldScissor = builder.shouldScissor;
+        this.scissorBox = new ScissorBox(this);
         addChildren(builder.children);
     }
 
@@ -59,6 +62,33 @@ public abstract class GuiContainer extends GuiElement
         }
 
         return elements;
+    }
+
+//    public FlexBehavior getFlexBehavior()
+//    {
+//        return flexBehavior;
+//    }
+
+//    public void setFlexBehavior(FlexBehavior flexBehavior)
+//    {
+//        this.flexBehavior = flexBehavior;
+//    }
+
+    @Override
+    public boolean isEnabled()
+    {
+        return enabled;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
+    }
+
+    public ScissorBox getScissorBox()
+    {
+        return scissorBox;
     }
 
     protected boolean shouldScissor()

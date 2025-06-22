@@ -72,7 +72,6 @@ public final class RenderUtils
     public static void scissorFromTopLeft(int x, int y, int w, int h)
     {
         ScaledResolution sr = new ScaledResolution(mc);
-//        System.out.println(sr.getScaleFactor() + " " + x + " " + y + " " + w + " " + h);
         GL11.glScissor(x * sr.getScaleFactor(), (sr.getScaledHeight() - y - h) * sr.getScaleFactor(),
                 w * sr.getScaleFactor(), h * sr.getScaleFactor());
     }
