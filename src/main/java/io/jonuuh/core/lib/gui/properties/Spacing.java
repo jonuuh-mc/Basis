@@ -2,17 +2,17 @@ package io.jonuuh.core.lib.gui.properties;
 
 public class Spacing
 {
-    private float top;
-    private float right;
-    private float bottom;
     private float left;
+    private float right;
+    private float top;
+    private float bottom;
 
-    public Spacing(float top, float right, float bottom, float left)
+    public Spacing(float left, float right, float top, float bottom)
     {
-        this.top = top;
-        this.right = right;
-        this.bottom = bottom;
         this.left = left;
+        this.right = right;
+        this.top = top;
+        this.bottom = bottom;
     }
 
     /**
@@ -33,20 +33,20 @@ public class Spacing
      */
     public Spacing(float elementWidth, float elementHeight, float scale)
     {
-        this(elementHeight * scale, elementWidth * scale, elementHeight * scale, elementWidth * scale);
+        this(elementWidth * scale, elementWidth * scale, elementHeight * scale, elementHeight * scale);
     }
 
-    public float getTop()
+    public float left()
     {
-        return top;
+        return left;
     }
 
-    public void setTop(float top)
+    public void setLeft(float left)
     {
-        this.top = top;
+        this.left = left;
     }
 
-    public float getRight()
+    public float right()
     {
         return right;
     }
@@ -56,7 +56,17 @@ public class Spacing
         this.right = right;
     }
 
-    public float getBottom()
+    public float top()
+    {
+        return top;
+    }
+
+    public void setTop(float top)
+    {
+        this.top = top;
+    }
+
+    public float bottom()
     {
         return bottom;
     }
@@ -66,13 +76,9 @@ public class Spacing
         this.bottom = bottom;
     }
 
-    public float getLeft()
+    @Override
+    public String toString()
     {
-        return left;
-    }
-
-    public void setLeft(float left)
-    {
-        this.left = left;
+        return "Spacing{" + "l=" + left + ", r=" + right + ", t=" + top + ", b=" + bottom + '}';
     }
 }
