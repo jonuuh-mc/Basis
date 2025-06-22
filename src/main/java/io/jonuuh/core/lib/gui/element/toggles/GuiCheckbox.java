@@ -25,8 +25,7 @@ public class GuiCheckbox extends GuiToggle
 //        Color boxColor = isChecked ? getColor(GuiColorType.BASE) : getColor(GuiColorType.ACCENT1);
 //        RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), boxColor);
 
-        RenderUtils.drawNineSliceTexturedRect(resourceGenericBackgroundTex,
-                worldXPos(), worldYPos(), /*0*/getZLevel() /*- 3*/, getWidth(), getHeight(),
+        RenderUtils.drawNineSliceTexturedRect(resourceBackgroundTex,
                 52, 52, 12, 8, getColor(GuiColorType.ACCENT1));
 
         if (isToggled())

@@ -22,21 +22,18 @@ import java.util.function.Predicate;
 public abstract class GuiElement
 {
     /** A reference to the static minecraft instance */
-    public static final Minecraft mc;
-
-    public static final float DEFAULT_WIDTH = 100;
-    public static final float DEFAULT_HEIGHT = 20;
-    protected static final ResourceLocation resourceGenericBackgroundTex;
-
-    static
-    {
-        mc = Minecraft.getMinecraft();
-        resourceGenericBackgroundTex = new ResourceLocation("core:textures/background_generic.png");
-    }
+    public static final Minecraft mc = Minecraft.getMinecraft();
+    protected static final ResourceLocation resourceBackgroundTex = new ResourceLocation("core:textures/background.png");
+    protected static final float DEFAULT_WIDTH = 100;
+    protected static final float DEFAULT_HEIGHT = 20;
 
     /** A readable name qualifying this element TODO: no enforcement of this being unique */
     public final String elementName;
-    /** This element's immediate ancestor: the container it's inside; Should only ever be null for the root container of the element tree */
+    /**
+     * This element's immediate ancestor: the container it's inside.
+     * Should only ever be null for the root container of the element tree, otherwise
+     * the element will be inaccessible via any events dispatched by the GuiScreen
+     */
     protected GuiContainer parent;
 
     /** A map of colors that may be used by this element */
