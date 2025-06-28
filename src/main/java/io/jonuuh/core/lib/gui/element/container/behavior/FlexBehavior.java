@@ -1,13 +1,21 @@
-package io.jonuuh.core.lib.gui.element.container;
+package io.jonuuh.core.lib.gui.element.container.behavior;
 
+import io.jonuuh.core.lib.gui.element.ElementUtils;
 import io.jonuuh.core.lib.gui.element.GuiElement;
-import io.jonuuh.core.lib.gui.element.container.flex.FlexItem;
-import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexAlign;
-import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexDirection;
-import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexJustify;
+import io.jonuuh.core.lib.gui.element.container.FlexItem;
+import io.jonuuh.core.lib.gui.element.container.GuiContainer;
+import io.jonuuh.core.lib.gui.properties.FlexAlign;
+import io.jonuuh.core.lib.gui.properties.FlexDirection;
+import io.jonuuh.core.lib.gui.properties.FlexJustify;
 import io.jonuuh.core.lib.gui.properties.Spacing;
+import io.jonuuh.core.lib.util.Color;
+import io.jonuuh.core.lib.util.RenderUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.EnumChatFormatting;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -15,39 +23,48 @@ import java.util.Map;
 
 public class FlexBehavior
 {
-    private final GuiContainer container;
+    private final GuiContainer host;
     protected final List<FlexItem> flexItems;
     protected FlexDirection direction;
-    protected FlexJustify justifyContent;
-    protected FlexAlign alignItems;
+    protected FlexJustify justify;
+    protected FlexAlign align;
 
     protected boolean doResize;
     protected boolean doJustify;
     protected boolean doAlign;
-    protected List<FlexItem> resizeExcludes;
-    protected List<FlexItem> justifyExcludes;
-    protected List<FlexItem> alignExcludes;
+    //    protected List<FlexItem> resizeExcludes;
+//    protected List<FlexItem> justifyExcludes;
+//    protected List<FlexItem> alignExcludes;
+    protected Float mainAxisSize;
 
-    public FlexBehavior(GuiContainer container)
+    protected FlexBehavior(Builder builder)
     {
-        this.container = container;
-        this.flexItems = new ArrayList<>();
-        this.direction = FlexDirection.ROW;
-        this.justifyContent = FlexJustify.START;
-        this.alignItems = FlexAlign.START;
-        this.doResize = true;
-        this.doJustify = true;
-        this.doAlign = true;
+//        this.container = container;
+        this.flexItems = builder.flexItems;
+//        addItems(builder.flexItems);
+//        this.flexItems = new ArrayList<>();
+////        addItems(builder.flexItems);
+        this.direction = builder.direction;
+        this.justify = builder.justify;
+        this.align = builder.align;
+
+        this.doResize = builder.doResize;
+        this.doJustify = builder.doJustify;
+        this.doAlign = builder.doAlign;
+
+        this.mainAxisSize = builder.mainAxisSize;
+
+        this.host = builder.host;
     }
 
-    public GuiContainer getContainer()
+    public GuiContainer getHost()
     {
-        return container;
+        return host;
     }
 
-    public Spacing getContainerPadding()
+    public Spacing getHostPadding()
     {
-        return getContainer().getPadding();
+        return getHost().getPadding();
     }
 
     public FlexDirection getDirection()
@@ -63,28 +80,28 @@ public class FlexBehavior
 
     public FlexJustify getJustifyContent()
     {
-        return justifyContent;
+        return justify;
     }
 
-    public FlexBehavior setJustifyContent(FlexJustify justifyContent)
+    public FlexBehavior setJustifyContent(FlexJustify justify)
     {
-        this.justifyContent = justifyContent;
+        this.justify = justify;
         return this;
     }
 
     public FlexAlign getAlignItems()
     {
-        return alignItems;
+        return align;
     }
 
-    public FlexBehavior setAlignItems(FlexAlign alignItems)
+    public FlexBehavior setAlignItems(FlexAlign align)
     {
-        this.alignItems = alignItems;
+        this.align = align;
         return this;
     }
 
     /**
-     * Retrieve the FlexItem wrapping the given GuiElement in this GuiFlexContainer
+     * Retrieve the FlexItem wrapping the given GuiElement in this FlexBehavior
      */
     public FlexItem getFlexItem(GuiElement element)
     {
@@ -98,33 +115,27 @@ public class FlexBehavior
         return null;
     }
 
-    public void addItem(FlexItem item)
+    public List<GuiElement> getElements()
     {
-        getContainer().addChild(item.getElement());
-        flexItems.add(item);
-    }
-
-    public void removeItem(FlexItem item)
-    {
-        getContainer().removeChild(item.getElement());
-        flexItems.remove(item);
-    }
-
-    public void addItems(Collection<FlexItem> items)
-    {
-        for (FlexItem item : items)
+        List<GuiElement> elements = new ArrayList<>();
+        for (FlexItem item : flexItems)
         {
-            addItem(item);
+            elements.add(item.getElement());
         }
+        return elements;
     }
 
-    public void addItems(FlexItem... items)
-    {
-        for (FlexItem item : items)
-        {
-            addItem(item);
-        }
-    }
+//    public void addItem(FlexItem item)
+//    {
+//        getContainer().addChild(item.getElement());
+//        flexItems.add(item);
+//    }
+//
+//    public void removeItem(FlexItem item)
+//    {
+//        getContainer().removeChild(item.getElement());
+//        flexItems.remove(item);
+//    }
 
     public void updateItemsLayout()
     {
@@ -133,20 +144,20 @@ public class FlexBehavior
             return;
         }
 
-        // should fix a few small problems (e.g. size reset is for post-stretch and direction change)
-        // forget what pos reset is for
+        // Reset position and size of items before running flex algorithm
+        // Size reset is for direction changes while items are currently align-stretched
         for (FlexItem item : flexItems)
         {
             GuiElement element = item.getElement();
-            element.setLocalXPos(0);
-            element.setLocalYPos(0);
+//            element.setLocalXPos(0);
+//            element.setLocalYPos(0);
             element.setWidth(item.getInitWidth());
             element.setHeight(item.getInitHeight());
         }
 
         if (doResize)
         {
-            // The total free space along the main axis gained or lost SINCE the last resize
+            // The total free space along the main axis
             // Should be positive when free space is available and negative when items are overflowing
             float freeLength = getMainAxisSize() - getItemBasesSum();
 
@@ -159,12 +170,17 @@ public class FlexBehavior
 
         if (doJustify)
         {
-            justifyMainAxis();
+            // TODO: dumb fix, will almost definitely be a problem later fuck it we ball
+            if (getHost().getScrollBehavior() == null ||
+                    (getHost().getScrollBehavior() != null && getHost().getScrollBehavior().getSlider().getNormalizedValue() == 0))
+            {
+                justifyMainAxis();
+            }
         }
 
         if (doAlign)
         {
-//            scaleCrossAxisOverflow(); // TODO:
+            scaleCrossAxisOverflow(); // TODO:
             alignCrossAxis();
         }
     }
@@ -249,16 +265,16 @@ public class FlexBehavior
     }
 
     /**
-     * Spaces the items out along the main axis according to this containers' {@link FlexBehavior#justifyContent} property
+     * Spaces the items out along the main axis according to this containers' {@link FlexBehavior#justify} property
      * <p>
      * This does not change the widths or heights of any elements, only the x or y positions of the items in the container.
      */
     private void justifyMainAxis()
     {
         float freeLength = getMainAxisSize() - getItemBasesSum();
-        boolean isMainAxisFull = freeLength == 0; // TODO: why does this work w/out floating point error correction - check in debug?
+        boolean isMainAxisFull = freeLength == 0; // TODO: why does this work w/out floating point error correction - check in debug? edit: can screen only resize by precise fixed amts? e.g. min change = 0.25?
 
-        float defaultPadding = isHorizontal() ? getContainerPadding().getLeft() : getContainerPadding().getTop();
+        float defaultPadding = isHorizontal() ? getHostPadding().left() : getHostPadding().top();
 
         // Justify from start by default
         float currentPos = isReversed() ? defaultPadding + freeLength : defaultPadding;
@@ -267,7 +283,7 @@ public class FlexBehavior
         // (e.g. if justifyContent=CENTER but no free space, use default starting pos of justifyContent=START)
         if (!isMainAxisFull)
         {
-            switch (justifyContent)
+            switch (justify)
             {
                 case END:
                     currentPos = isReversed() ? defaultPadding : defaultPadding + freeLength;
@@ -300,7 +316,7 @@ public class FlexBehavior
 
             if (!isMainAxisFull)
             {
-                switch (justifyContent)
+                switch (justify)
                 {
                     case BETWEEN:
                         currentPos += (flexItems.size() > 1 ? freeLength / (flexItems.size() - 1) : 0);
@@ -320,17 +336,17 @@ public class FlexBehavior
     }
 
     /**
-     * Aligns the items along the cross axis according to this containers' {@link FlexBehavior#alignItems} property
+     * Aligns the items along the cross axis according to this containers' {@link FlexBehavior#align} property
      * <p>
      * This can change the widths or heights of items if the container or an item has a FlexAlign property of stretch
      */
     private void alignCrossAxis()
     {
-        float paddingOffset = isHorizontal() ? getContainerPadding().getTop() : getContainerPadding().getLeft();
+        float paddingOffset = isHorizontal() ? getHostPadding().top() : getHostPadding().left();
 
         for (FlexItem item : flexItems)
         {
-            FlexAlign itemAlignment = (item.getAlign() != null) ? item.getAlign() : alignItems;
+            FlexAlign itemAlignment = (item.getAlign() != null) ? item.getAlign() : align;
 
             switch (itemAlignment)
             {
@@ -389,18 +405,21 @@ public class FlexBehavior
         return direction == FlexDirection.ROW_REVERSE || direction == FlexDirection.COLUMN_REVERSE;
     }
 
-    private float getMainAxisSize()
+    protected float getMainAxisSize()
     {
-        return isHorizontal()
-                ? getContainer().getWidth() - (getContainerPadding().getLeft() + getContainerPadding().getRight())
-                : getContainer().getHeight() - (getContainerPadding().getTop() + getContainerPadding().getBottom());
+        if (mainAxisSize != null)
+        {
+//            System.out.println(mainAxisSize);
+            return isHorizontal()
+                    ? mainAxisSize - getHost().getPadding().left() - getHost().getPadding().right()
+                    : mainAxisSize - getHost().getPadding().top() - getHost().getPadding().bottom();
+        }
+        return isHorizontal() ? ElementUtils.getInnerWidth(getHost()) : ElementUtils.getInnerHeight(getHost());
     }
 
     private float getCrossAxisSize()
     {
-        return isHorizontal()
-                ? getContainer().getHeight() - (getContainerPadding().getTop() + getContainerPadding().getBottom())
-                : getContainer().getWidth() - (getContainerPadding().getLeft() + getContainerPadding().getRight());
+        return isHorizontal() ? ElementUtils.getInnerHeight(getHost()) : ElementUtils.getInnerWidth(getHost());
     }
 
     // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
@@ -489,9 +508,168 @@ public class FlexBehavior
         }
     }
 
+    public void drawInspector()
+    {
+        Minecraft mc = Minecraft.getMinecraft();
+        drawArrow(getDirection(), new Color("FFD700"), 8);
+
+        FlexDirection alignDir = (getDirection() == FlexDirection.ROW || getDirection() == FlexDirection.ROW_REVERSE) ? FlexDirection.COLUMN : FlexDirection.ROW;
+        drawArrow(alignDir, new Color(EnumChatFormatting.WHITE), 5);
+
+        String info = direction.toString() + ", " + justify.toString() + ", " + align.toString();
+        float textX = ElementUtils.getInnerLeftBound(getHost()) + 1;
+        float textY = ElementUtils.getInnerBottomBound(getHost()) - mc.fontRendererObj.FONT_HEIGHT;
+        mc.fontRendererObj.drawString(info, textX, textY, -1, true);
+    }
+
+    // TODO: debug
+    private void drawArrow(FlexDirection direction, Color color, float headSize)
+    {
+        float tailX = 0;
+        float tailY = 0;
+        float headX = 0;
+        float headY = 0;
+        float[] headEdge1 = new float[2];
+        float[] headEdge2 = new float[2];
+
+        float hostX = ElementUtils.getInnerLeftBound(getHost());
+        float hostY = ElementUtils.getInnerTopBound(getHost());
+        float hostWidth = ElementUtils.getInnerWidth(getHost());
+        float hostHeight = ElementUtils.getInnerHeight(getHost());
+
+        switch (direction)
+        {
+            case ROW:
+                tailY = headY = hostY + (hostHeight / 2);
+                tailX = hostX;
+                headX = tailX + hostWidth;
+                headEdge1 = new float[]{headX - headSize, headY - headSize};
+                headEdge2 = new float[]{headX - headSize, headY + headSize};
+                break;
+            case ROW_REVERSE:
+                tailY = headY = hostY + (hostHeight / 2);
+                headX = hostX;
+                tailX = headX + hostWidth;
+                headEdge1 = new float[]{headX + headSize, headY + headSize};
+                headEdge2 = new float[]{headX + headSize, headY - headSize};
+                break;
+            case COLUMN:
+                tailX = headX = hostX + (hostWidth / 2);
+                tailY = hostY;
+                headY = tailY + hostHeight;
+                headEdge1 = new float[]{headX + headSize, headY - headSize};
+                headEdge2 = new float[]{headX - headSize, headY - headSize};
+                break;
+            case COLUMN_REVERSE:
+                tailX = headX = hostX + (hostWidth / 2);
+                headY = hostY;
+                tailY = headY + hostHeight;
+                headEdge1 = new float[]{headX - 10, headY + 10};
+                headEdge2 = new float[]{headX + 10, headY + 10};
+                break;
+        }
+
+        RenderUtils.drawVertices(GL11.GL_POLYGON, new float[][]{{headX, headY}, headEdge1, headEdge2}, color);
+        RenderUtils.drawVertices(GL11.GL_LINE_STRIP, new float[][]{{tailX, tailY}, {headX, headY}}, color);
+    }
+
     private enum ResizeType
     {
         SHRINK,
         GROW
+    }
+
+    public static class Builder
+    {
+        protected GuiContainer host = null;
+        protected final List<FlexItem> flexItems = new ArrayList<>();
+        protected FlexDirection direction = FlexDirection.ROW;
+        protected FlexJustify justify = FlexJustify.START;
+        protected FlexAlign align = FlexAlign.START;
+
+        protected boolean doResize = true;
+        protected boolean doJustify = true;
+        protected boolean doAlign = true;
+
+        // TODO: implement this
+        //  should maybe be lists of elementNames rather than flexitems
+        //  should make heavily chained building impossible (requires pre-making item)
+        //  if a reference to the item is necessary in this way
+//        protected List<FlexItem> resizeExcludes = new ArrayList<>();
+//        protected List<FlexItem> justifyExcludes = new ArrayList<>();
+//        protected List<FlexItem> alignExcludes = new ArrayList<>();
+
+        protected Float mainAxisSize = null;
+
+        public Builder host(GuiContainer host)
+        {
+            this.host = host;
+            return this;
+        }
+
+        public Builder item(FlexItem item)
+        {
+            this.flexItems.add(item);
+            return this;
+        }
+
+        public Builder items(Collection<FlexItem> items)
+        {
+            this.flexItems.addAll(items);
+            return this;
+        }
+
+        public Builder items(FlexItem... items)
+        {
+            this.flexItems.addAll(Arrays.asList(items));
+            return this;
+        }
+
+        public Builder direction(FlexDirection direction)
+        {
+            this.direction = direction;
+            return this;
+        }
+
+        public Builder justify(FlexJustify justify)
+        {
+            this.justify = justify;
+            return this;
+        }
+
+        public Builder align(FlexAlign align)
+        {
+            this.align = align;
+            return this;
+        }
+
+        public Builder doResize(boolean doResize)
+        {
+            this.doResize = doResize;
+            return this;
+        }
+
+        public Builder doJustify(boolean doJustify)
+        {
+            this.doJustify = doJustify;
+            return this;
+        }
+
+        public Builder doAlign(boolean doAlign)
+        {
+            this.doAlign = doAlign;
+            return this;
+        }
+
+        public Builder mainAxisSize(float mainAxisSize)
+        {
+            this.mainAxisSize = mainAxisSize;
+            return this;
+        }
+
+        public FlexBehavior build()
+        {
+            return new FlexBehavior(this);
+        }
     }
 }
