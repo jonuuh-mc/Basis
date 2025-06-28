@@ -1,11 +1,18 @@
 package io.jonuuh.core.lib.gui.element.container;
 
 import io.jonuuh.core.lib.gui.element.GuiElement;
+import io.jonuuh.core.lib.gui.element.container.behavior.FlexBehavior;
+import io.jonuuh.core.lib.gui.element.container.behavior.ScrollBehavior;
 import io.jonuuh.core.lib.gui.event.GuiEvent;
+import io.jonuuh.core.lib.gui.event.input.MouseScrollEvent;
+import io.jonuuh.core.lib.gui.event.lifecycle.InitGuiEvent;
+import io.jonuuh.core.lib.gui.listener.input.MouseScrollListener;
+import io.jonuuh.core.lib.gui.listener.lifecycle.InitGuiListener;
 import io.jonuuh.core.lib.gui.properties.GuiColorType;
+import io.jonuuh.core.lib.gui.properties.ScissorBox;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,9 +22,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public abstract class GuiContainer extends GuiElement
+public abstract class GuiContainer extends GuiElement implements InitGuiListener, MouseScrollListener
 {
     protected final List<GuiElement> children;
+    protected FlexBehavior flexBehavior;
+    protected ScrollBehavior scrollBehavior;
     protected boolean shouldScissor;
     protected ScissorBox scissorBox;
     private boolean enabled = true; // TODO:
@@ -29,6 +38,32 @@ public abstract class GuiContainer extends GuiElement
         this.shouldScissor = builder.shouldScissor;
         this.scissorBox = new ScissorBox(this);
         addChildren(builder.children);
+
+        if (builder.scrollBehaviorBuilder != null)
+        {
+            this.scrollBehavior = builder.scrollBehaviorBuilder.host(this).build();
+
+            if (this.getPadding().right() < scrollBehavior.getSlider().getWidth())
+            {
+                this.getPadding().setRight(scrollBehavior.getSlider().getWidth());
+            }
+        }
+
+        if (builder.flexBehaviorBuilder != null)
+        {
+            builder.flexBehaviorBuilder.host(this);
+
+            if (scrollBehavior != null)
+            {
+                builder.flexBehaviorBuilder.mainAxisSize(scrollBehavior.getSlider().getMax());
+            }
+
+            this.flexBehavior = builder.flexBehaviorBuilder.build();
+
+            // Note that normal children will be before flex item children in children list. Currently, the ordering of children
+            // (not flex items) within a container has no meaning, but if it does later maybe this will be important
+            addChildren(flexBehavior.getElements());
+        }
     }
 
     public List<GuiElement> getChildren()
@@ -44,6 +79,19 @@ public abstract class GuiContainer extends GuiElement
     public boolean hasChild(GuiElement child)
     {
         return children.contains(child);
+    }
+
+    // TODO: make children a map if using this becomes common enough?
+    public GuiElement getChildByName(String elementName)
+    {
+        for (GuiElement child : children)
+        {
+            if (child.elementName.equals(elementName))
+            {
+                return child;
+            }
+        }
+        return null;
     }
 
     // TODO: only for debugging for now, needs to be removed
@@ -64,15 +112,25 @@ public abstract class GuiContainer extends GuiElement
         return elements;
     }
 
-//    public FlexBehavior getFlexBehavior()
-//    {
-//        return flexBehavior;
-//    }
+    public FlexBehavior getFlexBehavior()
+    {
+        return flexBehavior;
+    }
 
-//    public void setFlexBehavior(FlexBehavior flexBehavior)
-//    {
-//        this.flexBehavior = flexBehavior;
-//    }
+    public void setFlexBehavior(FlexBehavior flexBehavior)
+    {
+        this.flexBehavior = flexBehavior;
+    }
+
+    public ScrollBehavior getScrollBehavior()
+    {
+        return scrollBehavior;
+    }
+
+    public void setScrollBehavior(ScrollBehavior scrollBehavior)
+    {
+        this.scrollBehavior = scrollBehavior;
+    }
 
     @Override
     public boolean isEnabled()
@@ -218,79 +276,108 @@ public abstract class GuiContainer extends GuiElement
     @Override
     public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
+        // TODO: because of this, any container that is invisible will make all its children invisible too.
+        //  is this a problem or should this be the intended behavior
         if (!isVisible())
         {
             return;
         }
-        // Handle screen draw for this element
-        super.onScreenDraw(mouseX, mouseY, partialTicks);
-//        if (debug && hasChildren())
-//        {
-//            Color padColor = new Color("#36ff0000");
-//            // Left
-//            RenderUtils.drawRectangle(worldXPos(), worldYPos(), getPadding().getLeft(), getHeight(), padColor);
-//            // Right
-//            RenderUtils.drawRectangle(worldXPos() + getWidth() - getPadding().getRight(), worldYPos(), getPadding().getRight(), getHeight(), padColor);
-//            // Top
-//            RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getPadding().getTop(), padColor);
-//            // Bottom
-//            RenderUtils.drawRectangle(worldXPos(), worldYPos() + getHeight() - getPadding().getBottom(), getWidth(), getPadding().getBottom(), padColor);
-//        }
 
-        boolean scissoring = false;
+        // TODO: dumb solution to making root invisible?
+        //  split only the actual draw textured rect into a protected funct which can be overridden to prevent drawing?
+        //  still drawing debug info for root is prob okay
+        if (!(this instanceof GuiRootContainer))
+        {
+            if (hasParent())
+            {
+                getParent().getScissorBox().start();
+            }
 
+            // Handle screen draw for this element
+            RenderUtils.drawNineSliceTexturedRect(new ResourceLocation("core:textures/slider.png"),
+                    worldXPos(), worldYPos(), getZLevel() - 90, getWidth(), getHeight(), 32, 32,
+                    5, Math.max(getWidth(), getHeight()) / 10, getColor(GuiColorType.BACKGROUND));
+
+            if (debug)
+            {
+                if (hasChildren())
+                {
+                    Color padColor = new Color("#36ff0000");
+                    // Left
+                    RenderUtils.drawRectangle(worldXPos(), worldYPos(), getPadding().left(), getHeight(), padColor);
+                    // Right
+                    RenderUtils.drawRectangle(worldXPos() + getWidth() - getPadding().right(), worldYPos(), getPadding().right(), getHeight(), padColor);
+                    // Top
+                    RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getPadding().top(), padColor);
+                    // Bottom
+                    RenderUtils.drawRectangle(worldXPos(), worldYPos() + getHeight() - getPadding().bottom(), getWidth(), getPadding().bottom(), padColor);
+                }
+
+                if (flexBehavior != null)
+                {
+                    flexBehavior.drawInspector();
+                }
+            }
+
+            super.onScreenDraw(mouseX, mouseY, partialTicks);
+            if (hasParent())
+            {
+                getParent().getScissorBox().end();
+            }
+        }
+
+        drawChildren(mouseX, mouseY, partialTicks);
+    }
+
+    protected void drawChildren(int mouseX, int mouseY, float partialTicks)
+    {
         if (this.shouldScissor())
         {
-            int greatestLeft = (int) getGreatestLeftBound();
-            int leastRight = (int) getLeastRightBound();
-
-            int greatestTopBound = (int) getGreatestTopBound();
-            int leastBottom = (int) getLeastBottomBound();
-
-            if (greatestLeft < leastRight && greatestTopBound < leastBottom)
-            {
-                int boundWidth = leastRight - greatestLeft;
-                int boundHeight = leastBottom - greatestTopBound;
-
-                GL11.glPushMatrix();
-                GL11.glEnable(GL11.GL_SCISSOR_TEST);
-                RenderUtils.drawRectangle(greatestLeft, greatestTopBound, boundWidth, boundHeight, new Color("#220000ff"));
-                RenderUtils.scissorFromTopLeft(greatestLeft, greatestTopBound, boundWidth, boundHeight);
-                scissoring = true;
-            }
+            scissorBox.start();
         }
 
         for (GuiElement child : children)
         {
-            // Continue propagating the screen draw event to any additional children
+            // If the child is another container, this will continue propagating the draw to any additional children
             child.onScreenDraw(mouseX, mouseY, partialTicks);
         }
 
-        if (scissoring)
+        if (this.shouldScissor())
         {
-            GL11.glDisable(GL11.GL_SCISSOR_TEST);
-            GL11.glPopMatrix();
+            scissorBox.end();
         }
     }
 
-    protected float getGreatestLeftBound()
+    @Override
+    public void onInitGui(InitGuiEvent event)
     {
-        return hasParent() ? Math.max(parent.getGreatestLeftBound(), this.getLeftBound()) : this.getLeftBound();
+        if (flexBehavior != null)
+        {
+            flexBehavior.updateItemsLayout();
+        }
+
+        if (scrollBehavior != null)
+        {
+            scrollBehavior.updateSlider();
+        }
     }
 
-    protected float getLeastRightBound()
+    /**
+     * Redirect mouse wheel scroll events to the scroll behavior's slider, if it exists.
+     */
+    @Override
+    public void onMouseScroll(MouseScrollEvent event)
     {
-        return hasParent() ? Math.min(parent.getLeastRightBound(), this.getRightBound()) : this.getRightBound();
-    }
+        // Ignore propagating events to other containers
+        if (event.target != this)
+        {
+            return;
+        }
 
-    protected float getGreatestTopBound()
-    {
-        return hasParent() ? Math.max(parent.getGreatestTopBound(), this.getTopBound()) : this.getTopBound();
-    }
-
-    protected float getLeastBottomBound()
-    {
-        return hasParent() ? Math.min(parent.getLeastBottomBound(), this.getBottomBound()) : this.getBottomBound();
+        if (scrollBehavior != null)
+        {
+            scrollBehavior.getSlider().onMouseScroll(event);
+        }
     }
 
     /**
@@ -340,7 +427,9 @@ public abstract class GuiContainer extends GuiElement
     protected static abstract class AbstractBuilder<T extends AbstractBuilder<T, R>, R extends GuiContainer> extends GuiElement.AbstractBuilder<T, R>
     {
         protected final List<GuiElement> children = new ArrayList<>();
-        protected boolean shouldScissor = false;
+        protected FlexBehavior.Builder flexBehaviorBuilder = null;
+        protected ScrollBehavior.Builder scrollBehaviorBuilder = null;
+        protected boolean shouldScissor = true;
 
         protected AbstractBuilder(String elementName)
         {
@@ -374,6 +463,18 @@ public abstract class GuiContainer extends GuiElement
         public T children(GuiElement... children)
         {
             this.children.addAll(Arrays.asList(children));
+            return self();
+        }
+
+        public T flexBehavior(FlexBehavior.Builder flexBehaviorBuilder)
+        {
+            this.flexBehaviorBuilder = flexBehaviorBuilder;
+            return self();
+        }
+
+        public T scrollBehavior(ScrollBehavior.Builder scrollBehaviorBuilder)
+        {
+            this.scrollBehaviorBuilder = scrollBehaviorBuilder;
             return self();
         }
     }

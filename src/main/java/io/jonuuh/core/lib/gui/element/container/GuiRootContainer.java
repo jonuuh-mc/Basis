@@ -1,13 +1,9 @@
 package io.jonuuh.core.lib.gui.element.container;
 
 import io.jonuuh.core.lib.gui.AbstractGuiScreen;
-import io.jonuuh.core.lib.gui.element.container.flex.GuiFlexContainer;
-import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexAlign;
-import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexJustify;
 import io.jonuuh.core.lib.gui.event.lifecycle.InitGuiEvent;
 
-// TODO: optional flexBehavior via builder instead of extending GuiFlexContainer?
-public class GuiRootContainer extends GuiFlexContainer
+public class GuiRootContainer extends GuiContainer
 {
     /** The GuiScreen containing this GuiRootContainer, should be a 1:1 relationship */
     public final AbstractGuiScreen guiScreen;
@@ -38,18 +34,18 @@ public class GuiRootContainer extends GuiFlexContainer
         super.onInitGui(event);
     }
 
-    @Override
-    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
-    {
-        if (!isVisible())
-        {
-            return;
-        }
-        super.onScreenDraw(mouseX, mouseY, partialTicks);
-//        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), 3, new Color("#FFFFFF", 0.2F));
-    }
+//    @Override
+//    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
+//    {
+//        if (!isVisible())
+//        {
+//            return;
+//        }
+//        super.onScreenDraw(mouseX, mouseY, partialTicks);
+////        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), 3, new Color("#FFFFFF", 0.2F));
+//    }
 
-    public static class Builder extends GuiFlexContainer.AbstractBuilder<Builder, GuiRootContainer>
+    public static class Builder extends GuiContainer.AbstractBuilder<Builder, GuiRootContainer>
     {
         protected final AbstractGuiScreen guiScreen;
 
@@ -57,8 +53,6 @@ public class GuiRootContainer extends GuiFlexContainer
         {
             super("ROOT");
             this.guiScreen = guiScreen;
-            this.justify = FlexJustify.CENTER;
-            this.align = FlexAlign.CENTER;
         }
 
         @Override

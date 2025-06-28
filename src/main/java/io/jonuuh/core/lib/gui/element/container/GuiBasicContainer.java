@@ -1,8 +1,5 @@
 package io.jonuuh.core.lib.gui.element.container;
 
-import io.jonuuh.core.lib.gui.properties.GuiColorType;
-import io.jonuuh.core.lib.util.RenderUtils;
-
 public class GuiBasicContainer extends GuiContainer
 {
     public GuiBasicContainer(Builder builder)
@@ -10,17 +7,16 @@ public class GuiBasicContainer extends GuiContainer
         super(builder);
     }
 
-    @Override
-    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
-    {
-        if (!isVisible())
-        {
-            return;
-        }
-        super.onScreenDraw(mouseX, mouseY, partialTicks);
-
-        RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), getColor(GuiColorType.BACKGROUND));
-    }
+//    @Override
+//    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
+//    {
+//        if (!isVisible())
+//        {
+//            return;
+//        }
+//        super.onScreenDraw(mouseX, mouseY, partialTicks);
+//        RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), getColor(GuiColorType.BACKGROUND));
+//    }
 
     public static class Builder extends GuiContainer.AbstractBuilder<Builder, GuiBasicContainer>
     {

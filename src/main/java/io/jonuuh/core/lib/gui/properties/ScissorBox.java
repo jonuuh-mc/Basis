@@ -20,10 +20,20 @@ public class ScissorBox
     public void start()
     {
         update();
-//        RenderUtils.drawRectangle(x/*-1*/, y/*-1*/, width/*+3*/, height/*+3*/, new Color("#4400ff00"));
+
+        int windowOffset = 1;
+        int textureOffset = 3;
+
         GL11.glPushMatrix();
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        RenderUtils.scissorFromTopLeft(x + 1, y + 1, width, height);
+
+        // Prevent trying to scissor an area with negative width/height
+        if (width - textureOffset - windowOffset < 0 || height - textureOffset - windowOffset < 0)
+        {
+            return;
+        }
+        //        RenderUtils.drawRectangle(x/*-1*/, y/*-1*/, width/*+3*/, height/*+3*/, new Color("#4400ff00"));
+        RenderUtils.scissorFromTopLeft(x + textureOffset, y + textureOffset, width - textureOffset - windowOffset, height - textureOffset - windowOffset);
     }
 
     public void end()
