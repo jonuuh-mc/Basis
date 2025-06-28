@@ -1,6 +1,7 @@
 package io.jonuuh.core.lib.gui;
 
 import io.jonuuh.core.lib.gui.element.GuiElement;
+import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.gui.element.container.GuiRootContainer;
 import io.jonuuh.core.lib.gui.event.GuiTargetedEvent;
 import io.jonuuh.core.lib.gui.event.input.KeyInputEvent;
@@ -142,12 +143,25 @@ public abstract class AbstractGuiScreen extends GuiScreen
 
         if (wheelDelta != 0)
         {
-            List<GuiElement> scrollable = new ArrayList<>();
-            rootContainer.collectMatchingElements(scrollable, element -> (element.isVisible() && element.isHovered() && canScrollOn(element)));
+//            rootContainer.performAction(element -> element.debug = !element.debug);
 
-            GuiElement scrollTarget = CollectionUtils.getMax(scrollable, Comparator.comparingInt(GuiElement::getZLevel));
+            if (hasCurrentFocus() && getCurrentFocus().isHovered())
+            {
+                dispatchTargetedEvent(new MouseScrollEvent(currentFocus, wheelDelta));
+            }
+            // Idea for scrolling on scrollable containers to not require focus
+            else
+            {
+                List<GuiElement> scrollableContainers = new ArrayList<>();
+                rootContainer.collectMatchingElements(scrollableContainers, element -> (element.isVisible() && element.isHovered()
+                        && element instanceof GuiContainer && ((InputListener) element).isEnabled() && ((GuiContainer) element).getScrollBehavior() != null));
 
-            dispatchTargetedEvent(new MouseScrollEvent(scrollTarget, wheelDelta));
+                if (!scrollableContainers.isEmpty())
+                {
+                    GuiElement scrollTarget = CollectionUtils.getMax(scrollableContainers, Comparator.comparingInt(GuiElement::getZLevel));
+                    dispatchTargetedEvent(new MouseScrollEvent(scrollTarget, wheelDelta));
+                }
+            }
         }
     }
 
