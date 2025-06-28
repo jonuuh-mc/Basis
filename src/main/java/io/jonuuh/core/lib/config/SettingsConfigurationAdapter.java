@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * A bridge between {@link Settings} objects and a Forge {@link Configuration}.
  * <p>
- * This singleton manages the transferral pipeline to and from {@link Setting} fields (current or default),
+ * This class manages the transferral pipeline to and from {@link Setting} fields (current or default),
  * {@link Property properties}, {@link ConfigCategory categories},
  * a {@link Configuration}, and an external config file.
  *
