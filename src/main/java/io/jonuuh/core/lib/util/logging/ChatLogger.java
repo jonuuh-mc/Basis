@@ -24,6 +24,7 @@ public final class ChatLogger
         this.mainColor = mainColor;
         this.accentColor = accentColor;
         this.header = new ChatComponentText(accentColor + "[" + mainColor + headerStr + accentColor + "] ");
+        setLevel(Level.ERROR);
     }
 
     ChatLogger(String headerStr)
