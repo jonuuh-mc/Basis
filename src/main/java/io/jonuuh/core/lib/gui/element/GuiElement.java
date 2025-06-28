@@ -358,12 +358,8 @@ public abstract class GuiElement
 
         if (debug)
         {
-            GL11.glEnable(GL11.GL_LINE_SMOOTH);
-            GL11.glLineWidth(0.8F);
             RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), getWidth(), getHeight(),
                     isFocused() ? new Color("#00ff00") : new Color("#ff55ff"));
-            GL11.glLineWidth(1F);
-            GL11.glDisable(GL11.GL_LINE_SMOOTH);
 
             mc.fontRendererObj.drawString(String.valueOf(getZLevel()), getRightBound() - mc.fontRendererObj.getStringWidth(String.valueOf(getZLevel())),
                     getBottomBound() - mc.fontRendererObj.FONT_HEIGHT, getColor(GuiColorType.ACCENT2).toPackedARGB(), true);
