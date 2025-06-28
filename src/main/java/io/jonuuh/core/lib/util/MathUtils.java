@@ -45,4 +45,9 @@ public final class MathUtils
         // Clamp value (min, max)
         return Math.min((Math.max(value, min)), max);
     }
+
+    public static int randomIntInclusiveRange(int min, int max)
+    {
+        return (int) ((Math.random() * ((max + 1) - min)) + min);
+    }
 }
