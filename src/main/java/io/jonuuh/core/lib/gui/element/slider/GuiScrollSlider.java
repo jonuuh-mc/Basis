@@ -2,10 +2,8 @@ package io.jonuuh.core.lib.gui.element.slider;
 
 import io.jonuuh.core.lib.gui.event.input.MouseDownEvent;
 import io.jonuuh.core.lib.gui.event.input.MouseDragEvent;
-import io.jonuuh.core.lib.gui.event.input.MouseScrollEvent;
 import io.jonuuh.core.lib.gui.listener.input.MouseDragListener;
 import io.jonuuh.core.lib.gui.properties.GuiColorType;
-import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
 
@@ -91,16 +89,12 @@ public class GuiScrollSlider extends GuiSlider implements MouseDragListener
     @Override
     protected void drawVerticalSlider()
     {
-        float trackWidth = (getWidth() / 3F);
-        RenderUtils.drawRectangle(worldXPos() + trackWidth, worldYPos(), trackWidth, getHeight(), getColor(GuiColorType.ACCENT1));
         drawPointer();
     }
 
     @Override
     protected void drawHorizontalSlider()
     {
-        float trackHeight = (getHeight() / 3F);
-        RenderUtils.drawRectangle(worldXPos(), worldYPos() + trackHeight, getWidth(), trackHeight, getColor(GuiColorType.ACCENT1));
         drawPointer();
     }
 
@@ -108,15 +102,16 @@ public class GuiScrollSlider extends GuiSlider implements MouseDragListener
     {
         float screenPosWindowStart = getScreenPosAtNormalValue(getNormalizedValue());
         float screenPosWindowEnd = getScreenPosAtNormalValue(getNormalizedValue() + scrollBarLength);
-        Color test = new Color("#aaff00ff");
 
         if (isVertical)
         {
-            RenderUtils.drawRectangle(worldXPos(), screenPosWindowStart, getWidth(), screenPosWindowEnd - screenPosWindowStart, test);
+            RenderUtils.drawNineSliceTexturedRect(trackResource, worldXPos(), screenPosWindowStart, getZLevel(), getWidth(), screenPosWindowEnd - screenPosWindowStart,
+                    32, 32, 5, 3, getColor(GuiColorType.BASE));
         }
         else
         {
-            RenderUtils.drawRectangle(screenPosWindowStart, worldYPos(), screenPosWindowEnd - screenPosWindowStart, getHeight(), test);
+            RenderUtils.drawNineSliceTexturedRect(trackResource, screenPosWindowStart, worldYPos(), getZLevel(), screenPosWindowEnd - screenPosWindowStart, getHeight(),
+                    32, 32, 5, 3, getColor(GuiColorType.BASE));
         }
     }
 
