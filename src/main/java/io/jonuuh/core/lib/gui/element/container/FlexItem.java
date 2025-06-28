@@ -1,7 +1,7 @@
-package io.jonuuh.core.lib.gui.element.container.flex;
+package io.jonuuh.core.lib.gui.element.container;
 
 import io.jonuuh.core.lib.gui.element.GuiElement;
-import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexAlign;
+import io.jonuuh.core.lib.gui.properties.FlexAlign;
 
 /**
  * A wrapper for a GuiElement inside a GuiFlexContainer;
@@ -35,44 +35,36 @@ public class FlexItem
      * A value of 0 is default and means this element will not grow to fill free space
      */
     private int grow;
-    /** Part of how much weight this element has when the items along the main axis are shrunk.
-     * A value of 1 is default, a value of 0 means this element will not shrink when there is negative free space */
+    /**
+     * Part of how much weight this element has when the items along the main axis are shrunk.
+     * A value of 1 is default, a value of 0 means this element will not shrink when there is negative free space
+     */
     private int shrink;
     /** How this item should be aligned along the cross axis */
     private FlexAlign alignSelf;
 
-    public FlexItem(GuiElement element, float minWidth, float maxWidth, float minHeight, float maxHeight, Integer order, int grow, int shrink, FlexAlign alignSelf)
+    public FlexItem(Builder builder)
     {
-        this.element = element;
+        this.element = builder.element;
 
         this.initWidth = element.getWidth();
         this.initHeight = element.getHeight();
 
-        setMinWidth(minWidth);
-        setMaxWidth(maxWidth);
-        setMinHeight(minHeight);
-        setMaxHeight(maxHeight);
+        this.minWidth = builder.minWidth;
+        this.maxWidth = builder.maxWidth;
 
-        setOrder(order);
-        setGrow(grow);
-        setShrink(shrink);
-        setAlign(alignSelf);
-    }
+        this.minHeight = builder.minHeight;
+        this.maxHeight = builder.maxHeight;
 
-    public FlexItem(GuiElement element, float minWidth, float maxWidth, float minHeight, float maxHeight)
-    {
-        this(element, minWidth, maxWidth, minHeight, maxHeight, null, 0, 1, null);
-    }
-
-    public FlexItem(GuiElement element, Integer order, int grow, int shrink, FlexAlign alignSelf)
-    {
-        this(element, 5, Integer.MAX_VALUE, 5, Integer.MAX_VALUE, order, grow, shrink, alignSelf);
+        this.order = builder.order;
+        this.grow = builder.grow;
+        this.shrink = builder.shrink;
+        this.alignSelf = builder.alignSelf;
     }
 
     public FlexItem(GuiElement element)
     {
-        // TODO: need to figure out good defaults for min/maxes
-        this(element, 5, Integer.MAX_VALUE, 5, Integer.MAX_VALUE);
+        this(new Builder(element));
     }
 
     public GuiElement getElement()
@@ -176,5 +168,79 @@ public class FlexItem
     {
         this.alignSelf = alignSelf;
         return this;
+    }
+
+    public static class Builder
+    {
+        private final GuiElement element;
+
+        // TODO: need to figure out good defaults for min/maxes
+        private float minWidth = 5;
+        private float minHeight = 5;
+        private float maxWidth = Integer.MAX_VALUE;
+        private float maxHeight = Integer.MAX_VALUE;
+
+        private Integer order = null;
+        private int grow = 0;
+        private int shrink = 1;
+        private FlexAlign alignSelf = null;
+
+        public Builder(GuiElement element)
+        {
+            this.element = element;
+        }
+
+        public Builder minWidth(float minWidth)
+        {
+            this.minWidth = minWidth;
+            return this;
+        }
+
+        public Builder maxWidth(float maxWidth)
+        {
+            this.maxWidth = maxWidth;
+            return this;
+        }
+
+        public Builder minHeight(float minHeight)
+        {
+            this.minHeight = minHeight;
+            return this;
+        }
+
+        public Builder maxHeight(float maxHeight)
+        {
+            this.maxHeight = maxHeight;
+            return this;
+        }
+
+        public Builder order(Integer order)
+        {
+            this.order = order;
+            return this;
+        }
+
+        public Builder grow(int grow)
+        {
+            this.grow = Math.max(grow, 0);
+            return this;
+        }
+
+        public Builder shrink(int shrink)
+        {
+            this.shrink = Math.max(shrink, 0);
+            return this;
+        }
+
+        public Builder align(FlexAlign alignSelf)
+        {
+            this.alignSelf = alignSelf;
+            return this;
+        }
+
+        public FlexItem build()
+        {
+            return new FlexItem(this);
+        }
     }
 }
