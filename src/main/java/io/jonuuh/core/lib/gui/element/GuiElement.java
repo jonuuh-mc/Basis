@@ -4,6 +4,7 @@ import io.jonuuh.core.lib.gui.AbstractGuiScreen;
 import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.gui.element.container.GuiRootContainer;
 import io.jonuuh.core.lib.gui.event.GuiEvent;
+import io.jonuuh.core.lib.gui.listener.input.InputListener;
 import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.gui.properties.Spacing;
 import io.jonuuh.core.lib.util.Color;
@@ -351,10 +352,10 @@ public abstract class GuiElement
 
         setHovered(isPointWithinBounds(mouseX, mouseY));
 
-//            if (!enabled)
-//            {
-//                RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), new Color("#aa181818"));
-//            }
+        if (this instanceof InputListener && !((InputListener) this).isEnabled())
+        {
+            RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), new Color("#aa181818"));
+        }
 
         if (debug)
         {
