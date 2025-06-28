@@ -87,6 +87,16 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
         tryApplyPostEventBehavior(MouseDownEvent.class);
     }
 
+    public float getMin()
+    {
+        return min;
+    }
+
+    public float getMax()
+    {
+        return max;
+    }
+
     protected float getPointerSizeRatio()
     {
         return 2;
