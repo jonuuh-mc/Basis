@@ -188,6 +188,10 @@ public final class RenderUtils
         dstCornerRatio = Math.max(dstCornerRatio, 2);
 
         float dstCornerSize = Math.min(width / dstCornerRatio, height / dstCornerRatio);
+        // TODO: bc of math.min, disproportionately slim rects will have such a small corner size that the border of the texture is invisible
+        //  math.max wouldnt work either for similar but opposite reasons. maybe combine width and height and div by 2 or something? idfk
+//        dstCornerSize = Math.max(dstCornerSize, 3);
+
         double s1 = MathUtils.normalize(srcCornerSize, 0, Math.min(texWidth, texHeight));
         double s2 = (1 - s1);
 
@@ -399,7 +403,7 @@ public final class RenderUtils
 
     public static void drawRoundedRect(float x, float y, float width, float height, float radius, Color color)
     {
-        drawRoundedRect(GL11.GL_POLYGON, x, y, width, height, radius, color);
+        drawRoundedRect(GL11.GL_TRIANGLE_FAN, x, y, width, height, radius, color);
 
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
         GL11.glLineWidth(0.5F);
@@ -448,6 +452,7 @@ public final class RenderUtils
         // Enable transparency
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        // Disable texturing
         GL11.glDisable(GL11.GL_TEXTURE_2D);
 
         GL11.glBegin(glMode);
@@ -460,6 +465,7 @@ public final class RenderUtils
 
         // Disable transparency
         GL11.glDisable(GL11.GL_BLEND);
+        // Enable texturing
         GL11.glEnable(GL11.GL_TEXTURE_2D);
 
         GL11.glPopMatrix();

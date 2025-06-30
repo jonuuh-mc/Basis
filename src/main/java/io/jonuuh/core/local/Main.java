@@ -4,6 +4,7 @@ import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.config.setting.types.single.IntSetting;
 import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
 import io.jonuuh.core.lib.gui.AbstractGuiScreen;
+import io.jonuuh.core.lib.gui.CoreGuiScreen;
 import io.jonuuh.core.lib.util.logging.ChatLoggerManager;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.client.ClientCommandHandler;

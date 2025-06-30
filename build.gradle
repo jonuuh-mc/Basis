@@ -2,7 +2,7 @@ buildscript {
     repositories {
         maven {
             name = "forge"
-            url = "http://files.minecraftforge.net/maven"
+            url = "https://files.minecraftforge.net/maven"
         }
     }
     dependencies {
@@ -13,21 +13,34 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'maven-publish'
 
-sourceCompatibility = targetCompatibility = 1.8
 version = "0.0.1"
 group = "io.jonuuh.core"
 archivesBaseName = "core-1.8.9"
+sourceCompatibility = targetCompatibility = 1.8
 
 minecraft {
     version = "1.8.9-11.15.1.2318-1.8.9"
     runDir = "run"
     mappings = "stable_22"
-    makeObfSourceJar = false // TODO: what does this do again
+    makeObfSourceJar = false
 }
+
+//// Use this when building or publishing
+//jar {
+//    sourceSets {
+//        main {
+//            java {
+//                exclude 'io/jonuuh/core/local/**'
+//            }
+//        }
+//    }
+//}
 
 // Define task for source jar
 task sourcesJar(type: Jar) {
-    from sourceSets.main.allSource
+    from sourceSets.main.allSource.matching {
+        exclude 'io/jonuuh/core/local/**'
+    }
     classifier = 'sources'
 }
 
@@ -50,24 +63,16 @@ publishing {
 
     publications {
         maven(MavenPublication) {
-            groupId = project.GH_ACTOR
-            artifactId "core-1.8.9"
+            groupId = "io.jonuuh"
+            artifactId archivesBaseName
             version project.version
 
             // Include main jar
             artifact file("${buildDir}/libs/${archivesBaseName}-${version}.jar")
 
-            // Include sources and Javadoc
+            // Include sources
+//            artifact file("${buildDir}/libs/${archivesBaseName}-${version}-sources.jar")
             artifact sourcesJar
         }
     }
 }
-
-//// Use this when building or publishing
-//sourceSets {
-//    main {
-//        java {
-//            exclude "io/jonuuh/core/local"
-//        }
-//    }
-//}

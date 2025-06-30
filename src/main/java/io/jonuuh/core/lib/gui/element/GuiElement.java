@@ -66,7 +66,7 @@ public abstract class GuiElement
 
     private String tooltipStr;
 
-    protected boolean debug;
+    public boolean debug;
 
     protected GuiElement(AbstractBuilder<?, ?> builder)
     {
@@ -181,7 +181,7 @@ public abstract class GuiElement
      */
     public float worldXPos()
     {
-        return localXPos + inheritedXPos;
+        return getLocalXPos() + inheritedXPos;
     }
 
     /**
@@ -189,7 +189,7 @@ public abstract class GuiElement
      */
     public float worldYPos()
     {
-        return localYPos + inheritedYPos;
+        return getLocalYPos() + inheritedYPos;
     }
 
     public float getLocalXPos()
@@ -411,7 +411,7 @@ public abstract class GuiElement
     @Override
     public String toString()
     {
-        return this.getClass().getSimpleName() + "{" + "elementName='" + elementName + '\'' + ", parent=" + parent + '}';
+        return this.getClass().getSimpleName() + "{" + "name='" + elementName + '\'' + ", parent=" + parent + '}';
     }
 
     /**
