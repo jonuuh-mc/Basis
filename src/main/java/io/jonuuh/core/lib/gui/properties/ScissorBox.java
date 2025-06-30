@@ -21,8 +21,8 @@ public class ScissorBox
     {
         update();
 
-        int windowOffset = 1;
-        int textureOffset = 3;
+        int windowOffset = 0;
+        int textureOffset = 1;
 
         GL11.glPushMatrix();
         GL11.glEnable(GL11.GL_SCISSOR_TEST);

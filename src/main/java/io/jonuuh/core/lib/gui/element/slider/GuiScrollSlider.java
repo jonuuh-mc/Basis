@@ -50,12 +50,12 @@ public class GuiScrollSlider extends GuiSlider implements MouseDragListener
         this.scrollBarLength = isVertical ? getHeight() / max : getWidth() / max;
     }
 
-    @Override
-    public void onMouseScroll(MouseScrollEvent event)
-    {
-        isMovingTimer = 10;
-        setNormalizedValue(getNormalizedValue() + (float) (MathUtils.normalize(event.wheelDelta * 10, min, max)));
-    }
+//    @Override
+//    public void onMouseScroll(MouseScrollEvent event)
+//    {
+//        isMovingTimer = 10;
+//        setNormalizedValue(getNormalizedValue() + (float) (MathUtils.normalize(event.wheelDelta * 10, min, max)));
+//    }
 
     @Override
     public void onMouseDrag(MouseDragEvent event)
@@ -80,12 +80,6 @@ public class GuiScrollSlider extends GuiSlider implements MouseDragListener
         startSliderValue = getNormalizedValue();
     }
 
-//    @Override
-//    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
-//    {
-//
-//    }
-
     @Override
     protected void drawVerticalSlider()
     {
@@ -105,13 +99,11 @@ public class GuiScrollSlider extends GuiSlider implements MouseDragListener
 
         if (isVertical)
         {
-            RenderUtils.drawNineSliceTexturedRect(trackResource, worldXPos(), screenPosWindowStart, getZLevel(), getWidth(), screenPosWindowEnd - screenPosWindowStart,
-                    32, 32, 5, 3, getColor(GuiColorType.BASE));
+            RenderUtils.drawRoundedRect(worldXPos(), screenPosWindowStart, getWidth(), screenPosWindowEnd - screenPosWindowStart, 5, getColor(GuiColorType.BASE));
         }
         else
         {
-            RenderUtils.drawNineSliceTexturedRect(trackResource, screenPosWindowStart, worldYPos(), getZLevel(), screenPosWindowEnd - screenPosWindowStart, getHeight(),
-                    32, 32, 5, 3, getColor(GuiColorType.BASE));
+            RenderUtils.drawRoundedRect(screenPosWindowStart, worldYPos(), screenPosWindowEnd - screenPosWindowStart, getHeight(), 5, getColor(GuiColorType.BASE));
         }
     }
 

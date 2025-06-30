@@ -33,9 +33,7 @@ public class GuiTexturedButton extends GuiButton
         }
         super.onScreenDraw(mouseX, mouseY, partialTicks);
 
-        RenderUtils.drawNineSliceTexturedRect(resourceBackgroundTex,
-                worldXPos(), worldYPos(), /*0*/getZLevel() /*- 3*/, getWidth(), getHeight(),
-                52, 52, 12, 8, getColor(GuiColorType.ACCENT1));
+        RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), 5, getColor(GuiColorType.ACCENT1));
 
         if (texture != null)
         {

@@ -37,11 +37,9 @@ public class GuiSingleSlider extends GuiSlider
         float pointerPos = getScreenPosAtNormalValue(getNormalizedValue());
 
         // Left track
-        RenderUtils.drawNineSliceTexturedRect(trackResource, x, trackPos, getZLevel(), pointerPos - x, trackThickness,
-                32, 32, 5, 3, getColor(GuiColorType.BASE));
+        RenderUtils.drawRoundedRect(x, trackPos, pointerPos - x, trackThickness, 5, getColor(GuiColorType.BASE));
         // Right track
-        RenderUtils.drawNineSliceTexturedRect(trackResource, pointerPos, trackPos, getZLevel(), getWidth() - (pointerPos - x), trackThickness,
-                32, 32, 5, 3, getColor(GuiColorType.ACCENT1));
+        RenderUtils.drawRoundedRect(pointerPos, trackPos, getWidth() - (pointerPos - x), trackThickness, 5, getColor(GuiColorType.ACCENT1));
 
         drawPointer();
     }
@@ -57,11 +55,9 @@ public class GuiSingleSlider extends GuiSlider
         float pointerPos = getScreenPosAtNormalValue(getNormalizedValue());
 
         // Top track
-        RenderUtils.drawNineSliceTexturedRect(trackResource, trackPos, y, getZLevel(), trackThickness, pointerPos - y,
-                32, 32, 5, 3, getColor(GuiColorType.BASE));
+        RenderUtils.drawRoundedRect(trackPos, y, trackThickness, pointerPos - y, 5, getColor(GuiColorType.BASE));
         // Bottom track
-        RenderUtils.drawNineSliceTexturedRect(trackResource, trackPos, pointerPos, getZLevel(), trackThickness, getHeight() - (pointerPos - y),
-                32, 32, 5, 3, getColor(GuiColorType.ACCENT1));
+        RenderUtils.drawRoundedRect(trackPos, pointerPos, trackThickness, getHeight() - (pointerPos - y), 5, getColor(GuiColorType.ACCENT1));
 
         drawPointer();
     }
@@ -84,7 +80,7 @@ public class GuiSingleSlider extends GuiSlider
         float x = isVertical ? trackPos - (Math.abs(getTrackThickness() - size) / 2) : pointerPos - (size / 2);
         float y = isVertical ? pointerPos - (size / 2) : trackPos - (Math.abs(getTrackThickness() - size) / 2);
 
-        RenderUtils.drawNineSliceTexturedRect(trackResource, x, y, getZLevel(), size, size, 32, 32, 5, 3, getColor(GuiColorType.ACCENT1));
+        RenderUtils.drawRoundedRect(x, y, size, size, 5, getColor(GuiColorType.BASE));
 
         if (debug)
         {

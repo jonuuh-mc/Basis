@@ -12,7 +12,6 @@ import io.jonuuh.core.lib.gui.properties.GuiColorType;
 import io.jonuuh.core.lib.gui.properties.ScissorBox;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.RenderUtils;
-import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -294,9 +293,7 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
             }
 
             // Handle screen draw for this element
-            RenderUtils.drawNineSliceTexturedRect(new ResourceLocation("core:textures/slider.png"),
-                    worldXPos(), worldYPos(), getZLevel() - 90, getWidth(), getHeight(), 32, 32,
-                    5, Math.max(getWidth(), getHeight()) / 10, getColor(GuiColorType.BACKGROUND));
+            RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), 5, getColor(GuiColorType.BACKGROUND));
 
             if (debug)
             {
