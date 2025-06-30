@@ -1,25 +1,21 @@
 package io.jonuuh.core.lib.gui.element;
 
 import io.jonuuh.core.lib.gui.properties.GuiColorType;
+import io.jonuuh.core.lib.util.RenderUtils;
 import net.minecraft.client.gui.FontRenderer;
 
 public class GuiLabel extends GuiElement
 {
     protected final FontRenderer fontRenderer;
     protected String text;
-    protected boolean centerStrInWidth;
-    protected boolean centerStrInHeight;
-    protected boolean fitWidthToStr;
-    protected boolean fitHeightToStr;
-    protected float textXPos;
-    protected float textYPos;
 
     public GuiLabel(Builder builder)
     {
         super(builder);
         this.fontRenderer = mc.fontRendererObj;
         this.text = builder.text;
-        centerStrInWidth = centerStrInHeight = true;
+        setHeight(mc.fontRendererObj.FONT_HEIGHT - 1);
+        setWidth(mc.fontRendererObj.getStringWidth(text));
     }
 
     public String getText()
@@ -42,28 +38,8 @@ public class GuiLabel extends GuiElement
         }
         super.onScreenDraw(mouseX, mouseY, partialTicks);
 
-        textXPos = worldXPos();
-        textYPos = worldYPos();
-
-        if (centerStrInWidth)
-        {
-            textXPos = worldXPos() + (getWidth() / 2) - (fontRenderer.getStringWidth(text) / 2F);
-        }
-        else if (fitWidthToStr)
-        {
-            setWidth(fontRenderer.getStringWidth(text));
-        }
-
-        if (centerStrInHeight)
-        {
-            textYPos = worldYPos() + (getHeight() / 2) - ((fontRenderer.FONT_HEIGHT - 1) / 2F);
-        }
-        else if (fitHeightToStr)
-        {
-            setHeight(fontRenderer.FONT_HEIGHT - 1);
-        }
-
-        fontRenderer.drawString(text, textXPos, textYPos, getColor(GuiColorType.BASE).toPackedARGB(), true);
+        String trimmedText = RenderUtils.trimStringToWidthWithEllipsis(text, (int) getWidth());
+        fontRenderer.drawString(trimmedText, worldXPos(), worldYPos(), getColor(GuiColorType.ACCENT1).toPackedARGB(), true);
     }
 
     public static class Builder extends GuiElement.AbstractBuilder<Builder, GuiLabel>

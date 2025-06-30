@@ -38,18 +38,16 @@ public final class RenderUtils
         return getFontRenderer().getStringWidth(str) - 1; // getStringWidth is sometimes over by 1 depending on usage? (for loop end condition?)
     }
 
-    // yoinked from somewhere in mc src code, not sure where
+    // Taken from somewhere in vanilla code
     public static String trimStringToWidthWithEllipsis(String str, int width)
     {
         int strWidth = getFontRenderer().getStringWidth(str);
         int ellipsisWidth = getFontRenderer().getStringWidth("...");
 
-        // TODO: what was magic number '6' for? hard coded ellipsis width for default font maybe?
-        if (strWidth > width - 6 && strWidth > ellipsisWidth)
+        if (strWidth > width && strWidth > ellipsisWidth)
         {
-            return getFontRenderer().trimStringToWidth(str, width - 6 - ellipsisWidth).trim() + "...";
+            return getFontRenderer().trimStringToWidth(str, width - ellipsisWidth).trim() + "...";
         }
-
         return str;
     }
 
