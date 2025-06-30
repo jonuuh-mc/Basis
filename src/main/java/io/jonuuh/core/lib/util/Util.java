@@ -1,8 +1,5 @@
 package io.jonuuh.core.lib.util;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.network.NetworkPlayerInfo;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumChatFormatting;
 
 public final class Util
@@ -10,11 +7,6 @@ public final class Util
     /** Prevents instantiation */
     private Util()
     {
-    }
-
-    public static NetworkPlayerInfo getPlayerInfo(EntityPlayer player)
-    {
-        return Minecraft.getMinecraft().getNetHandler().getPlayerInfo(player.getUniqueID());
     }
 
 //        // from GuiPlayerTabOverlay & ScorePlayerTeam
