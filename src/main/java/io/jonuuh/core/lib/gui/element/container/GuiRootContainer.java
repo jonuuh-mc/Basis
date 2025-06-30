@@ -1,12 +1,12 @@
 package io.jonuuh.core.lib.gui.element.container;
 
-import io.jonuuh.core.lib.gui.AbstractGuiScreen;
+import io.jonuuh.core.lib.gui.CoreGuiScreen;
 import io.jonuuh.core.lib.gui.event.lifecycle.InitGuiEvent;
 
 public class GuiRootContainer extends GuiContainer
 {
-    /** The GuiScreen containing this GuiRootContainer, should be a 1:1 relationship */
-    public final AbstractGuiScreen guiScreen;
+    /** The CoreGuiScreen containing this GuiRootContainer, should be a 1:1 relationship */
+    public final CoreGuiScreen guiScreen;
 
     public GuiRootContainer(Builder builder)
     {
@@ -47,9 +47,9 @@ public class GuiRootContainer extends GuiContainer
 
     public static class Builder extends GuiContainer.AbstractBuilder<Builder, GuiRootContainer>
     {
-        protected final AbstractGuiScreen guiScreen;
+        protected final CoreGuiScreen guiScreen;
 
-        public Builder(AbstractGuiScreen guiScreen)
+        public Builder(CoreGuiScreen guiScreen)
         {
             super("ROOT");
             this.guiScreen = guiScreen;

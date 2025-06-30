@@ -28,14 +28,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public abstract class AbstractGuiScreen extends GuiScreen
+public abstract class CoreGuiScreen extends GuiScreen
 {
     protected GuiRootContainer rootContainer;
     protected GuiElement currentFocus;
     // TODO: implement something like this later? could be shared between all guiscreens of a mod
 //    protected FontRenderer customFontRenderer = new FontRenderer(mc.gameSettings, new ResourceLocation("core:ascii.png"), mc.renderEngine, false);
 
-    public AbstractGuiScreen()
+    public CoreGuiScreen()
     {
     }
 
@@ -95,7 +95,7 @@ public abstract class AbstractGuiScreen extends GuiScreen
     }
 
     /**
-     * Should be used similarly to {@link AbstractGuiScreen#drawScreen(int, int, float)}, but when mouse position
+     * Should be used similarly to {@link CoreGuiScreen#drawScreen(int, int, float)}, but when mouse position
      * and/or very frequent updates aren't required. Called 20 client ticks per second?
      */
     @Override

@@ -1,6 +1,6 @@
 package io.jonuuh.core.lib.gui.element;
 
-import io.jonuuh.core.lib.gui.AbstractGuiScreen;
+import io.jonuuh.core.lib.gui.CoreGuiScreen;
 import io.jonuuh.core.lib.gui.element.container.GuiContainer;
 import io.jonuuh.core.lib.gui.element.container.GuiRootContainer;
 import io.jonuuh.core.lib.gui.event.GuiEvent;
@@ -137,9 +137,9 @@ public abstract class GuiElement
     }
 
     /**
-     * Propagate up the tree to retrieve a reference to the GuiScreen containing this element held by the GuiRootContainer
+     * Propagate up the tree to retrieve a reference to the CoreGuiScreen containing this element held by the GuiRootContainer
      */
-    public AbstractGuiScreen getGuiScreen()
+    public CoreGuiScreen getGuiScreen()
     {
         if (this instanceof GuiRootContainer)
         {

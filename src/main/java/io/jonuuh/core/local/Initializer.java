@@ -47,7 +47,7 @@ public class Initializer
 //        ClientRegistry.registerKeyBinding(keyBinding);
 //        MinecraftForge.EVENT_BUS.register(new Events(keyBinding));
 //
-//        AbstractGuiScreen guiScreen = new SettingsGuiScreen(SettingsConfigurationAdapter.INSTANCE.getDefaultCategorySettings());
+//        CoreGuiScreen guiScreen = new SettingsGuiScreen(SettingsConfigurationAdapter.INSTANCE.getDefaultCategorySettings());
 //        ClientCommandHandler.instance.registerCommand(new CommandOpenSettingsGui(modID, guiScreen));
     }
 }

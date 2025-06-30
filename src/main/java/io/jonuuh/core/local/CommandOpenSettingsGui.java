@@ -1,6 +1,6 @@
 package io.jonuuh.core.local;
 
-import io.jonuuh.core.lib.gui.AbstractGuiScreen;
+import io.jonuuh.core.lib.gui.CoreGuiScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.command.CommandBase;
@@ -12,9 +12,9 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 public class CommandOpenSettingsGui extends CommandBase
 {
     protected final String commandName;
-    protected final AbstractGuiScreen gui;
+    protected final CoreGuiScreen gui;
 
-    public CommandOpenSettingsGui(String commandName, AbstractGuiScreen settingsGui)
+    public CommandOpenSettingsGui(String commandName, CoreGuiScreen settingsGui)
     {
         this.commandName = commandName;
         this.gui = settingsGui;
