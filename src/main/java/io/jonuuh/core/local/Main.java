@@ -3,8 +3,8 @@ package io.jonuuh.core.local;
 import io.jonuuh.core.lib.config.setting.Settings;
 import io.jonuuh.core.lib.config.setting.types.single.IntSetting;
 import io.jonuuh.core.lib.config.setting.types.single.StringSetting;
-import io.jonuuh.core.lib.gui.AbstractGuiScreen;
 import io.jonuuh.core.lib.gui.CoreGuiScreen;
+import io.jonuuh.core.lib.gui.screen.MainGuiScreen;
 import io.jonuuh.core.lib.util.logging.ChatLoggerManager;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.client.ClientCommandHandler;
@@ -40,7 +40,7 @@ public class Main
 //        MinecraftForge.EVENT_BUS.register(new Events(keyBinding));
 
 //        Settings settings = ConfigManager.getAdapter(modID).getDefaultCategorySettings();
-        AbstractGuiScreen guiScreen = new GuiScreenImpl(null);
+        CoreGuiScreen guiScreen = new MainGuiScreen(null);
 //        MinecraftForge.EVENT_BUS.register(guiScreen);
         ClientCommandHandler.instance.registerCommand(new CommandOpenSettingsGui(modID, guiScreen));
     }
