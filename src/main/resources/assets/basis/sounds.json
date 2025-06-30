@@ -1,0 +1,20 @@
+{
+  "click":{
+    "category": "master",
+    "sounds": [
+      {
+        "name": "basis:click",
+        "stream": true
+      }
+    ]
+  },
+  "tick":{
+    "category": "master",
+    "sounds": [
+      {
+        "name": "basis:tick",
+        "stream": true
+      }
+    ]
+  }
+}
