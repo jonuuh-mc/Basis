@@ -1,17 +1,31 @@
 package io.jonuuh.core.lib.gui.element.container;
 
+import io.jonuuh.core.lib.gui.element.GuiElement;
+import io.jonuuh.core.lib.gui.element.GuiLabel;
 import io.jonuuh.core.lib.gui.element.button.GuiLabeledButton;
-import io.jonuuh.core.lib.gui.element.container.flex.FlexItem;
-import io.jonuuh.core.lib.gui.element.container.flex.GuiFlexContainer;
-import io.jonuuh.core.lib.gui.element.container.flex.properties.FlexDirection;
+import io.jonuuh.core.lib.gui.element.container.behavior.FlexBehavior;
+import io.jonuuh.core.lib.gui.event.GuiEvent;
+import io.jonuuh.core.lib.gui.event.PostEventBehaviorHost;
+import io.jonuuh.core.lib.gui.event.input.MouseDownEvent;
+import io.jonuuh.core.lib.gui.event.lifecycle.CloseGuiEvent;
+import io.jonuuh.core.lib.gui.listener.input.MouseClickListener;
+import io.jonuuh.core.lib.gui.listener.lifecycle.CloseGuiListener;
+import io.jonuuh.core.lib.gui.properties.FlexDirection;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
-public class GuiDropdown extends GuiFlexContainer
+public class GuiDropdown extends GuiContainer implements MouseClickListener, CloseGuiListener, PostEventBehaviorHost
 {
-    protected GuiFlexContainer optionsContainer;
+    private final Map<Class<? extends GuiEvent>, Consumer<GuiElement>> postBehaviors;
+    protected GuiContainer optionsContainer;
     protected GuiLabeledButton header;
+    private boolean enabled;
+    private boolean mouseDown;
 
     // TODO: just make this one container instead of nested containers and dynamically add/remove children or make them visible/invisible?
     //  also should make flex alg account for invisible elements? add boolean in flexcontainer whether to ignore invisibles?
@@ -19,38 +33,14 @@ public class GuiDropdown extends GuiFlexContainer
     {
         super(builder);
         this.enabled = builder.enabled;
-        this.setDirection(FlexDirection.COLUMN);
+        this.header = builder.header;
+        this.optionsContainer = builder.optionsContainer;
 
-        this.header = new GuiLabeledButton.Builder(this.elementName + "$header")
-                .size(this.getWidth(), this.getHeight())
-                .label(builder.prompt)
-                .build();
-        addItem(new FlexItem(header/*, 0, width, height, height*/).setShrink(0));
-
-        // TODO: about .visible(false): would probably need to both make GuiElement constructor call the overridden setVisible()
-        //  as well as add children before this in order for this to automatically propagate to child buttons?
-        //  - on second thought this should just never work since GuiElement constructor will ALWAYS be called before GuiContainer constructor,
-        //    and there is rightfully no way to add children to a GuiContainer before calling GuiElement constructor
-        //  - instead just call .visible(false) here and when creating each button down below
-        this.optionsContainer = new GuiFlexContainer.Builder(elementName + "$option-container")
-                .localPosition(0, getHeight())
-                .size(getWidth(), getHeight() * builder.options.size())
-                .visible(false)
-                .direction(FlexDirection.COLUMN)
-                .build();
-
-        for (String option : builder.options)
+        this.postBehaviors = new HashMap<>();
+        if (builder.mouseDownBehavior != null)
         {
-            GuiLabeledButton button = new GuiLabeledButton.Builder(option)
-                    .size(this.getWidth(), this.getHeight())
-                    .visible(false)
-                    .label(option)
-                    .build();
-            optionsContainer.addItem(new FlexItem(button));
+            assignPostEventBehavior(MouseDownEvent.class, builder.mouseDownBehavior);
         }
-//        optionsContainer.setVisible(false);
-
-        addItem(new FlexItem(optionsContainer).setShrink(0));
     }
 
     public String getHeaderText()
@@ -63,14 +53,53 @@ public class GuiDropdown extends GuiFlexContainer
         header.setLabel(headerText);
     }
 
-    protected void toggleOpen(GuiElement element)
+    @Override
+    public boolean isEnabled()
     {
-//        if (handlePreCustomEvent())
-//        {
-        header.setButtonLabel(((GuiButton) element).getButtonLabel());
-        dropdownContainer.setVisible(!dropdownContainer.isVisible());
-//        }
-//        handlePostCustomEvent();
+        return enabled;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
+    }
+
+    @Override
+    public boolean isMouseDown()
+    {
+        return mouseDown;
+    }
+
+    @Override
+    public void setMouseDown(boolean mouseDown)
+    {
+        this.mouseDown = mouseDown;
+    }
+
+    @Override
+    public Map<Class<? extends GuiEvent>, Consumer<GuiElement>> getPostEventBehaviors()
+    {
+        return postBehaviors;
+    }
+
+    @Override
+    public void onMouseDown(MouseDownEvent event)
+    {
+        MouseClickListener.super.onMouseDown(event);
+        // TODO: class cast exception if target is ever something other than a GuiButton
+        header.setLabel(((GuiLabel) event.target).getText());
+        optionsContainer.setVisible(!optionsContainer.isVisible());
+        tryApplyPostEventBehavior(event.getClass());
+
+        // Prevent the event from traveling to the clicked option GuiButton within the container
+        event.stopPropagation();
+    }
+
+    @Override
+    public void onCloseGui(CloseGuiEvent event)
+    {
+        optionsContainer.setVisible(!optionsContainer.isVisible());
     }
 
     @Override
@@ -88,11 +117,14 @@ public class GuiDropdown extends GuiFlexContainer
 //                size, size, getColor(GuiColorType.ACCENT1), 0)
     }
 
-    public static class Builder extends GuiFlexContainer.AbstractBuilder<Builder, GuiDropdown>
+    public static class Builder extends GuiContainer.AbstractBuilder<Builder, GuiDropdown>
     {
+        protected Consumer<GuiElement> mouseDownBehavior = null;
         protected String prompt = "Dropdown";
         protected Collection<String> options = new ArrayList<>();
         protected boolean enabled = true;
+        protected GuiContainer optionsContainer;
+        protected GuiLabeledButton header;
 
         public Builder(String elementName)
         {
@@ -117,6 +149,12 @@ public class GuiDropdown extends GuiFlexContainer
             return self();
         }
 
+        public Builder mouseDownBehavior(Consumer<GuiElement> mouseDownBehavior)
+        {
+            this.mouseDownBehavior = mouseDownBehavior;
+            return self();
+        }
+
         @Override
         protected Builder self()
         {
@@ -126,6 +164,34 @@ public class GuiDropdown extends GuiFlexContainer
         @Override
         public GuiDropdown build()
         {
+            this.header = new GuiLabeledButton.Builder(this.elementName + "$header")
+                    .size(width, height)
+                    .label(prompt)
+                    .build();
+
+            List<FlexItem> optionLabels = new ArrayList<>();
+            for (String option : options)
+            {
+                GuiLabel optionLabel = new GuiLabel.Builder(option)
+                        .size(width, height)
+                        .visible(false)
+                        .text(option)
+                        .build();
+                optionLabels.add(new FlexItem(optionLabel));
+            }
+
+            this.optionsContainer = new GuiBasicContainer.Builder(elementName + "$option-container")
+                    .localPosition(0, height)
+                    .size(width, height * options.size())
+                    .visible(false)
+                    .flexBehavior(new FlexBehavior.Builder().direction(FlexDirection.COLUMN).items(optionLabels))
+                    .build();
+
+            this.flexBehavior(new FlexBehavior.Builder().direction(FlexDirection.COLUMN));
+
+            flexBehaviorBuilder.item(new FlexItem(header/*, 0, width, height, height*/).setShrink(0));
+            flexBehaviorBuilder.item(new FlexItem(optionsContainer).setShrink(0));
+
             return new GuiDropdown(this);
         }
     }
