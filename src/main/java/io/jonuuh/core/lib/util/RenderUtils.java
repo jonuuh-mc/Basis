@@ -12,6 +12,11 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.Sphere;
+
+import javax.vecmath.Vector2f;
+import java.util.ArrayList;
+import java.util.List;
 
 // TODO: why again are we using raw GL11 instead of GlStateManager
 public final class RenderUtils
@@ -311,6 +316,43 @@ public final class RenderUtils
         GL11.glDisable(GL11.GL_BLEND);
     }
 
+    public static void drawSphere(boolean cullFace, boolean blend, Color color/*, int polygonFace, int polygonMode*/)
+    {
+        GL11.glColor4ub(color.r, color.g, color.b, color.a);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+
+        if (cullFace)
+        {
+            GL11.glDisable(GL11.GL_CULL_FACE);
+        }
+        if (blend)
+        {
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        }
+//        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
+
+        GL11.glPushMatrix();
+        GL11.glRotatef(90, 1.0F, 0.0F, 0.0F);
+        new Sphere().draw(2, 12, 12);
+        GL11.glPopMatrix();
+
+        // TODO: what is the default?
+//        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+
+        if (blend)
+        {
+            GL11.glDisable(GL11.GL_BLEND);
+        }
+        if (cullFace)
+        {
+            GL11.glEnable(GL11.GL_CULL_FACE);
+        }
+
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glColor4f(1, 1, 1, 1);
+    }
+
     public static void drawLine2D(double x1, double y1, double x2, double y2)
     {
         GL11.glColor4f(1F, 1F, 1F, 0.2F);
@@ -485,5 +527,17 @@ public final class RenderUtils
         {
             GL11.glVertex2f(centerX - (radius * MathHelper.cos(angle)), centerY + (radius * MathHelper.sin(angle)));
         }
+    }
+
+    public static List<Vector2f> getRadialVertices(int numPoints, float radius)
+    {
+        List<Vector2f> points = new ArrayList<>();
+        float oneEightyRad = (float) (Math.PI);
+
+        for (float angle = 0; angle <= 360; angle += oneEightyRad / (numPoints / 2F))
+        {
+            points.add(new Vector2f(radius * MathHelper.cos(angle), radius * MathHelper.sin(angle)));
+        }
+        return points;
     }
 }
