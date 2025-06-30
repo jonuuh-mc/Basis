@@ -1,5 +1,10 @@
 package io.jonuuh.core.lib.gui.element;
 
+import io.jonuuh.core.lib.gui.event.input.KeyInputEvent;
+import io.jonuuh.core.lib.gui.event.lifecycle.ScreenTickEvent;
+import io.jonuuh.core.lib.gui.listener.input.KeyInputListener;
+import io.jonuuh.core.lib.gui.listener.input.MouseClickListener;
+import io.jonuuh.core.lib.gui.listener.lifecycle.ScreenTickListener;
 import io.jonuuh.core.lib.util.Color;
 import io.jonuuh.core.lib.util.MathUtils;
 import io.jonuuh.core.lib.util.RenderUtils;
@@ -9,26 +14,23 @@ import net.minecraft.util.ChatAllowedCharacters;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
-public class GuiTextField extends GuiElement
+public class GuiTextField extends GuiElement implements KeyInputListener, ScreenTickListener, MouseClickListener
 {
     protected FontRenderer fontRenderer = mc.fontRendererObj;
     protected String text;
-    protected int maxTextLength = 32;
+    protected int maxTextLength;
     protected int cursorPos;
     protected int cursorFlashCounter;
     protected boolean isTyping;
     protected int selectionPos;
+    protected boolean enabled;
+    protected boolean mouseDown;
 
-    public GuiTextField(String elementName, float xPos, float yPos, float width, float height, String text)
+    public GuiTextField(Builder builder)
     {
-        super(elementName, xPos, yPos, width, height);
-        this.text = text;
-    }
-
-    public GuiTextField(String elementName, float xPos, float yPos, String text)
-    {
-        super(elementName, xPos, yPos);
-        this.text = text;
+        super(builder);
+        this.text = builder.text;
+        this.maxTextLength = builder.maxTextLength;
     }
 
     // TODO: some textfield logic: `this.doneBtn.enabled = this.commandTextField.getText().trim().length() > 0;`
@@ -131,7 +133,31 @@ public class GuiTextField extends GuiElement
     }
 
     @Override
-    public void onScreenTick()
+    public boolean isEnabled()
+    {
+        return enabled;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
+    }
+
+    @Override
+    public boolean isMouseDown()
+    {
+        return mouseDown;
+    }
+
+    @Override
+    public void setMouseDown(boolean mouseDown)
+    {
+        this.mouseDown = mouseDown;
+    }
+
+    @Override
+    public void onScreenTick(ScreenTickEvent event)
     {
         cursorFlashCounter++; // TODO: originally pre-increment for some reason?
     }
@@ -164,9 +190,9 @@ public class GuiTextField extends GuiElement
 //    }
 
     @Override
-    protected void onScreenDraw(int mouseX, int mouseY, float partialTicks)
+    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
-        if (mouseDown)
+        if (isMouseDown())
         {
             setSelectionPos(getTextBelowMouseX(mouseX).length());
         }
@@ -348,16 +374,12 @@ public class GuiTextField extends GuiElement
 ////        }
     }
 
-    public void onKeyTyped(char typedChar, int keyCode)
+    @Override
+    public void onKeyTyped(KeyInputEvent event)
     {
         isTyping = true;
         cursorFlashCounter = 0;
 
-        // now handled upstream
-//        if (!focused)
-//        {
-//            return;
-//        }
 //        else if (GuiScreen.isKeyComboCtrlA(keyCode))
 //        {
 //            setCursorPosition(text.length());
@@ -369,7 +391,7 @@ public class GuiTextField extends GuiElement
 //            GuiScreen.setClipboardString(getSelectedText());
 //            return true;
 //        }
-        if (GuiScreen.isKeyComboCtrlV(keyCode) && enabled)
+        if (GuiScreen.isKeyComboCtrlV(event.keyCode) && isEnabled())
         {
             writeText(GuiScreen.getClipboardString());
         }
@@ -377,7 +399,7 @@ public class GuiTextField extends GuiElement
 //        {
 //            GuiScreen.setClipboardString(getSelectedText());
 //
-//            if (enabled)
+//            if (isEnabled())
 //            {
 //                writeText("");
 //            }
@@ -385,10 +407,10 @@ public class GuiTextField extends GuiElement
 //        }
         else
         {
-            switch (keyCode)
+            switch (event.keyCode)
             {
                 case Keyboard.KEY_BACK:
-                    if (enabled)
+                    if (isEnabled())
                     {
 //                        int deletionAmt = (selectionPos < cursorPos) ? -getSelectedText().length()
 //                                : (selectionPos > cursorPos) ? getSelectedText().length() : 1;
@@ -440,9 +462,9 @@ public class GuiTextField extends GuiElement
 //                    return true;
 
                 default:
-                    if (enabled && ChatAllowedCharacters.isAllowedCharacter(typedChar)) // not one of first reserved 0-31, + not DEL or section sign
+                    if (isEnabled() && ChatAllowedCharacters.isAllowedCharacter(event.typedChar)) // not one of first reserved 0-31, + not DEL or section sign
                     {
-                        writeText(Character.toString(typedChar));
+                        writeText(Character.toString(event.typedChar));
                         break;
 //                        return true;
                     }
@@ -454,5 +476,40 @@ public class GuiTextField extends GuiElement
         }
 
         isTyping = false;
+    }
+
+    public static class Builder extends GuiElement.AbstractBuilder<Builder, GuiTextField>
+    {
+        protected String text;
+        protected int maxTextLength;
+
+        public Builder(String elementName)
+        {
+            super(elementName);
+        }
+
+        public Builder text(String text)
+        {
+            this.text = text;
+            return self();
+        }
+
+        public Builder maxTextLength(int maxTextLength)
+        {
+            this.maxTextLength = maxTextLength;
+            return self();
+        }
+
+        @Override
+        protected Builder self()
+        {
+            return this;
+        }
+
+        @Override
+        public GuiTextField build()
+        {
+            return new GuiTextField(this);
+        }
     }
 }
