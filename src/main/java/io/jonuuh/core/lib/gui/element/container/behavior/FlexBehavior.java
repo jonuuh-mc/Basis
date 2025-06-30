@@ -125,17 +125,17 @@ public class FlexBehavior
         return elements;
     }
 
-//    public void addItem(FlexItem item)
-//    {
-//        getContainer().addChild(item.getElement());
-//        flexItems.add(item);
-//    }
-//
-//    public void removeItem(FlexItem item)
-//    {
-//        getContainer().removeChild(item.getElement());
-//        flexItems.remove(item);
-//    }
+    public void addItem(FlexItem item)
+    {
+        getHost().addChild(item.getElement());
+        flexItems.add(item);
+    }
+
+    public void removeItem(FlexItem item)
+    {
+        getHost().removeChild(item.getElement());
+        flexItems.remove(item);
+    }
 
     public void updateItemsLayout()
     {
