@@ -25,6 +25,7 @@ public class MouseUpEvent extends GuiTargetedEvent
             if (!((InputListener) element).isEnabled())
             {
                 this.stopPropagation();
+                return;
             }
 
             ((MouseClickListener) element).onMouseUp(this);

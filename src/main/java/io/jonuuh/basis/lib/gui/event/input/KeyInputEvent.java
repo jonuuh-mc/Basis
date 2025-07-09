@@ -25,6 +25,7 @@ public class KeyInputEvent extends GuiTargetedEvent
             if (!((InputListener) element).isEnabled())
             {
                 this.stopPropagation();
+                return;
             }
 
             ((KeyInputListener) element).onKeyTyped(this);

@@ -25,6 +25,7 @@ public class MouseDownEvent extends GuiTargetedEvent
             if (!((InputListener) element).isEnabled())
             {
                 this.stopPropagation();
+                return;
             }
 
             ((MouseClickListener) element).onMouseDown(this);

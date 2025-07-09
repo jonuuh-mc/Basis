@@ -23,6 +23,7 @@ public class MouseScrollEvent extends GuiTargetedEvent
             if (!((InputListener) element).isEnabled())
             {
                 this.stopPropagation();
+                return;
             }
 
             ((MouseScrollListener) element).onMouseScroll(this);
