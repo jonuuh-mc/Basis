@@ -358,6 +358,82 @@ public final class RenderUtils
         GL11.glColor4f(1, 1, 1, 1);
     }
 
+    public static void drawSmoothRing(float centerX, float centerY, float innerRadius, float outerRadius, float startAngleDeg, float endAngleDeg, int numPoints, Color fillColor, Color borderColor, float borderThickness)
+    {
+        // Normal filled ring pass
+        drawRing(GL11.GL_TRIANGLE_STRIP, centerX, centerY, innerRadius, outerRadius, startAngleDeg, endAngleDeg, numPoints, fillColor);
+
+        // Smooth ring pass
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+        GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
+        GL11.glLineWidth(borderThickness);
+
+        drawCircle(GL11.GL_LINE_STRIP, centerX, centerY, innerRadius, startAngleDeg, endAngleDeg, numPoints, borderColor);
+        drawCircle(GL11.GL_LINE_STRIP, centerX, centerY, outerRadius, startAngleDeg, endAngleDeg, numPoints, borderColor);
+
+        GL11.glLineWidth(1F);
+        GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_DONT_CARE);
+        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+    }
+
+    public static void drawRing(int glMode, float centerX, float centerY, float innerRadius, float outerRadius, float startAngleDeg, float endAngleDeg, int numPoints, Color color)
+    {
+        float startRad = (float) Math.toRadians(startAngleDeg);
+        float endRad = (float) Math.toRadians(endAngleDeg);
+        float angleStep = (endRad - startRad) / numPoints;
+
+        GL11.glColor4ub(color.r, color.g, color.b, color.a);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        GL11.glBegin(glMode);
+        for (int i = 0; i <= numPoints; i++)
+        {
+            float angle = startRad + angleStep * i;
+
+            float outerX = centerX + (outerRadius * MathHelper.cos(angle));
+            float outerY = centerY + (outerRadius * MathHelper.sin(angle));
+            float innerX = centerX + (innerRadius * MathHelper.cos(angle));
+            float innerY = centerY + (innerRadius * MathHelper.sin(angle));
+
+            GL11.glVertex2f(outerX, outerY);
+            GL11.glVertex2f(innerX, innerY);
+        }
+        GL11.glEnd();
+
+        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    public static void drawCircle(int glMode, float centerX, float centerY, float radius, float startAngleDeg, float endAngleDeg, int numPoints, Color color)
+    {
+        float startRad = (float) Math.toRadians(startAngleDeg);
+        float endRad = (float) Math.toRadians(endAngleDeg);
+        float angleStep = (endRad - startRad) / numPoints;
+
+        GL11.glColor4ub(color.r, color.g, color.b, color.a);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        GL11.glBegin(glMode);
+        for (int i = 0; i <= numPoints; i++)
+        {
+            float angle = startRad + angleStep * i;
+
+            float outerX = centerX + (radius * MathHelper.cos(angle));
+            float outerY = centerY + (radius * MathHelper.sin(angle));
+            GL11.glVertex2f(outerX, outerY);
+        }
+        GL11.glEnd();
+
+        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
     public static void drawLine2D(double x1, double y1, double x2, double y2)
     {
         GL11.glColor4f(1F, 1F, 1F, 0.2F);
@@ -538,7 +614,9 @@ public final class RenderUtils
     {
         List<Vector2f> points = new ArrayList<>();
         float oneEightyRad = (float) (Math.PI);
+//        float start = (float) (Math.toRadians(360) - Math.toRadians(arcAngle / 2D));
 
+//        for (float angle = start; angle + start >= 0; angle -= oneEightyRad / (numPoints / 2F))
         for (float angle = 0; angle <= 360; angle += oneEightyRad / (numPoints / 2F))
         {
             points.add(new Vector2f(radius * MathHelper.cos(angle), radius * MathHelper.sin(angle)));
