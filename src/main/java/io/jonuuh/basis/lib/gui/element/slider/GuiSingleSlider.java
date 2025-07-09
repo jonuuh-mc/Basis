@@ -34,9 +34,9 @@ public class GuiSingleSlider extends GuiSlider
         float pointerPos = getScreenPosAtNormalValue(getNormalizedValue());
 
         // Left track
-        RenderUtils.drawRoundedRect(x, trackPos, pointerPos - x, trackThickness, getCornerRadius(), getColor(GuiColorType.BASE));
+        RenderUtils.drawRoundedRectWithBorder(x, trackPos, pointerPos - x, trackThickness, getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
         // Right track
-        RenderUtils.drawRoundedRect(pointerPos, trackPos, getWidth() - (pointerPos - x), trackThickness, getCornerRadius(), getColor(GuiColorType.ACCENT1));
+        RenderUtils.drawRoundedRectWithBorder(pointerPos, trackPos, getWidth() - (pointerPos - x), trackThickness, getCornerRadius(), 1, getColor(GuiColorType.ACCENT1), getColor(GuiColorType.BORDER));
 
         drawPointer();
     }
@@ -52,9 +52,9 @@ public class GuiSingleSlider extends GuiSlider
         float pointerPos = getScreenPosAtNormalValue(getNormalizedValue());
 
         // Top track
-        RenderUtils.drawRoundedRect(trackPos, y, trackThickness, pointerPos - y, getCornerRadius(), getColor(GuiColorType.BASE));
+        RenderUtils.drawRoundedRectWithBorder(trackPos, y, trackThickness, pointerPos - y, getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
         // Bottom track
-        RenderUtils.drawRoundedRect(trackPos, pointerPos, trackThickness, getHeight() - (pointerPos - y), getCornerRadius(), getColor(GuiColorType.ACCENT1));
+        RenderUtils.drawRoundedRectWithBorder(trackPos, pointerPos, trackThickness, getHeight() - (pointerPos - y), getCornerRadius(), 1, getColor(GuiColorType.ACCENT1), getColor(GuiColorType.BORDER));
 
         drawPointer();
     }
@@ -77,7 +77,7 @@ public class GuiSingleSlider extends GuiSlider
         float x = isVertical ? trackPos - (Math.abs(getTrackThickness() - size) / 2) : pointerPos - (size / 2);
         float y = isVertical ? pointerPos - (size / 2) : trackPos - (Math.abs(getTrackThickness() - size) / 2);
 
-        RenderUtils.drawRoundedRect(x, y, size, size, getCornerRadius(), getColor(GuiColorType.BASE));
+        RenderUtils.drawRoundedRectWithBorder(x, y, size, size, getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
 
         if (debug)
         {

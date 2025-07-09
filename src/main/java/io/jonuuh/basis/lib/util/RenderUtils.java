@@ -18,7 +18,6 @@ import javax.vecmath.Vector2f;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: why again are we using raw GL11 instead of GlStateManager
 public final class RenderUtils
 {
     /** Prevents instantiation */
@@ -511,26 +510,22 @@ public final class RenderUtils
 //        // TODO: ?
 //    }
 
-    public static void drawRoundedRectWithBorder(float x, float y, float width, float height, float radius, Color color, Color borderColor)
+    public static void drawRoundedRectWithBorder(float x, float y, float width, float height, float radius, float borderWidth, Color color, Color borderColor)
     {
-        drawRoundedRect(x, y, width, height, radius, color);
+        drawRoundedRect(GL11.GL_TRIANGLE_FAN, x, y, width, height, radius, color);
 
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
-//        GL11.glLineWidth(0.5F);
+        GL11.glLineWidth(borderWidth);
         drawRoundedRect(GL11.GL_LINE_LOOP, x, y, width, height, radius, borderColor);
-//        GL11.glLineWidth(1F);
+        GL11.glLineWidth(1F);
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
     }
 
     public static void drawRoundedRect(float x, float y, float width, float height, float radius, Color color)
     {
-        drawRoundedRect(GL11.GL_TRIANGLE_FAN, x, y, width, height, radius, color);
-
-        GL11.glEnable(GL11.GL_LINE_SMOOTH);
-        GL11.glLineWidth(0.5F);
-        drawRoundedRect(GL11.GL_LINE_LOOP, x, y, width, height, radius, color);
-        GL11.glLineWidth(1F);
-        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+        // Drawing the rectangle with a same-color thin border is a hack to make the rounded edges look anti-aliased.
+        // Should prob normally use some kind of filter if drawing a texture, but not using textures so doing this instead
+        drawRoundedRectWithBorder(x, y, width, height, radius, 0.5F, color, color);
     }
 
     public static void drawRoundedRect(int glMode, float x, float y, float width, float height, float radius, Color color)

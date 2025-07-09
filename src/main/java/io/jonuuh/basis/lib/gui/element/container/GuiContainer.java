@@ -293,7 +293,7 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
             }
 
             // Handle screen draw for this element
-            RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), getColor(GuiColorType.BACKGROUND));
+            RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), 1, getColor(GuiColorType.BACKGROUND), getColor(GuiColorType.BORDER));
 
             if (debug)
             {

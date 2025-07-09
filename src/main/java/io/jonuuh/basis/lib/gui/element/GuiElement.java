@@ -153,10 +153,9 @@ public abstract class GuiElement
         }
     }
 
-    public GuiElement putColor(GuiColorType type, Color color)
+    public void putColor(GuiColorType type, Color color)
     {
         colorMap.put(type, color);
-        return this;
     }
 
     public Color getColor(GuiColorType type)

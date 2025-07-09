@@ -6,6 +6,7 @@ public enum GuiColorType
     ACCENT1,
     ACCENT2,
     BACKGROUND,
+    BORDER,
     BASE_HOVER,
     ACCENT_HOVER
 }

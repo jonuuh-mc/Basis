@@ -2,7 +2,6 @@ package io.jonuuh.basis.lib.gui.element.toggles;
 
 import io.jonuuh.basis.lib.gui.element.ElementUtils;
 import io.jonuuh.basis.lib.gui.properties.GuiColorType;
-import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.RenderUtils;
 import net.minecraft.util.ResourceLocation;
 
@@ -26,7 +25,7 @@ public class GuiCheckbox extends GuiToggle
 
 //        Color boxColor = isChecked ? getColor(GuiColorType.BASE) : getColor(GuiColorType.ACCENT1);
 
-        RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), new Color());
+        RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), 1, getColor(GuiColorType.ACCENT1), getColor(GuiColorType.BORDER));
 
         if (isToggled())
         {
