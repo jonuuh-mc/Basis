@@ -3,12 +3,9 @@ package io.jonuuh.basis.lib.gui.element.toggles;
 import io.jonuuh.basis.lib.gui.element.ElementUtils;
 import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.util.RenderUtils;
-import net.minecraft.util.ResourceLocation;
 
 public class GuiCheckbox extends GuiToggle
 {
-    protected static final ResourceLocation checkmarkResource = new ResourceLocation("basis:textures/check.png");
-
     public GuiCheckbox(Builder builder)
     {
         super(builder);
@@ -29,11 +26,10 @@ public class GuiCheckbox extends GuiToggle
 
         if (isToggled())
         {
-            RenderUtils.drawTexturedRect(checkmarkResource,
+            RenderUtils.drawRoundedRectWithBorder(
                     ElementUtils.getInnerLeftBound(this), ElementUtils.getInnerTopBound(this),
-                    /*0*/getZLevel(),
                     ElementUtils.getInnerWidth(this), ElementUtils.getInnerHeight(this),
-                    getColor(GuiColorType.BASE));
+                    getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
         }
     }
 
