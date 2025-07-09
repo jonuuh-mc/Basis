@@ -23,7 +23,6 @@ public abstract class GuiElement
 {
     /** A reference to the static minecraft instance */
     public static final Minecraft mc = Minecraft.getMinecraft();
-    //    protected static final ResourceLocation resourceBackgroundTex = new ResourceLocation("basis:textures/background.png");
     protected static final float DEFAULT_WIDTH = 100;
     protected static final float DEFAULT_HEIGHT = 20;
 

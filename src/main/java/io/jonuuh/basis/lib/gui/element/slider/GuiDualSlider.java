@@ -10,7 +10,6 @@ import org.lwjgl.opengl.GL11;
 
 public class GuiDualSlider extends GuiSlider
 {
-    //    protected static final ResourceLocation pointerResource = new ResourceLocation("basis:textures/pointer.png");
     protected float normalValueEnd;
     /**
      * MouseDown and MouseScroll events will update the normal value corresponding to this pointer.

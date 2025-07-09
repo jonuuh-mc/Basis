@@ -7,8 +7,6 @@ import org.lwjgl.opengl.GL11;
 
 public class GuiSingleSlider extends GuiSlider
 {
-//    protected static final ResourceLocation pointerResource = new ResourceLocation("basis:textures/bar.png");
-
     public GuiSingleSlider(Builder builder)
     {
         super(builder);

@@ -18,7 +18,6 @@ import java.util.function.Consumer;
 
 abstract class GuiSlider extends GuiElement implements MouseClickListener, MouseScrollListener, ScreenTickListener, PostEventBehaviorHost
 {
-    //    protected static final ResourceLocation trackResource = new ResourceLocation("basis:textures/slider.png");
     private final Map<Class<? extends GuiEvent>, Consumer<GuiElement>> postBehaviors;
     /** The minimum value of this slider (not normalized; readable value) */
     protected final float min;
