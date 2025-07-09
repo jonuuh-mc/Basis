@@ -2,6 +2,7 @@ package io.jonuuh.basis.lib.gui.event.input;
 
 import io.jonuuh.basis.lib.gui.element.GuiElement;
 import io.jonuuh.basis.lib.gui.event.GuiTargetedEvent;
+import io.jonuuh.basis.lib.gui.listener.input.InputListener;
 import io.jonuuh.basis.lib.gui.listener.input.KeyInputListener;
 
 public class KeyInputEvent extends GuiTargetedEvent
@@ -21,6 +22,11 @@ public class KeyInputEvent extends GuiTargetedEvent
     {
         if (element instanceof KeyInputListener)
         {
+            if (!((InputListener) element).isEnabled())
+            {
+                this.stopPropagation();
+            }
+
             ((KeyInputListener) element).onKeyTyped(this);
             lastCapture = element;
         }

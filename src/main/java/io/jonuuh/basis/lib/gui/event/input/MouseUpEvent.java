@@ -2,6 +2,7 @@ package io.jonuuh.basis.lib.gui.event.input;
 
 import io.jonuuh.basis.lib.gui.element.GuiElement;
 import io.jonuuh.basis.lib.gui.event.GuiTargetedEvent;
+import io.jonuuh.basis.lib.gui.listener.input.InputListener;
 import io.jonuuh.basis.lib.gui.listener.input.MouseClickListener;
 
 public class MouseUpEvent extends GuiTargetedEvent
@@ -21,6 +22,11 @@ public class MouseUpEvent extends GuiTargetedEvent
     {
         if (element instanceof MouseClickListener)
         {
+            if (!((InputListener) element).isEnabled())
+            {
+                this.stopPropagation();
+            }
+
             ((MouseClickListener) element).onMouseUp(this);
             lastCapture = element;
         }
