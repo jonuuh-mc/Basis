@@ -18,14 +18,14 @@ public class MouseScrollEvent extends GuiTargetedEvent
     @Override
     public void tryDispatchTo(GuiElement element)
     {
+        if (!((InputListener) element).isEnabled())
+        {
+            this.stopPropagation();
+            return;
+        }
+
         if (element instanceof MouseScrollListener)
         {
-            if (!((InputListener) element).isEnabled())
-            {
-                this.stopPropagation();
-                return;
-            }
-
             ((MouseScrollListener) element).onMouseScroll(this);
             lastCapture = element;
         }

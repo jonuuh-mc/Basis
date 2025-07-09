@@ -20,14 +20,14 @@ public class KeyInputEvent extends GuiTargetedEvent
     @Override
     public void tryDispatchTo(GuiElement element)
     {
+        if (!((InputListener) element).isEnabled())
+        {
+            this.stopPropagation();
+            return;
+        }
+
         if (element instanceof KeyInputListener)
         {
-            if (!((InputListener) element).isEnabled())
-            {
-                this.stopPropagation();
-                return;
-            }
-
             ((KeyInputListener) element).onKeyTyped(this);
             lastCapture = element;
         }

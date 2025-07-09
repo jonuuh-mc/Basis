@@ -20,14 +20,14 @@ public class MouseDownEvent extends GuiTargetedEvent
     @Override
     public void tryDispatchTo(GuiElement element)
     {
+        if (!((InputListener) element).isEnabled())
+        {
+            this.stopPropagation();
+            return;
+        }
+
         if (element instanceof MouseClickListener)
         {
-            if (!((InputListener) element).isEnabled())
-            {
-                this.stopPropagation();
-                return;
-            }
-
             ((MouseClickListener) element).onMouseDown(this);
             lastCapture = element;
         }

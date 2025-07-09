@@ -24,14 +24,14 @@ public class MouseDragEvent extends GuiTargetedEvent
     @Override
     public void tryDispatchTo(GuiElement element)
     {
+        if (!((InputListener) element).isEnabled())
+        {
+            this.stopPropagation();
+            return;
+        }
+
         if (element instanceof MouseDragListener)
         {
-            if (!((InputListener) element).isEnabled())
-            {
-                this.stopPropagation();
-                return;
-            }
-
             ((MouseDragListener) element).onMouseDrag(this);
             lastCapture = element;
         }
