@@ -110,7 +110,7 @@ public final class RenderUtils
         GL11.glTranslatef(-objectCenterX, -objectCenterY, 0);
     }
 
-    public static void drawTexturedRect(ResourceLocation texture, float x, float y, int z, float width, float height, Color color)
+    public static void drawTexturedRect(ResourceLocation texture, float x, float y, int z, float width, float height, boolean smoothing, Color color)
     {
         GL11.glColor4ub(color.r, color.g, color.b, color.a);
         // Enable transparency
@@ -118,6 +118,12 @@ public final class RenderUtils
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         mc.getTextureManager().bindTexture(texture);
+        if (smoothing)
+        {
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+        }
+
         Tessellator tessellator = Tessellator.getInstance();
         WorldRenderer wr = tessellator.getWorldRenderer();
 
@@ -132,7 +138,6 @@ public final class RenderUtils
         // Disable transparency
         GL11.glDisable(GL11.GL_BLEND);
     }
-
 
     /**
      * Draws a nine-sliced rectangle with the given texture.
