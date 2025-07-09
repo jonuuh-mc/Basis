@@ -20,9 +20,15 @@ public abstract class GuiToggle extends GuiElement implements MouseClickListener
     protected GuiToggle(AbstractBuilder<?, ?> builder)
     {
         super(builder);
-        this.postBehaviors = new HashMap<>();
         this.isToggled = builder.isToggled;
         this.enabled = builder.enabled;
+
+        this.postBehaviors = new HashMap<>();
+
+        if (builder.mouseDownBehavior != null)
+        {
+            assignPostEventBehavior(MouseDownEvent.class, builder.mouseDownBehavior);
+        }
     }
 
     public boolean isToggled()
@@ -80,12 +86,19 @@ public abstract class GuiToggle extends GuiElement implements MouseClickListener
 
     protected static abstract class AbstractBuilder<T extends GuiToggle.AbstractBuilder<T, R>, R extends GuiToggle> extends GuiElement.AbstractBuilder<T, R>
     {
+        protected Consumer<GuiElement> mouseDownBehavior = null;
         protected boolean isToggled = false;
         protected boolean enabled = true;
 
         protected AbstractBuilder(String elementName)
         {
             super(elementName);
+        }
+
+        public T mouseDownBehavior(Consumer<GuiElement> mouseDownBehavior)
+        {
+            this.mouseDownBehavior = mouseDownBehavior;
+            return self();
         }
 
         public T toggled(boolean toggled)
