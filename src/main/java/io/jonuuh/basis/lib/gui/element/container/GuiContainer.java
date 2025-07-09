@@ -293,10 +293,11 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
             }
 
             // Handle screen draw for this element
-            RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), 5, getColor(GuiColorType.BACKGROUND));
+            RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), getColor(GuiColorType.BACKGROUND));
 
             if (debug)
             {
+                // Draw padding debug info
                 if (hasChildren())
                 {
                     Color padColor = new Color("#36ff0000");

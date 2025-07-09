@@ -63,6 +63,8 @@ public abstract class GuiElement
     private Spacing margin;
     private Spacing padding;
 
+    private float cornerRadius;
+
     private String tooltipStr;
 
     public boolean debug;
@@ -79,6 +81,8 @@ public abstract class GuiElement
 
         this.padding = builder.padding;
         this.margin = builder.margin;
+
+        this.cornerRadius = builder.cornerRadius;
 
         this.visible = builder.visible;
 
@@ -316,6 +320,16 @@ public abstract class GuiElement
         this.padding = padding;
     }
 
+    public float getCornerRadius()
+    {
+        return cornerRadius;
+    }
+
+    public void setCornerRadius(float cornerRadius)
+    {
+        this.cornerRadius = cornerRadius;
+    }
+
     public boolean isPointWithinBounds(float x, float y)
     {
         return (x > getLeftBound()) && (x < getRightBound())
@@ -351,6 +365,7 @@ public abstract class GuiElement
 
         setHovered(isPointWithinBounds(mouseX, mouseY));
 
+        // Temporary; draw dark tint over disabled elements
         if (this instanceof InputListener && !((InputListener) this).isEnabled())
         {
             RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), new Color("#aa181818"));
@@ -438,6 +453,8 @@ public abstract class GuiElement
         protected Spacing margin = new Spacing(0);
         protected Spacing padding = new Spacing(0);
 
+        protected float cornerRadius = 0;
+
         protected AbstractBuilder(String elementName)
         {
             this.elementName = elementName;
@@ -485,6 +502,12 @@ public abstract class GuiElement
         public T padding(Spacing padding)
         {
             this.padding = padding;
+            return self();
+        }
+
+        public T cornerRadius(float cornerRadius)
+        {
+            this.cornerRadius = cornerRadius;
             return self();
         }
 

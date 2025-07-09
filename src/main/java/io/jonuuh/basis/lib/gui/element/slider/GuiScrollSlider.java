@@ -99,11 +99,11 @@ public class GuiScrollSlider extends GuiSlider implements MouseDragListener
 
         if (isVertical)
         {
-            RenderUtils.drawRoundedRect(worldXPos(), screenPosWindowStart, getWidth(), screenPosWindowEnd - screenPosWindowStart, 5, getColor(GuiColorType.BASE));
+            RenderUtils.drawRoundedRect(worldXPos(), screenPosWindowStart, getWidth(), screenPosWindowEnd - screenPosWindowStart, getCornerRadius(), getColor(GuiColorType.BASE));
         }
         else
         {
-            RenderUtils.drawRoundedRect(screenPosWindowStart, worldYPos(), screenPosWindowEnd - screenPosWindowStart, getHeight(), 5, getColor(GuiColorType.BASE));
+            RenderUtils.drawRoundedRect(screenPosWindowStart, worldYPos(), screenPosWindowEnd - screenPosWindowStart, getHeight(), getCornerRadius(), getColor(GuiColorType.BASE));
         }
     }
 

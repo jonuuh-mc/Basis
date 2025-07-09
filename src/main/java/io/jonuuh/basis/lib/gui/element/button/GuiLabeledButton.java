@@ -32,7 +32,7 @@ public class GuiLabeledButton extends GuiButton
         }
         super.onScreenDraw(mouseX, mouseY, partialTicks);
 
-        RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), getColor(GuiColorType.BASE));
+        RenderUtils.drawRoundedRect(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), getColor(GuiColorType.BASE));
 
         String buttonText = RenderUtils.trimStringToWidthWithEllipsis(label, (int) getWidth());
 
