@@ -280,7 +280,7 @@ public class Color
 
     private String byteToHexStr(byte component)
     {
-        return Integer.toHexString(toInt(component));
+        return String.format("%02X", toInt(component));
     }
 
     private int toInt(byte colorComponentByte)
