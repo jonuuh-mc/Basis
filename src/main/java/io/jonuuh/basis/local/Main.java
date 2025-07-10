@@ -6,11 +6,15 @@ import io.jonuuh.basis.lib.config.setting.types.single.StringSetting;
 import io.jonuuh.basis.lib.gui.BaseGuiScreen;
 import io.jonuuh.basis.lib.gui.screen.MainGuiScreen;
 import io.jonuuh.basis.lib.util.logging.ChatLoggerManager;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import org.lwjgl.input.Keyboard;
 
 @Mod(modid = Main.modID, version = Main.version, acceptedMinecraftVersions = "[1.8.9]")
 public class Main
@@ -35,9 +39,9 @@ public class Main
 //        new UpdateHandler(modID, modName, version, jsonObject);
 //        ClientCommandHandler.instance.registerCommand(new UpdateCommand(modID));
 
-//        KeyBinding keyBinding = new KeyBinding("", Keyboard.KEY_NONE, modName);
-//        ClientRegistry.registerKeyBinding(keyBinding);
-//        MinecraftForge.EVENT_BUS.register(new Events(keyBinding));
+        KeyBinding keyBinding = new KeyBinding("", Keyboard.KEY_MINUS, modName);
+        ClientRegistry.registerKeyBinding(keyBinding);
+        MinecraftForge.EVENT_BUS.register(new Events(keyBinding));
 
 //        Settings settings = ConfigManager.getAdapter(modID).getDefaultCategorySettings();
         BaseGuiScreen guiScreen = new MainGuiScreen(null);
