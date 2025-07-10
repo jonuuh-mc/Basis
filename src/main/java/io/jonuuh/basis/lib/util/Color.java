@@ -199,18 +199,49 @@ public class Color
         this(MAX_COMPONENT_BYTE, MAX_COMPONENT_BYTE, MAX_COMPONENT_BYTE, MAX_COMPONENT_BYTE);
     }
 
-    // TODO: this has literally no use now that fields are immutable (no setters)
-    /**
-     * Copies the components of this color into a new color
-     */
-    public Color copy()
+    public Color addA(float a)
     {
-        return new Color(this.a, this.r, this.g, this.b);
+        float alpha = (float) MathUtils.clamp(getAAsFloat() + a);
+        return new Color(alpha, getRAsFloat(), getGAsFloat(), getBAsFloat());
     }
 
-    // TODO: r g b a as float accessors; GlStateManager only takes 4f :(
-    //  also setter r g b a methods which return a new color? not "set" but
-    //  something more clear to communicate that it creates a new
+    public Color addR(float r)
+    {
+        float red = (float) MathUtils.clamp(getRAsFloat() + r);
+        return new Color(getAAsFloat(), red, getGAsFloat(), getBAsFloat());
+    }
+
+    public Color addG(float g)
+    {
+        float green = (float) MathUtils.clamp(getGAsFloat() + g);
+        return new Color(getAAsFloat(), getRAsFloat(), green, getBAsFloat());
+    }
+
+    public Color addB(float b)
+    {
+        float blue = (float) MathUtils.clamp(getBAsFloat() + b);
+        return new Color(getAAsFloat(), getRAsFloat(), getGAsFloat(), blue);
+    }
+
+    public float getAAsFloat()
+    {
+        return toFloat(a);
+    }
+
+    public float getRAsFloat()
+    {
+        return toFloat(r);
+    }
+
+    public float getGAsFloat()
+    {
+        return toFloat(g);
+    }
+
+    public float getBAsFloat()
+    {
+        return toFloat(b);
+    }
 
     /**
      * Gets this color's red component as an unsigned int
@@ -283,18 +314,27 @@ public class Color
         return String.format("%02X", toInt(component));
     }
 
+    /**
+     * Performs {@code ((int) component) & 0xff} internally.
+     * <p>
+     * Also, IIRC casting to (int) is actually unnecessary but just clearer to what's happening in the conversion
+     */
     private int toInt(byte colorComponentByte)
     {
         return Byte.toUnsignedInt(colorComponentByte);
     }
 
-    // TODO: no reason for this to be static, just so it can be called within a this() constructor call
+    private float toFloat(byte colorComponentByte)
+    {
+        return (colorComponentByte & MAX_COMPONENT_INT) / 255.0F;
+    }
 
     /**
      * Trim '#' or "0x" hex string prefixes, if they exist
      */
     private static String trimPrefixes(String hexStr)
     {
+        // TODO: only reason this is static is so it can be called within a this() constructor call
         return hexStr.charAt(0) == '#' ? hexStr.substring(1)
                 : hexStr.startsWith("0x") ? hexStr.substring(2) : hexStr;
     }
