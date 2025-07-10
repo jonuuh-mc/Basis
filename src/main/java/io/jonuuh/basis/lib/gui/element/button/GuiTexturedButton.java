@@ -37,7 +37,7 @@ public class GuiTexturedButton extends GuiButton
 
         if (texture != null)
         {
-            RenderUtils.drawTexturedRect(texture, worldXPos(), worldYPos(), getZLevel(), getWidth(), getHeight(), getColor(GuiColorType.BASE));
+            RenderUtils.drawTexturedRect(texture, worldXPos(), worldYPos(), getZLevel(), getWidth(), getHeight(), true, getColor(GuiColorType.BASE));
         }
     }
 

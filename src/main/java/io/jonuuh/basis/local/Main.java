@@ -17,7 +17,7 @@ public class Main
 {
     public static final String modID = "basis";
     public static final String modName = "Basis";
-    public static final String version = "0.1.0";
+    public static final String version = "0.0.0";
 
     @Mod.EventHandler
     public void FMLPreInit(FMLPreInitializationEvent event)

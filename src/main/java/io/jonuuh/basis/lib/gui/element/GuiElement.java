@@ -87,7 +87,7 @@ public abstract class GuiElement
 
         this.colorMap = builder.colorMap;
 
-        this.debug = true;
+        this.debug = false;
 
         if (builder.parent != null)
         {
