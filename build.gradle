@@ -13,9 +13,9 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'maven-publish'
 
-version = "0.1.0"
+version = "0.3.2"
 group = "io.jonuuh.basis"
-archivesBaseName = "Basis-1.8.9"
+archivesBaseName = "basis-1.8.9"
 sourceCompatibility = targetCompatibility = 1.8
 
 minecraft {
@@ -25,21 +25,21 @@ minecraft {
     makeObfSourceJar = false
 }
 
-//// Use this when building or publishing
-//jar {
-//    sourceSets {
-//        main {
-//            java {
-//                exclude 'io/jonuuh/basis/local/**'
-//            }
-//        }
-//    }
-//}
+// TODO: Use this when building or publishing
+jar {
+    sourceSets {
+        main {
+            java {
+                exclude 'io/jonuuh/basis/local/**', 'io/jonuuh/basis/local'
+            }
+        }
+    }
+}
 
 // Define task for source jar
 task sourcesJar(type: Jar) {
     from sourceSets.main.allSource.matching {
-        exclude 'io/jonuuh/basis/local/**'
+        exclude 'io/jonuuh/basis/local/**', 'io/jonuuh/basis/local'
     }
     classifier = 'sources'
 }
