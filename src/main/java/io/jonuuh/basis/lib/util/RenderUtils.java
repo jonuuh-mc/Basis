@@ -57,13 +57,13 @@ public final class RenderUtils
 
     public static Vec3 getEntityPosForRender(EntityPlayer player, float partialTicks)
     {
-        RenderManager renderManager = mc.getRenderManager();
-
-        if (player == mc.thePlayer && renderManager.livingPlayer == mc.thePlayer)
-        {
-            // viewer pos (usually client player pos) is cached by render manager during each render pass
-            return new Vec3(renderManager.viewerPosX, renderManager.viewerPosY, renderManager.viewerPosZ);
-        }
+        // TODO: this probably is the cause of objects relative to viewer pos lagging behind while in 'spectator' on hypixel
+//        RenderManager renderManager = mc.getRenderManager();
+//        if (player == mc.thePlayer && renderManager.livingPlayer == mc.thePlayer)
+//        {
+//            // viewer pos (usually client player pos) is cached by render manager during each render pass
+//            return new Vec3(renderManager.viewerPosX, renderManager.viewerPosY, renderManager.viewerPosZ);
+//        }
 
         double x = (player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks);
         double y = (player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks);
