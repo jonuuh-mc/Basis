@@ -86,7 +86,7 @@ public class GuiDropdown extends GuiContainer implements MouseClickListener, Clo
     @Override
     public void onMouseDown(MouseDownEvent event)
     {
-        MouseClickListener.super.onMouseDown(event);
+        super.onMouseDown(event);
         // TODO: class cast exception if target is ever something other than a GuiButton
         header.setLabel(((GuiLabel) event.target).getText());
         optionsContainer.setVisible(!optionsContainer.isVisible());

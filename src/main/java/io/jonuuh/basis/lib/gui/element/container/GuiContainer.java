@@ -4,8 +4,10 @@ import io.jonuuh.basis.lib.gui.element.GuiElement;
 import io.jonuuh.basis.lib.gui.element.container.behavior.FlexBehavior;
 import io.jonuuh.basis.lib.gui.element.container.behavior.ScrollBehavior;
 import io.jonuuh.basis.lib.gui.event.GuiEvent;
+import io.jonuuh.basis.lib.gui.event.input.MouseDownEvent;
 import io.jonuuh.basis.lib.gui.event.input.MouseScrollEvent;
 import io.jonuuh.basis.lib.gui.event.lifecycle.InitGuiEvent;
+import io.jonuuh.basis.lib.gui.listener.input.MouseClickListener;
 import io.jonuuh.basis.lib.gui.listener.input.MouseScrollListener;
 import io.jonuuh.basis.lib.gui.listener.lifecycle.InitGuiListener;
 import io.jonuuh.basis.lib.gui.properties.GuiColorType;
@@ -21,21 +23,25 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public abstract class GuiContainer extends GuiElement implements InitGuiListener, MouseScrollListener
+public abstract class GuiContainer extends GuiElement implements InitGuiListener, MouseClickListener, MouseScrollListener
 {
     protected final List<GuiElement> children;
     protected FlexBehavior flexBehavior;
     protected ScrollBehavior scrollBehavior;
     protected boolean shouldScissor;
     protected ScissorBox scissorBox;
-    private boolean enabled = true; // TODO:
+    protected boolean enabled;
+    protected boolean mouseDown;
 
     protected GuiContainer(AbstractBuilder<?, ?> builder)
     {
         super(builder);
         this.children = new ArrayList<>();
+        this.enabled = builder.enabled;
+
         this.shouldScissor = builder.shouldScissor;
         this.scissorBox = new ScissorBox(this);
+
         addChildren(builder.children);
 
         if (builder.scrollBehaviorBuilder != null)
@@ -141,6 +147,18 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
     public void setEnabled(boolean enabled)
     {
         this.enabled = enabled;
+    }
+
+    @Override
+    public boolean isMouseDown()
+    {
+        return mouseDown;
+    }
+
+    @Override
+    public void setMouseDown(boolean mouseDown)
+    {
+        this.mouseDown = mouseDown;
     }
 
     public ScissorBox getScissorBox()
@@ -360,6 +378,12 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         }
     }
 
+    @Override
+    public void onMouseDown(MouseDownEvent event)
+    {
+        MouseClickListener.super.onMouseDown(event);
+    }
+
     /**
      * Redirect mouse wheel scroll events to the scroll behavior's slider, if it exists.
      */
@@ -428,6 +452,7 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         protected FlexBehavior.Builder flexBehaviorBuilder = null;
         protected ScrollBehavior.Builder scrollBehaviorBuilder = null;
         protected boolean shouldScissor = true;
+        protected boolean enabled = true;
 
         protected AbstractBuilder(String elementName)
         {
@@ -473,6 +498,12 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         public T scrollBehavior(ScrollBehavior.Builder scrollBehaviorBuilder)
         {
             this.scrollBehaviorBuilder = scrollBehaviorBuilder;
+            return self();
+        }
+
+        public T enabled(boolean enabled)
+        {
+            this.enabled = enabled;
             return self();
         }
     }

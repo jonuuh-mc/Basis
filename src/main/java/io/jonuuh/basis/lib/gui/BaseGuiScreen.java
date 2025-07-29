@@ -1,7 +1,6 @@
 package io.jonuuh.basis.lib.gui;
 
 import io.jonuuh.basis.lib.gui.element.GuiElement;
-import io.jonuuh.basis.lib.gui.element.container.GuiContainer;
 import io.jonuuh.basis.lib.gui.element.container.GuiRootContainer;
 import io.jonuuh.basis.lib.gui.event.GuiTargetedEvent;
 import io.jonuuh.basis.lib.gui.event.input.KeyInputEvent;
@@ -143,24 +142,9 @@ public abstract class BaseGuiScreen extends GuiScreen
 
         if (wheelDelta != 0)
         {
-//            rootContainer.performAction(element -> element.debug = !element.debug);
-
-            if (hasCurrentFocus() && getCurrentFocus().isHovered())
+            if (hasCurrentFocus())
             {
                 dispatchTargetedEvent(new MouseScrollEvent(currentFocus, wheelDelta));
-            }
-            // Idea for scrolling on scrollable containers to not require focus
-            else
-            {
-                List<GuiElement> scrollableContainers = new ArrayList<>();
-                rootContainer.collectMatchingElements(scrollableContainers, element -> (element.isVisible() && element.isHovered()
-                        && element instanceof GuiContainer && ((InputListener) element).isEnabled() && ((GuiContainer) element).getScrollBehavior() != null));
-
-                if (!scrollableContainers.isEmpty())
-                {
-                    GuiElement scrollTarget = CollectionUtils.getMax(scrollableContainers, Comparator.comparingInt(GuiElement::getZLevel));
-                    dispatchTargetedEvent(new MouseScrollEvent(scrollTarget, wheelDelta));
-                }
             }
         }
     }
