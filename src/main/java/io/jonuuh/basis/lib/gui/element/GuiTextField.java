@@ -338,8 +338,8 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
 
     public String replaceText(String replacement, int startIndex, int endIndex)
     {
-        System.out.println(" replacement: `" + replacement + "`" + " start: " + startIndex + " end: " + endIndex);
-        System.out.println(text.substring(0, startIndex) + " `" + replacement + "` " + text.substring(endIndex));
+//        System.out.println(" replacement: `" + replacement + "`" + " start: " + startIndex + " end: " + endIndex);
+//        System.out.println(text.substring(0, startIndex) + " `" + replacement + "` " + text.substring(endIndex));
         return text.substring(0, startIndex) + replacement + text.substring(endIndex);
     }
 
