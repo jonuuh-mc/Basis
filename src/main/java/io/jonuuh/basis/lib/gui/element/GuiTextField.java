@@ -1,11 +1,12 @@
 package io.jonuuh.basis.lib.gui.element;
 
 import io.jonuuh.basis.lib.gui.event.input.KeyInputEvent;
+import io.jonuuh.basis.lib.gui.event.input.MouseDownEvent;
 import io.jonuuh.basis.lib.gui.event.lifecycle.ScreenTickEvent;
 import io.jonuuh.basis.lib.gui.listener.input.KeyInputListener;
 import io.jonuuh.basis.lib.gui.listener.input.MouseClickListener;
 import io.jonuuh.basis.lib.gui.listener.lifecycle.ScreenTickListener;
-import io.jonuuh.basis.lib.util.Color;
+import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.util.MathUtils;
 import io.jonuuh.basis.lib.util.RenderUtils;
 import net.minecraft.client.gui.FontRenderer;
@@ -19,10 +20,19 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
     protected FontRenderer fontRenderer = mc.fontRendererObj;
     protected String text;
     protected int maxTextLength;
+    /** Position of the cursor within the text */
     protected int cursorPos;
-    protected int cursorFlashCounter;
-    protected boolean isTyping;
+    /**
+     * Position of the start/end of the selection within the text.
+     * <p>
+     * This will be equal to cursorPos when nothing is selected (the default state),
+     * otherwise it may be less than or greater than cursorPos
+     */
     protected int selectionPos;
+    /** Used to flash cursor on and off based on screen tick timing */
+    protected int cursorFlashCounter;
+    /** Used to prevent cursor flashing while typing */
+    protected boolean isTyping;
     protected boolean enabled;
     protected boolean mouseDown;
 
@@ -31,25 +41,19 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         super(builder);
         this.text = builder.text;
         this.maxTextLength = builder.maxTextLength;
-    }
+        this.enabled = builder.enabled;
 
-    // TODO: some textfield logic: `this.doneBtn.enabled = this.commandTextField.getText().trim().length() > 0;`
-
-//    public void setCursorPosition(int position)
-//    {
-//        cursorPos = position;
-////        cursorPos = MathHelper.clamp_int(position, 0, text.length());
-////        setSelectionPos(cursorPos);
-//    }
-
-    public void setSelectionPos(int selectionPos)
-    {
-        this.selectionPos = (int) MathUtils.clamp(selectionPos, 0, text.length());
+        setHeight((mc.fontRendererObj.FONT_HEIGHT - 1) + getPadding().top() + getPadding().bottom());
     }
 
     public void setCursorPos(int cursorPos)
     {
         this.cursorPos = (int) MathUtils.clamp(cursorPos, 0, text.length());
+    }
+
+    public void setSelectionPos(int selectionPos)
+    {
+        this.selectionPos = (int) MathUtils.clamp(selectionPos, 0, text.length());
     }
 
     public void moveCursorAndSelection(int amount)
@@ -58,22 +62,32 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         setSelectionPos(selectionPos + amount);
     }
 
-    private float getCursorScreenPos()
+    public float getCursorScreenPos()
     {
-        return worldXPos() + fontRenderer.getStringWidth(getTextBeforeCursor()) - 1;
+        return ElementUtils.getInnerLeftBound(this) + fontRenderer.getStringWidth(getTextBeforeCursor()) - 1;
     }
 
-    private String getTextBelowMouseX(int mouseX)
+    public String getTextBelowMouseX(int mouseX)
     {
-        return fontRenderer.trimStringToWidth(text, (int) (mouseX - worldXPos() + 1));
+        return fontRenderer.trimStringToWidth(text, (int) (mouseX - ElementUtils.getInnerLeftBound(this) + 1));
     }
+
+    public String getTextBeforeCursor()
+    {
+        return text.substring(0, cursorPos);
+    }
+
+//    public String getTextAfterCursor()
+//    {
+//        return text.substring(cursorPos);
+//    }
 
     public int getSelectionStart()
     {
         return Math.min(cursorPos, selectionPos);
     }
 
-    private int getSelectionEnd()
+    public int getSelectionEnd()
     {
         return Math.max(cursorPos, selectionPos);
     }
@@ -83,48 +97,14 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         return text.substring(getSelectionStart(), getSelectionEnd());
     }
 
-    public String getTextBeforeCursor()
+    public boolean hasSelection()
     {
-        return text.substring(0, cursorPos);
+        return selectionPos != cursorPos;
     }
-
-    public String getTextAfterCursor()
-    {
-        return text.substring(cursorPos);
-    }
-
-    public String insertText(String insertion, int index)
-    {
-        return replaceText(insertion, index, index);
-//        return text.substring(0, index) + insertion + text.substring(index);
-    }
-
-    public String replaceText(String replacement, int startIndex, int endIndex)
-    {
-        System.out.println(" replacement: `" + replacement + "`" + " start: " + startIndex + " end: " + endIndex);
-        System.out.println(text.substring(0, startIndex) + " `" + replacement + "` " + text.substring(endIndex));
-
-        return text.substring(0, startIndex) + replacement + text.substring(endIndex);
-    }
-
-//    public String deleteCharsFromStart(String str, int charAmount)
-//    {
-//        return str.substring(charAmount);
-//    }
-//
-//    public String deleteCharsFromEnd(String str, int charAmount)
-//    {
-//        return str.substring(0, str.length() - charAmount);
-//    }
 
     public void clearSelection()
     {
         selectionPos = cursorPos;
-    }
-
-    public boolean hasSelection()
-    {
-        return selectionPos != cursorPos;
     }
 
     public boolean isSelectionForward()
@@ -159,71 +139,66 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
     @Override
     public void onScreenTick(ScreenTickEvent event)
     {
-        cursorFlashCounter++; // TODO: originally pre-increment for some reason?
+        cursorFlashCounter++;
     }
-
-    // 12345678901234567890
-
-//    @Override
-//    public void onScreenDraw(Minecraft mc, int mouseX, int mouseY)
-//    {
-//        super.onScreenDraw(mc, mouseX, mouseY);
-//
-//        if (mouseDown)
-//        {
-//            setSelectionPos(getTextBelowMouseX(mouseX).length());
-//        }
-//
-//        RenderUtils.drawRectangle(GL11.GL_POLYGON, xPos, yPos, width, height, new Color("#242424").setA(0.75F));
-//
-//        if (hasSelection())
-//        {
-//            drawSelectionHighlight();
-//        }
-//
-//        if (Display.isActive() && focused && (cursorFlashCounter % 20 < 10 || isTyping))
-//        {
-//            RenderUtils.drawRectangle(GL11.GL_POLYGON, getCursorScreenPos(), yPos - 2, 1, fontRenderer.FONT_HEIGHT + 2, new Color("#00ff00")/*.setA(0.5F)*/);
-//        }
-//
-//        fontRenderer.drawString(text, xPos, yPos, -1);
-//    }
 
     @Override
     public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
+        if (!isVisible())
+        {
+            return;
+        }
+        super.onScreenDraw(mouseX, mouseY, partialTicks);
+
+        RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(),
+                getCornerRadius(), 1, getColor(GuiColorType.BACKGROUND), getColor(GuiColorType.BORDER));
+
         if (isMouseDown())
         {
             setSelectionPos(getTextBelowMouseX(mouseX).length());
         }
 
-        RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), new Color("#BF242424"));
-
         if (hasSelection())
         {
-            drawSelectionHighlight();
+            if (!isFocused())
+            {
+                setSelectionPos(cursorPos);
+            }
+            else
+            {
+                drawSelectionHighlight();
+            }
         }
 
         if (Display.isActive() && isFocused() && (cursorFlashCounter % 20 < 10 || isTyping))
         {
-            RenderUtils.drawRectangle(getCursorScreenPos(), worldYPos() - 2, 1, fontRenderer.FONT_HEIGHT + 2, new Color("#00ff00")/*.setA(0.5F)*/);
+            RenderUtils.drawRectangle(getCursorScreenPos(), ElementUtils.getInnerTopBound(this) - 2, 1, fontRenderer.FONT_HEIGHT + 2, getColor(GuiColorType.BASE));
         }
 
-        fontRenderer.drawString(text, worldXPos(), worldYPos(), -1, false);
+//        RenderUtils.drawRoundedRectWithBorder(
+//                ElementUtils.getInnerLeftBound(this), ElementUtils.getInnerTopBound(this),
+//                ElementUtils.getInnerWidth(this), ElementUtils.getInnerHeight(this),
+//                getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
+
+        String trimmedText = RenderUtils.trimStringToWidthWithEllipsis(text, (int) ElementUtils.getInnerWidth(this));
+        fontRenderer.drawString(trimmedText, ElementUtils.getInnerLeftBound(this), ElementUtils.getInnerTopBound(this), -1, false);
     }
 
-    public void drawSelectionHighlight()
+    protected void drawSelectionHighlight()
     {
         float cursorX = getCursorScreenPos();
         int rectWidth = fontRenderer.getStringWidth(getSelectedText()) - 1;
         float rectX = isSelectionForward() ? cursorX + 1 : cursorX - rectWidth;
-//        System.out.println("cursorPos: " + cursorPos + ", selectionPos: " + selectionPos);
 
-        RenderUtils.drawRectangle(rectX, worldYPos(), rectWidth, fontRenderer.FONT_HEIGHT - 1, new Color("#BF009ac2")); // 3399FF
+        RenderUtils.drawRectangle(rectX, ElementUtils.getInnerTopBound(this), rectWidth, fontRenderer.FONT_HEIGHT - 1, getColor(GuiColorType.BASE).addA(-0.2F));
     }
 
-    public void onMouseDown(int mouseX, int mouseY)
+    @Override
+    public void onMouseDown(MouseDownEvent event)
     {
+        MouseClickListener.super.onMouseDown(event);
+
         if (!isFocused())
         {
             cursorFlashCounter = 0;
@@ -234,34 +209,111 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
             return;
         }
 
-        setCursorPos(getTextBelowMouseX(mouseX).length());
-        clearSelection(); // TODO: redundant, set to cursorPos anyway in onScreenDraw
-
-//        System.out.println(deleteCharsFromIndex("HelloWorld12345", 0, 2));
-//        System.out.println(deleteCharsFromIndex("HelloWorld12345", 0, -2));
-//        System.out.println(deleteCharsFromIndex("HelloWorld12345", 14, 2));
-//        System.out.println(deleteCharsFromIndex("HelloWorld12345", 14, -16));
-
-//        if (enableBackgroundDrawing)
-//        {
-//            i -= 4;
-//        }
-
-//        String s = fontRenderer.trimStringToWidth(text.substring(lineScrollOffset), getWidth());
-//
-//        setCursorPosition(fontRenderer.trimStringToWidth(s, i).length() + lineScrollOffset);
-//        }
+        setCursorPos(getTextBelowMouseX(event.mouseX).length());
+        clearSelection(); // TODO: redundant? set to cursorPos anyway in onScreenDraw
     }
 
-    protected void replaceSelection(String replacement)
+    @Override
+    public void onKeyTyped(KeyInputEvent event)
     {
-        int selectionLength = getSelectedText().length();
-        text = replaceText(replacement, getSelectionStart(), getSelectionEnd());
+        isTyping = true;
+        cursorFlashCounter = 0;
 
-        if (!isSelectionForward())
+        if (GuiScreen.isCtrlKeyDown())
         {
-            setCursorPos(cursorPos - selectionLength); // TODO: move to replaceText?
+            // Select all
+            if (GuiScreen.isKeyComboCtrlA(event.keyCode))
+            {
+                setCursorPos(text.length());
+                setSelectionPos(0);
+            }
+            // Copy
+            else if (GuiScreen.isKeyComboCtrlC(event.keyCode))
+            {
+                GuiScreen.setClipboardString(getSelectedText());
+            }
+            // Paste
+            else if (GuiScreen.isKeyComboCtrlV(event.keyCode) && isEnabled())
+            {
+                writeString(GuiScreen.getClipboardString());
+            }
+            // Cut
+            else if (GuiScreen.isKeyComboCtrlX(event.keyCode))
+            {
+                GuiScreen.setClipboardString(getSelectedText());
+
+                if (isEnabled())
+                {
+                    deleteText();
+                }
+            }
         }
+        else
+        {
+            switch (event.keyCode)
+            {
+                case Keyboard.KEY_LEFT:
+                    if (GuiScreen.isShiftKeyDown())
+                    {
+                        setCursorPos(cursorPos - 1);
+                    }
+                    else
+                    {
+                        moveCursorAndSelection(-1);
+                    }
+                    break;
+
+                case Keyboard.KEY_RIGHT:
+                    if (GuiScreen.isShiftKeyDown())
+                    {
+                        setCursorPos(cursorPos + 1);
+                    }
+                    else
+                    {
+                        moveCursorAndSelection(1);
+                    }
+                    break;
+
+                case Keyboard.KEY_BACK:
+                    if (isEnabled())
+                    {
+                        deleteText();
+                    }
+                    break;
+
+                default:
+                    // Enabled + not one of first ascii reserved 0-31, + not DEL or section sign
+                    if (isEnabled() && ChatAllowedCharacters.isAllowedCharacter(event.typedChar))
+                    {
+                        writeString(Character.toString(event.typedChar));
+                        break;
+                    }
+            }
+        }
+
+        isTyping = false;
+    }
+
+    public void writeString(String str)
+    {
+        String cleanedText = cleanText(str);
+
+        if (cleanedText.isEmpty())
+        {
+            return;
+        }
+
+        if (hasSelection())
+        {
+            replaceSelection(cleanedText);
+        }
+        else /*if (!text.isEmpty())*/
+        {
+            this.text = insertText(cleanedText, cursorPos);
+            setCursorPos(cursorPos + cleanedText.length());
+        }
+
+        clearSelection();
     }
 
     public void deleteText()
@@ -279,209 +331,63 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         clearSelection();
     }
 
-    // filter and trim new text being added to the text
-    protected String cleanTextIn(String textIn)
+    public String insertText(String insertion, int index)
     {
-        String textInFiltered = ChatAllowedCharacters.filterAllowedCharacters(textIn);
-//        int postLength;
-//
-//        if (hasSelection())
-//        {
-//            postLength = (text.length() - getSelectedText().length()) + textInFiltered.length();
-//        }
-//        else
-//        {
-//            postLength = text.length() + textInFiltered.length();
-//        }
-//
-//        if (postLength > maxTextLength)
-//        {
-//            System.out.println("`" + textInFiltered + "`" + "postLength: " + postLength + " maxTextLength: " + maxTextLength);
-//            textInFiltered = textInFiltered.substring(0, maxTextLength - text.length());
-//        }
-//        String textInFilteredTrimmed = textInFiltered;
-
-        int availableTextLength = maxTextLength - text.length();
-
-        if (hasSelection())
-        {
-            availableTextLength += getSelectedText().length();
-        }
-
-        if (textInFiltered.length() > availableTextLength)
-        {
-            return textInFiltered.substring(0, availableTextLength);
-            // System.out.println("`" + textInFiltered + "` `" + textInFilteredTrimmed + "`");
-        }
-
-        return textInFiltered;
+        return replaceText(insertion, index, index);
     }
 
-    public void writeText(String textIn)
+    public String replaceText(String replacement, int startIndex, int endIndex)
     {
-        String textInCleaned = cleanTextIn(textIn);
-
-        if (textInCleaned.isEmpty())
-        {
-            return;
-        }
-
-        if (hasSelection())
-        {
-            replaceSelection(textInCleaned);
-        }
-        else /*if (!text.isEmpty())*/
-        {
-            text = insertText(textInCleaned, cursorPos);
-            setCursorPos(cursorPos + textInCleaned.length());
-//            text = replaceText("", cursorPos, cursorPos);
-//            setCursorPos(cursorPos - 1);
-        }
-
-        clearSelection();
-
-//        String s = "";
-//        int start = getSelectionStart()/*Math.min(cursorPos, selectionPos)*/;
-//        int end = getSelectionEnd()/*Math.max(cursorPos, selectionPos)*/;
-//        int k = maxTextLength - text.length() - (start - end);
-//        int l;
-//
-//        if (!text.isEmpty())
-//        {
-//            s = s + text.substring(0, start);
-//        }
-//
-//        if (k < textInFiltered.length())
-//        {
-//            s = s + textInFiltered.substring(0, k);
-//            l = k;
-//        }
-//        else
-//        {
-//            s = s + textInFiltered;
-//            l = textInFiltered.length();
-//        }
-//
-//        if (!text.isEmpty() && end < text.length())
-//        {
-//            s = s + text.substring(end);
-//        }
-//
-////        if (validator.apply(s))
-////        {
-//        text = s;
-//        moveCursorBy(start - selectionPos + l);
-////        }
+        System.out.println(" replacement: `" + replacement + "`" + " start: " + startIndex + " end: " + endIndex);
+        System.out.println(text.substring(0, startIndex) + " `" + replacement + "` " + text.substring(endIndex));
+        return text.substring(0, startIndex) + replacement + text.substring(endIndex);
     }
 
-    @Override
-    public void onKeyTyped(KeyInputEvent event)
+    protected void replaceSelection(String replacement)
     {
-        isTyping = true;
-        cursorFlashCounter = 0;
+        int selectionLength = getSelectedText().length();
+        text = replaceText(replacement, getSelectionStart(), getSelectionEnd());
 
-//        else if (GuiScreen.isKeyComboCtrlA(keyCode))
-//        {
-//            setCursorPosition(text.length());
-//            setSelectionPos(0);
-//            return true;
-//        }
-//        else if (GuiScreen.isKeyComboCtrlC(keyCode))
-//        {
-//            GuiScreen.setClipboardString(getSelectedText());
-//            return true;
-//        }
-        if (GuiScreen.isKeyComboCtrlV(event.keyCode) && isEnabled())
+        if (!isSelectionForward())
         {
-            writeText(GuiScreen.getClipboardString());
+            setCursorPos(cursorPos - selectionLength); // TODO: move to replaceText?
         }
-//        else if (GuiScreen.isKeyComboCtrlX(keyCode))
-//        {
-//            GuiScreen.setClipboardString(getSelectedText());
-//
-//            if (isEnabled())
-//            {
-//                writeText("");
-//            }
-//            return true;
-//        }
-        else
+    }
+
+    /**
+     * Filter and trim a new string being added to the text.
+     *
+     * @param str A new string
+     * @return The cleaned new string
+     */
+    protected String cleanText(String str)
+    {
+        // Filter the string
+        String filteredStr = ChatAllowedCharacters.filterAllowedCharacters(str);
+
+        float availableWidth = ElementUtils.getInnerWidth(this) - fontRenderer.getStringWidth(text);
+
+        // If there's a selection, it will be replaced by the new string after it's cleaned,
+        // so it can be treated as empty (available space)
+        if (hasSelection())
         {
-            switch (event.keyCode)
-            {
-                case Keyboard.KEY_BACK:
-                    if (isEnabled())
-                    {
-//                        int deletionAmt = (selectionPos < cursorPos) ? -getSelectedText().length()
-//                                : (selectionPos > cursorPos) ? getSelectedText().length() : 1;
-                        deleteText();
-//                        deleteText(hasSelection() ? getSelectedText().length() : 1, selectionPos <= cursorPos);
-
-//                        if (selectionPos == cursorPos)
-//                        {
-//                            deleteText(1);
-//                        }
-//                        else if (selectionPos > cursorPos)
-//                        {
-//                            deleteText(getSelectedText().length());
-//                        }
-//                        else if (selectionPos < cursorPos)
-//                        {
-//                            deleteText(getSelectedText().length());
-//                        }
-                    }
-                    break;
-//                    return true;
-
-                case Keyboard.KEY_LEFT:
-//                    setCursorPos(cursorPos - 1);
-                    moveCursorAndSelection(-1);
-                    break;
-//                    if (GuiScreen.isShiftKeyDown())
-//                    {
-//                        setSelectionPos(selectionEnd - 1);
-//                    }
-//                    else
-//                    {
-//                        moveCursorBy(-1);
-//                    }
-//                    return true;
-
-                case Keyboard.KEY_RIGHT:
-                    moveCursorAndSelection(1);
-//                    setCursorPos(cursorPos + 1);
-                    break;
-//                    if (GuiScreen.isShiftKeyDown())
-//                    {
-//                        setSelectionPos(selectionEnd + 1);
-//                    }
-//                    else
-//                    {
-//                        moveCursorBy(1);
-//                    }
-//                    return true;
-
-                default:
-                    if (isEnabled() && ChatAllowedCharacters.isAllowedCharacter(event.typedChar)) // not one of first reserved 0-31, + not DEL or section sign
-                    {
-                        writeText(Character.toString(event.typedChar));
-                        break;
-//                        return true;
-                    }
-//                    else
-//                    {
-//                        return false;
-//                    }
-            }
+            availableWidth += fontRenderer.getStringWidth(getSelectedText());
         }
 
-        isTyping = false;
+        // Trim the string if necessary
+        if (fontRenderer.getStringWidth(filteredStr) > availableWidth)
+        {
+            return fontRenderer.trimStringToWidth(filteredStr, (int) availableWidth);
+        }
+
+        return filteredStr;
     }
 
     public static class Builder extends GuiElement.AbstractBuilder<Builder, GuiTextField>
     {
-        protected String text;
-        protected int maxTextLength;
+        protected String text = "";
+        protected int maxTextLength = 32;
+        protected boolean enabled = true;
 
         public Builder(String elementName)
         {
@@ -497,6 +403,12 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         public Builder maxTextLength(int maxTextLength)
         {
             this.maxTextLength = maxTextLength;
+            return self();
+        }
+
+        public Builder enabled(boolean enabled)
+        {
+            this.enabled = enabled;
             return self();
         }
 
