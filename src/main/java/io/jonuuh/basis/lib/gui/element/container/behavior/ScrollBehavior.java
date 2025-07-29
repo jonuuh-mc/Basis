@@ -1,6 +1,5 @@
 package io.jonuuh.basis.lib.gui.element.container.behavior;
 
-import io.jonuuh.basis.lib.gui.element.ElementUtils;
 import io.jonuuh.basis.lib.gui.element.GuiElement;
 import io.jonuuh.basis.lib.gui.element.container.GuiContainer;
 import io.jonuuh.basis.lib.gui.element.slider.GuiScrollSlider;
@@ -77,8 +76,8 @@ public class ScrollBehavior
             // TODO: safest behavior would be to disable an element if ANY of it is out of bounds,
             //  otherwise unintended wins/losses of greatest z element calc could arise when clicking around the edges of a
             //  container whose children are partially scrolled out of bounds
-            boolean isOutOfBottomBound = (element.getBottomBound() - ElementUtils.getInnerBottomBound(host)) > 0;
-            boolean isOutOfTopBound = (ElementUtils.getInnerTopBound(host) - element.getTopBound()) > 0;
+            boolean isOutOfBottomBound = (element.getBottomBound() - host.getBottomBound()) > 0;
+            boolean isOutOfTopBound = (host.getTopBound() - element.getTopBound()) > 0;
 
             if (element instanceof InputListener)
             {
