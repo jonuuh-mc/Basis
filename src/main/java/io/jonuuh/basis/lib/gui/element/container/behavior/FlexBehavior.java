@@ -127,8 +127,13 @@ public class FlexBehavior
 
     public void addItem(FlexItem item)
     {
-        getHost().addChild(item.getElement());
-        flexItems.add(item);
+        addItem(item, flexItems.size());
+    }
+
+    public void addItem(FlexItem item, int index)
+    {
+        getHost().addChild(item.getElement(), index);
+        flexItems.add(index, item);
     }
 
     public void removeItem(FlexItem item)

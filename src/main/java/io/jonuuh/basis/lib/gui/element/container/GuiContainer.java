@@ -173,12 +173,17 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
 
     public void addChild(GuiElement child)
     {
+        addChild(child, children.size());
+    }
+
+    public void addChild(GuiElement child, int index)
+    {
         if (children.contains(child))
         {
             return;
         }
 
-        children.add(child);
+        children.add(index, child);
 
         // If this function was called independently rather than being called via
         // GuiElement#setParent(), make the child aware that this is now its parent
