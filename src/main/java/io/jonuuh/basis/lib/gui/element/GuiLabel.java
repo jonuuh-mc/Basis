@@ -14,8 +14,8 @@ public class GuiLabel extends GuiElement
         super(builder);
         this.fontRenderer = mc.fontRendererObj;
         this.text = builder.text;
-        setHeight(mc.fontRendererObj.FONT_HEIGHT - 1);
-        setWidth(mc.fontRendererObj.getStringWidth(text));
+        setHeight((mc.fontRendererObj.FONT_HEIGHT - 1) + getPadding().top() + getPadding().bottom());
+        setWidth(mc.fontRendererObj.getStringWidth(text) + getPadding().left() + getPadding().right());
     }
 
     public String getText()
@@ -38,8 +38,10 @@ public class GuiLabel extends GuiElement
         }
         super.onScreenDraw(mouseX, mouseY, partialTicks);
 
-        String trimmedText = RenderUtils.trimStringToWidthWithEllipsis(text, (int) getWidth());
-        fontRenderer.drawString(trimmedText, worldXPos(), worldYPos(), getColor(GuiColorType.ACCENT1).toPackedARGB(), true);
+        String trimmedText = RenderUtils.trimStringToWidthWithEllipsis(text, (int) ElementUtils.getInnerWidth(this));
+
+        fontRenderer.drawString(trimmedText, ElementUtils.getInnerLeftBound(this), ElementUtils.getInnerTopBound(this),
+                getColor(GuiColorType.ACCENT1).toPackedARGB(), true);
     }
 
     public static class Builder extends GuiElement.AbstractBuilder<Builder, GuiLabel>
