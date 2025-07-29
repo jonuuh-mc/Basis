@@ -320,7 +320,19 @@ public abstract class GuiElement
 
     public float getCornerRadius()
     {
-        return cornerRadius;
+        if (this.cornerRadius != -1)
+        {
+            return cornerRadius;
+        }
+        else if (hasParent())
+        {
+            float cornerRadius = parent.getCornerRadius();
+            // Cache the corner radius in more specific elements downward for slightly faster access in future (negligible?)
+            setCornerRadius(cornerRadius);
+            return cornerRadius;
+        }
+
+        return 0;
     }
 
     public void setCornerRadius(float cornerRadius)
@@ -451,7 +463,7 @@ public abstract class GuiElement
         protected Spacing margin = new Spacing(0);
         protected Spacing padding = new Spacing(0);
 
-        protected float cornerRadius = 0;
+        protected float cornerRadius = -1;
 
         protected AbstractBuilder(String elementName)
         {

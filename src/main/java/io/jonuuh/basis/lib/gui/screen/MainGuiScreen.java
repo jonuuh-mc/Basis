@@ -69,6 +69,7 @@ public class MainGuiScreen extends BaseGuiScreen
                 .size(575, 330)
                 .color(GuiColorType.BACKGROUND, new Color("4d4d4d", 0.75F))
                 .padding(new Spacing(10, 10, 10, 10))
+                .cornerRadius(3)
                 .flexBehavior(new FlexBehavior.Builder()
                         .direction(FlexDirection.COLUMN)
                         .justify(FlexJustify.BETWEEN)
