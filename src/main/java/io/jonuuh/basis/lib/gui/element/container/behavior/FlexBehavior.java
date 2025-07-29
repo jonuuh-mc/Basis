@@ -175,11 +175,17 @@ public class FlexBehavior
 
         if (doJustify)
         {
-            // TODO: dumb fix, will almost definitely be a problem later fuck it we ball
-            if (getHost().getScrollBehavior() == null ||
-                    (getHost().getScrollBehavior() != null && getHost().getScrollBehavior().getSlider().getNormalizedValue() == 0))
+            if (getHost().getScrollBehavior() == null)
             {
                 justifyMainAxis();
+            }
+            else
+            {
+                // TODO: dumb
+                float sliderValue = getHost().getScrollBehavior().getSlider().getNormalizedValue();
+                getHost().getScrollBehavior().getSlider().setNormalizedValue(0);
+                justifyMainAxis();
+                getHost().getScrollBehavior().getSlider().setNormalizedValue(sliderValue);
             }
         }
 
