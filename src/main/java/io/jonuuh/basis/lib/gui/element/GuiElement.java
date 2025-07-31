@@ -432,6 +432,11 @@ public abstract class GuiElement
         }
     }
 
+    public GuiElement getElementByName(String elementName)
+    {
+        return this.elementName.equals(elementName) ? this : null;
+    }
+
     @Override
     public String toString()
     {

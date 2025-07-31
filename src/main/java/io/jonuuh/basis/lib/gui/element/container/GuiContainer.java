@@ -86,19 +86,6 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         return children.contains(child);
     }
 
-    // TODO: make children a map if using this becomes common enough?
-    public GuiElement getChildByName(String elementName)
-    {
-        for (GuiElement child : children)
-        {
-            if (child.elementName.equals(elementName))
-            {
-                return child;
-            }
-        }
-        return null;
-    }
-
     // TODO: only for debugging for now, needs to be removed
     public List<GuiElement> getNestedChildren()
     {
@@ -449,6 +436,29 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         {
             child.collectMatchingElements(collector, predicate);
         }
+    }
+
+    // TODO: make children a map if using this becomes common enough?
+    @Override
+    public GuiElement getElementByName(String elementName)
+    {
+        GuiElement element = super.getElementByName(elementName);
+
+        if (element != null)
+        {
+            return element;
+        }
+
+        for (GuiElement child : children)
+        {
+            GuiElement element1 = child.getElementByName(elementName);
+
+            if (element1 != null)
+            {
+                return element1;
+            }
+        }
+        return null;
     }
 
     protected static abstract class AbstractBuilder<T extends AbstractBuilder<T, R>, R extends GuiContainer> extends GuiElement.AbstractBuilder<T, R>
