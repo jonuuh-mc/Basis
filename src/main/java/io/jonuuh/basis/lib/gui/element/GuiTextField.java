@@ -46,6 +46,23 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         setHeight((mc.fontRendererObj.FONT_HEIGHT - 1) + getPadding().top() + getPadding().bottom());
     }
 
+    public String getText()
+    {
+        return text;
+    }
+
+    public void setText(String text)
+    {
+        this.text = text;
+        setCursorPos(text.length());
+        setSelectionPos(text.length());
+    }
+
+    public void clearText()
+    {
+        setText("");
+    }
+
     public void setCursorPos(int cursorPos)
     {
         this.cursorPos = (int) MathUtils.clamp(cursorPos, 0, text.length());
