@@ -11,13 +11,15 @@ import io.jonuuh.basis.lib.gui.listener.input.MouseClickListener;
 import io.jonuuh.basis.lib.gui.listener.input.MouseScrollListener;
 import io.jonuuh.basis.lib.gui.listener.lifecycle.InitGuiListener;
 import io.jonuuh.basis.lib.gui.properties.GuiColorType;
-import io.jonuuh.basis.lib.gui.properties.ScissorBox;
+import io.jonuuh.basis.lib.util.CollectionUtils;
 import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.RenderUtils;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -29,7 +31,6 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
     protected FlexBehavior flexBehavior;
     protected ScrollBehavior scrollBehavior;
     protected boolean shouldScissor;
-    protected ScissorBox scissorBox;
     protected boolean enabled;
     protected boolean mouseDown;
 
@@ -40,7 +41,6 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         this.enabled = builder.enabled;
 
         this.shouldScissor = builder.shouldScissor;
-        this.scissorBox = new ScissorBox(this);
 
         addChildren(builder.children);
 
@@ -148,14 +148,9 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         this.mouseDown = mouseDown;
     }
 
-    public ScissorBox getScissorBox()
-    {
-        return scissorBox;
-    }
-
     protected boolean shouldScissor()
     {
-        return shouldScissor && hasChildren();
+        return shouldScissor;
     }
 
     public void addChild(GuiElement child)
@@ -297,27 +292,15 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         //  still drawing debug info for root is prob okay
         if (!(this instanceof GuiRootContainer))
         {
-            if (hasParent())
-            {
-                getParent().getScissorBox().start();
-            }
-
             // Handle screen draw for this element
             RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), 1, getColor(GuiColorType.BACKGROUND), getColor(GuiColorType.BORDER));
 
-            if (debug)
+            if (debug && flexBehavior != null)
             {
-                if (flexBehavior != null)
-                {
-                    flexBehavior.drawInspector();
-                }
+                flexBehavior.drawInspector();
             }
 
             super.onScreenDraw(mouseX, mouseY, partialTicks);
-            if (hasParent())
-            {
-                getParent().getScissorBox().end();
-            }
         }
 
         drawChildren(mouseX, mouseY, partialTicks);
@@ -325,20 +308,66 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
 
     protected void drawChildren(int mouseX, int mouseY, float partialTicks)
     {
-        if (this.shouldScissor())
+        List<GuiContainer> containers = new ArrayList<>();
+        collectScissoringParents(containers);
+
+        int scissorX = 0;
+        int scissorY = 0;
+        int scissorWidth = 0;
+        int scissorHeight = 0;
+
+        if (!containers.isEmpty())
         {
-            scissorBox.start();
+            int greatestLeftBound = (int) CollectionUtils.getMax(containers, Comparator.comparingDouble(GuiElement::getLeftBound)).getLeftBound();
+            int greatestTopBound = (int) CollectionUtils.getMax(containers, Comparator.comparingDouble(GuiElement::getTopBound)).getTopBound();
+
+            int leastRightBound = (int) CollectionUtils.getMin(containers, Comparator.comparingDouble(GuiElement::getRightBound)).getRightBound();
+            int leastBottomBound = (int) CollectionUtils.getMin(containers, Comparator.comparingDouble(GuiElement::getBottomBound)).getBottomBound();
+
+            scissorX = greatestLeftBound;
+            scissorY = greatestTopBound;
+            scissorWidth = leastRightBound - greatestLeftBound;
+            scissorHeight = leastBottomBound - greatestTopBound;
         }
 
         for (GuiElement child : children)
         {
+            if (!containers.isEmpty())
+            {
+                // Prevent trying to scissor an area with zero width/height
+                if (scissorWidth <= 0 || scissorHeight <= 0)
+                {
+                    return;
+                }
+
+                GL11.glPushMatrix();
+                GL11.glEnable(GL11.GL_SCISSOR_TEST);
+
+//                RenderUtils.drawRectangle(scissorX, scissorY, scissorWidth, scissorHeight, new Color("#4400ff00"));
+                RenderUtils.scissorFromTopLeft(scissorX, scissorY, scissorWidth, scissorHeight);
+            }
+
             // If the child is another container, this will continue propagating the draw to any additional children
             child.onScreenDraw(mouseX, mouseY, partialTicks);
+
+            if (!containers.isEmpty())
+            {
+                GL11.glDisable(GL11.GL_SCISSOR_TEST);
+                GL11.glPopMatrix();
+            }
+        }
+    }
+
+    protected void collectScissoringParents(List<GuiContainer> containers)
+    {
+        if (shouldScissor())
+        {
+            containers.add(this);
         }
 
-        if (this.shouldScissor())
+        if (hasParent())
         {
-            scissorBox.end();
+            getParent().collectScissoringParents(containers);
         }
     }
 
@@ -452,7 +481,7 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         protected final List<GuiElement> children = new ArrayList<>();
         protected FlexBehavior.Builder flexBehaviorBuilder = null;
         protected ScrollBehavior.Builder scrollBehaviorBuilder = null;
-        protected boolean shouldScissor = true;
+        protected boolean shouldScissor = false;
         protected boolean enabled = true;
 
         protected AbstractBuilder(String elementName)
@@ -499,6 +528,7 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         public T scrollBehavior(ScrollBehavior.Builder scrollBehaviorBuilder)
         {
             this.scrollBehaviorBuilder = scrollBehaviorBuilder;
+            this.shouldScissor = true;
             return self();
         }
 
