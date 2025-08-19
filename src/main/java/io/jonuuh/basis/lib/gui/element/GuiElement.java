@@ -383,9 +383,22 @@ public abstract class GuiElement
 
         if (debug)
         {
+            // Draw element outline
             RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), getWidth(), getHeight(),
                     isFocused() ? new Color("#00ff00") : new Color("#ff55ff"));
 
+            // Draw padding rectangles
+            Color padColor = new Color("#36ff0000");
+            // Left
+            RenderUtils.drawRectangle(worldXPos(), worldYPos(), getPadding().left(), getHeight(), padColor);
+            // Right
+            RenderUtils.drawRectangle(worldXPos() + getWidth() - getPadding().right(), worldYPos(), getPadding().right(), getHeight(), padColor);
+            // Top
+            RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getPadding().top(), padColor);
+            // Bottom
+            RenderUtils.drawRectangle(worldXPos(), worldYPos() + getHeight() - getPadding().bottom(), getWidth(), getPadding().bottom(), padColor);
+
+            // Draw z level string
             mc.fontRendererObj.drawString(String.valueOf(getZLevel()), getRightBound() - mc.fontRendererObj.getStringWidth(String.valueOf(getZLevel())),
                     getBottomBound() - mc.fontRendererObj.FONT_HEIGHT, getColor(GuiColorType.ACCENT2).toPackedARGB(), true);
         }

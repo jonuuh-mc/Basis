@@ -307,20 +307,6 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
 
             if (debug)
             {
-                // Draw padding debug info
-                if (hasChildren())
-                {
-                    Color padColor = new Color("#36ff0000");
-                    // Left
-                    RenderUtils.drawRectangle(worldXPos(), worldYPos(), getPadding().left(), getHeight(), padColor);
-                    // Right
-                    RenderUtils.drawRectangle(worldXPos() + getWidth() - getPadding().right(), worldYPos(), getPadding().right(), getHeight(), padColor);
-                    // Top
-                    RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getPadding().top(), padColor);
-                    // Bottom
-                    RenderUtils.drawRectangle(worldXPos(), worldYPos() + getHeight() - getPadding().bottom(), getWidth(), getPadding().bottom(), padColor);
-                }
-
                 if (flexBehavior != null)
                 {
                     flexBehavior.drawInspector();
