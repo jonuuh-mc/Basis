@@ -8,11 +8,13 @@ import net.minecraft.util.ResourceLocation;
 public class GuiTexturedButton extends GuiButton
 {
     private ResourceLocation texture;
+    private boolean smoothing;
 
     public GuiTexturedButton(Builder builder)
     {
         super(builder);
         this.texture = builder.texture;
+        this.smoothing = builder.smoothing;
     }
 
     public ResourceLocation getTexture()
@@ -40,13 +42,14 @@ public class GuiTexturedButton extends GuiButton
         {
             RenderUtils.drawTexturedRect(texture, ElementUtils.getInnerLeftBound(this), ElementUtils.getInnerTopBound(this),
                     getZLevel(), ElementUtils.getInnerWidth(this), ElementUtils.getInnerHeight(this),
-                    0, true, getColor(GuiColorType.BASE));
+                    0, smoothing, getColor(GuiColorType.BASE));
         }
     }
 
     public static class Builder extends GuiButton.AbstractBuilder<Builder, GuiTexturedButton>
     {
         protected ResourceLocation texture = null;
+        protected boolean smoothing = false;
 
         public Builder(String elementName)
         {
@@ -56,6 +59,12 @@ public class GuiTexturedButton extends GuiButton
         public Builder texture(ResourceLocation texture)
         {
             this.texture = texture;
+            return self();
+        }
+
+        public Builder smoothing(boolean smoothing)
+        {
+            this.smoothing = smoothing;
             return self();
         }
 
