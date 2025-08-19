@@ -32,4 +32,32 @@ public final class CollectionUtils
         }
         return max;
     }
+
+    /**
+     * Retrieve the minimum element in the given list, according to the given comparator.
+     * <p>
+     * In case of multiple elements being the minimum, the last such minimum element is returned.
+     *
+     * @param list A list.
+     * @param comparator A comparator used to compare the elements of the list.
+     * @param <T> The type of elements in the list.
+     * @return The last minimum element in the list.
+     */
+    public static <T> T getMin(List<T> list, Comparator<T> comparator)
+    {
+        if (list == null || list.isEmpty() || comparator == null)
+        {
+            return null;
+        }
+
+        T min = list.get(0);
+        for (T item : list)
+        {
+            if (comparator.compare(item, min) <= 0)
+            {
+                min = item;
+            }
+        }
+        return min;
+    }
 }
