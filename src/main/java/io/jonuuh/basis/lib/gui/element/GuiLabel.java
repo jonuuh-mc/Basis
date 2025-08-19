@@ -14,8 +14,6 @@ public class GuiLabel extends GuiElement
         super(builder);
         this.fontRenderer = mc.fontRendererObj;
         this.text = builder.text;
-        setHeight((mc.fontRendererObj.FONT_HEIGHT - 1) + getPadding().top() + getPadding().bottom());
-        setWidth(mc.fontRendererObj.getStringWidth(text) + getPadding().left() + getPadding().right());
     }
 
     public String getText()
@@ -56,6 +54,8 @@ public class GuiLabel extends GuiElement
         public Builder text(String text)
         {
             this.text = text;
+            this.width = mc.fontRendererObj.getStringWidth(text) + padding.left() + padding.right();
+            this.height = (mc.fontRendererObj.FONT_HEIGHT - 1) + padding.top() + padding.bottom();
             return self();
         }
 
