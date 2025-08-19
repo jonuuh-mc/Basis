@@ -11,18 +11,18 @@ public class ScrollBehavior
 {
     private final GuiContainer host;
     private final GuiScrollSlider scrollSlider;
-    private int sliderXPosOffset;
-    private int sliderWidth;
+    private float sliderEdgeOffset;
+    private float sliderWidth;
 
     public ScrollBehavior(Builder builder)
     {
         this.host = builder.host;
-        this.sliderXPosOffset = 2;
-        this.sliderWidth = 7;
+        this.sliderWidth = builder.sliderWidth;
+        this.sliderEdgeOffset = builder.sliderEdgeOffset;
 
         this.scrollSlider = new GuiScrollSlider.Builder(host.elementName + "$sliderVertical")
-                .localPosition(host.getWidth() - sliderWidth - sliderXPosOffset, 2)
-                .size(sliderWidth, host.getHeight() - 4)
+                .localPosition(host.getWidth() - sliderWidth - sliderEdgeOffset, sliderEdgeOffset)
+                .size(sliderWidth, host.getHeight() - (sliderEdgeOffset * 2))
                 .vertical(true)
                 .stateChangeBehavior(element -> slideChildrenVertically())
                 .bounds(0, builder.scrollLength).build();
@@ -42,9 +42,9 @@ public class ScrollBehavior
         return scrollSlider;
     }
 
-    public void setSliderXPosOffset(int sliderXPosOffset)
+    public void setSliderEdgeOffset(int sliderEdgeOffset)
     {
-        this.sliderXPosOffset = sliderXPosOffset;
+        this.sliderEdgeOffset = sliderEdgeOffset;
     }
 
     public void setSliderWidth(int sliderWidth)
@@ -54,8 +54,8 @@ public class ScrollBehavior
 
     public void updateSlider()
     {
-        getSlider().setLocalXPos(host.getWidth() - sliderWidth - sliderXPosOffset);
-        getSlider().setHeight(host.getHeight() - 4);
+        getSlider().setLocalXPos(host.getWidth() - sliderWidth - sliderEdgeOffset);
+        getSlider().setHeight(host.getHeight() - (sliderEdgeOffset * 2));
         getSlider().updateScrollBarLength();
 //        getSlider().setValue(0);
     }
@@ -89,7 +89,9 @@ public class ScrollBehavior
     public static class Builder
     {
         protected GuiContainer host = null;
-        protected float scrollLength;
+        protected float scrollLength = 0;
+        protected float sliderWidth = 6;
+        protected float sliderEdgeOffset = 2;
 
         public Builder host(GuiContainer host)
         {
@@ -100,6 +102,18 @@ public class ScrollBehavior
         public Builder length(float scrollLength)
         {
             this.scrollLength = scrollLength;
+            return this;
+        }
+
+        public Builder sliderWidth(float sliderWidth)
+        {
+            this.sliderWidth = sliderWidth;
+            return this;
+        }
+
+        public Builder sliderEdgeOffset(float sliderEdgeOffset)
+        {
+            this.sliderEdgeOffset = sliderEdgeOffset;
             return this;
         }
 
