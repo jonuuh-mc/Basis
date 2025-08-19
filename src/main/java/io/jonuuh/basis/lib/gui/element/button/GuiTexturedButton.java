@@ -1,5 +1,6 @@
 package io.jonuuh.basis.lib.gui.element.button;
 
+import io.jonuuh.basis.lib.gui.element.ElementUtils;
 import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.util.RenderUtils;
 import net.minecraft.util.ResourceLocation;
@@ -37,7 +38,9 @@ public class GuiTexturedButton extends GuiButton
 
         if (texture != null)
         {
-            RenderUtils.drawTexturedRect(texture, worldXPos(), worldYPos(), getZLevel(), getWidth(), getHeight(), true, getColor(GuiColorType.BASE));
+            RenderUtils.drawTexturedRect(texture, ElementUtils.getInnerLeftBound(this), ElementUtils.getInnerTopBound(this),
+                    getZLevel(), ElementUtils.getInnerWidth(this), ElementUtils.getInnerHeight(this),
+                    0, true, getColor(GuiColorType.BASE));
         }
     }
 
