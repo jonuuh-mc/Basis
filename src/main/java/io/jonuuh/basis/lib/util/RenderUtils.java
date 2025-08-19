@@ -110,14 +110,16 @@ public final class RenderUtils
         GL11.glTranslatef(-objectCenterX, -objectCenterY, 0);
     }
 
-    public static void drawTexturedRect(ResourceLocation texture, float x, float y, int z, float width, float height, boolean smoothing, Color color)
+    public static void drawTexturedRect(ResourceLocation texture, float x, float y, int z, float width, float height, float radius, boolean smoothing, Color color)
     {
+        List<Vertex2F> vertices = genRoundedRectVertices(x, y, width, height, radius);
+
         GL11.glColor4ub(color.r, color.g, color.b, color.a);
-        // Enable transparency
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         mc.getTextureManager().bindTexture(texture);
+
         if (smoothing)
         {
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
@@ -127,16 +129,22 @@ public final class RenderUtils
         Tessellator tessellator = Tessellator.getInstance();
         WorldRenderer wr = tessellator.getWorldRenderer();
 
-        wr.begin(7, DefaultVertexFormats.POSITION_TEX);
-        wr.pos(x, y + height, z).tex(0, 1).endVertex(); // bottom left
-        wr.pos(x + width, y + height, z).tex(1, 1).endVertex(); // bottom right
-        wr.pos(x + width, y, z).tex(1, 0).endVertex(); // top right
-        wr.pos(x, y, z).tex(0, 0).endVertex(); // top left
+        // glMode 7 == GL11.GL_QUADS? use GL11.GL_TRIANGLE_FAN or strip instead?
+        wr.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION_TEX);
+        for (Vertex2F v : vertices)
+        {
+            wr.pos(v.x, v.y, z).tex(v.u, v.v).endVertex();
+        }
         tessellator.draw();
 
-        GL11.glColor4f(1, 1, 1, 1);
-        // Disable transparency
+        if (smoothing)
+        {
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+        }
+
         GL11.glDisable(GL11.GL_BLEND);
+        GL11.glColor4f(1, 1, 1, 1);
     }
 
     /**
@@ -535,79 +543,93 @@ public final class RenderUtils
 
     public static void drawRoundedRect(int glMode, float x, float y, float width, float height, float radius, Color color)
     {
+        List<Vertex2F> vertices = genRoundedRectVertices(x, y, width, height, radius);
+
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glColor4ub(color.r, color.g, color.b, color.a);
+
+        GL11.glBegin(glMode);
+        for (Vertex2F v : vertices)
+        {
+            GL11.glVertex2f(v.x, v.y);
+        }
+        GL11.glEnd();
+
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        // Disable transparency
+        GL11.glDisable(GL11.GL_BLEND);
+        // Reset color state to default white
+        GL11.glColor4f(1, 1, 1, 1);
+    }
+
+    public static List<Vertex2F> genRoundedRectVertices(float x, float y, float width, float height, float radius)
+    {
+        List<Vertex2F> vertices = new ArrayList<>();
+
+        // Save these for UVs
+        float fullWidth = width;
+        float fullHeight = height;
+
         float centerX = x + (width / 2F);
         float centerY = y + (height / 2F);
 
-        radius = Math.min(radius, (width / 2F));
-        radius = Math.min(radius, (height / 2F));
+        radius = Math.min(radius, width / 2F);
+        radius = Math.min(radius, height / 2F);
 
         width = width - (radius * 2);
         height = height - (radius * 2);
 
-        drawRoundedRectCentered(glMode, centerX, centerY, width, height, radius, color);
-    }
-
-    /*
-    Draws a rounded rectangle
-    - Given the params, calculates vertices for four corners/quadrants of a circle, counter-clockwise from (1, 0) on a unit circle.
-    - When the full object is drawn, all vertices are connected, so by spacing the quadrants apart (width and height),
-      and drawing them in the right order (google "opengl triangle winding order") a line will be drawn between
-      each quadrant, making it a rounded rectangle
-    */
-    public static void drawRoundedRectCentered(int glMode, float centerX, float centerY, float width, float height, float radius, Color color)
-    {
-        float ninetyDegRad = (float) (Math.PI / 2);
-
+        // Prevent negative width, height, or radius
         width = Math.max(width, 0);
         height = Math.max(height, 0);
         radius = Math.max(radius, 0);
 
-        float xRight = centerX - (width / 2.0F);
-        float xLeft = centerX + (width / 2.0F);
-        float yUp = centerY + (height / 2.0F);
-        float yDown = centerY - (height / 2.0F);
+        float xRight = centerX - (width / 2F);
+        float xLeft = centerX + (width / 2F);
+        float yUp = centerY + (height / 2F);
+        float yDown = centerY - (height / 2F);
 
-        GL11.glColor4ub(color.r, color.g, color.b, color.a);
-        GL11.glPushMatrix();
+        float ninetyDegRad = (float) (Math.PI / 2);
 
-        // Enable transparency
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        // Disable texturing
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        vertices.addAll(getQuadrantVertices(xRight, yUp, 0, radius, x, y, fullWidth, fullHeight)); // bottom right
+        vertices.addAll(getQuadrantVertices(xLeft, yUp, ninetyDegRad, radius, x, y, fullWidth, fullHeight)); // bottom left
+        vertices.addAll(getQuadrantVertices(xLeft, yDown, ninetyDegRad * 2, radius, x, y, fullWidth, fullHeight)); // top left
+        vertices.addAll(getQuadrantVertices(xRight, yDown, ninetyDegRad * 3, radius, x, y, fullWidth, fullHeight)); // top right
 
-        GL11.glBegin(glMode);
-        // Each corner is drawn around (x,y) as the center of the circle
-        addQuadrantVertices(xRight, yUp, 0, radius); // top right
-        addQuadrantVertices(xLeft, yUp, ninetyDegRad, radius); // top left
-        addQuadrantVertices(xLeft, yDown, ninetyDegRad * 2, radius); // bottom left
-        addQuadrantVertices(xRight, yDown, ninetyDegRad * 3, radius); // bottom right
-        GL11.glEnd();
-
-        // Disable transparency
-        GL11.glDisable(GL11.GL_BLEND);
-        // Enable texturing
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-
-        GL11.glPopMatrix();
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        return vertices;
     }
 
-    private static void addQuadrantVertices(float centerX, float centerY, float startAngle, float radius)
+    private static List<Vertex2F> getQuadrantVertices(float centerX, float centerY, float startAngle, float radius, float x, float y, float width, float height)
     {
+        List<Vertex2F> vertices = new ArrayList<>();
+
         if (radius == 0)
         {
-            GL11.glVertex2f(centerX, centerY);
-            return;
+            float u = (centerX - x) / width;
+            float v = (centerY - y) / height;
+            vertices.add(new Vertex2F(centerX, centerY, u, v));
+            return vertices;
         }
 
         float ninetyDegRad = (float) (Math.PI / 2);
         int segments = 32;
 
-        for (float angle = startAngle; angle <= startAngle + ninetyDegRad; angle += ninetyDegRad / segments)
+        for (int i = 0; i <= segments; i++)
         {
-            GL11.glVertex2f(centerX - (radius * MathHelper.cos(angle)), centerY + (radius * MathHelper.sin(angle)));
+            float angle = startAngle + (ninetyDegRad * i / segments);
+
+            float vertexX = centerX - (MathHelper.cos(angle) * radius);
+            float vertexY = centerY + (MathHelper.sin(angle) * radius);
+
+            float u = (vertexX - x) / width;
+            float v = (vertexY - y) / height;
+
+            vertices.add(new Vertex2F(vertexX, vertexY, u, v));
         }
+
+        return vertices;
     }
 
     public static List<Vector2f> getRadialVertices(int numPoints, float radius)
