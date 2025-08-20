@@ -380,8 +380,8 @@ public final class RenderUtils
         GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
         GL11.glLineWidth(borderThickness);
 
-        drawCircle(GL11.GL_LINE_STRIP, centerX, centerY, innerRadius, startAngleDeg, endAngleDeg, numPoints, borderColor);
-        drawCircle(GL11.GL_LINE_STRIP, centerX, centerY, outerRadius, startAngleDeg, endAngleDeg, numPoints, borderColor);
+        drawArc(GL11.GL_LINE_STRIP, centerX, centerY, innerRadius, startAngleDeg, endAngleDeg, numPoints, borderColor);
+        drawArc(GL11.GL_LINE_STRIP, centerX, centerY, outerRadius, startAngleDeg, endAngleDeg, numPoints, borderColor);
 
         GL11.glLineWidth(1F);
         GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_DONT_CARE);
@@ -419,7 +419,7 @@ public final class RenderUtils
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    public static void drawCircle(int glMode, float centerX, float centerY, float radius, float startAngleDeg, float endAngleDeg, int numPoints, Color color)
+    public static void drawArc(int glMode, float centerX, float centerY, float radius, float startAngleDeg, float endAngleDeg, int numPoints, Color color)
     {
         float startRad = (float) Math.toRadians(startAngleDeg);
         float endRad = (float) Math.toRadians(endAngleDeg);
