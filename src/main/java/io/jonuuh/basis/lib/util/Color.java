@@ -32,6 +32,26 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class Color
 {
+    // EnumChatFormatting Colors
+    public static final Color BLACK = new Color("#000000");
+    public static final Color DARK_BLUE = new Color("#0000AA");
+    public static final Color DARK_GREEN = new Color("#00AA00");
+    public static final Color DARK_AQUA = new Color("#00AAAA");
+    public static final Color DARK_RED = new Color("#AA0000");
+    public static final Color DARK_PURPLE = new Color("#AA00AA");
+    public static final Color GOLD = new Color("#FFAA00");
+    public static final Color GRAY = new Color("#AAAAAA");
+    public static final Color DARK_GRAY = new Color("#555555");
+    public static final Color BLUE = new Color("#5555FF");
+    public static final Color GREEN = new Color("#55FF55");
+    public static final Color AQUA = new Color("#55FFFF");
+    public static final Color RED = new Color("#FF5555");
+    public static final Color LIGHT_PURPLE = new Color("#FF55FF");
+    public static final Color YELLOW = new Color("#FFFF55");
+    public static final Color WHITE = new Color("#FFFFFF");
+
+    public static final Color TRANSPARENT = new Color("#FFFFFF", 0.0F);
+
     /** The max value a color component can hold as an int (255) */
     public static final int MAX_COMPONENT_INT = 0xFF;
     /** The max value a color component can hold as a byte (-1) */
