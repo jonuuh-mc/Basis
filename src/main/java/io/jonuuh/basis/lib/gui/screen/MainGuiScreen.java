@@ -2,14 +2,17 @@ package io.jonuuh.basis.lib.gui.screen;
 
 import io.jonuuh.basis.lib.config.setting.Settings;
 import io.jonuuh.basis.lib.gui.BaseGuiScreen;
+import io.jonuuh.basis.lib.gui.element.GuiElement;
 import io.jonuuh.basis.lib.gui.element.GuiLabel;
+import io.jonuuh.basis.lib.gui.element.GuiTextField;
+import io.jonuuh.basis.lib.gui.element.button.GuiLabeledButton;
 import io.jonuuh.basis.lib.gui.element.container.FlexItem;
 import io.jonuuh.basis.lib.gui.element.container.GuiBasicContainer;
 import io.jonuuh.basis.lib.gui.element.container.GuiContainer;
+import io.jonuuh.basis.lib.gui.element.container.GuiDropdown;
 import io.jonuuh.basis.lib.gui.element.container.GuiRootContainer;
 import io.jonuuh.basis.lib.gui.element.container.behavior.FlexBehavior;
 import io.jonuuh.basis.lib.gui.element.container.behavior.ScrollBehavior;
-import io.jonuuh.basis.lib.gui.element.slider.GuiSingleSlider;
 import io.jonuuh.basis.lib.gui.element.toggles.GuiCheckbox;
 import io.jonuuh.basis.lib.gui.properties.FlexAlign;
 import io.jonuuh.basis.lib.gui.properties.FlexDirection;
@@ -17,8 +20,8 @@ import io.jonuuh.basis.lib.gui.properties.FlexJustify;
 import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.gui.properties.Spacing;
 import io.jonuuh.basis.lib.util.Color;
-import io.jonuuh.basis.lib.util.MathUtils;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,13 +72,13 @@ public class MainGuiScreen extends BaseGuiScreen
                 .size(575, 330)
                 .color(GuiColorType.BACKGROUND, new Color("4d4d4d", 0.75F))
                 .padding(new Spacing(10, 10, 10, 10))
-                .cornerRadius(3)
+                .cornerRadius(5)
                 .flexBehavior(new FlexBehavior.Builder()
                         .direction(FlexDirection.COLUMN)
                         .justify(FlexJustify.BETWEEN)
                         .align(FlexAlign.CENTER)
-                        .items(makeSettingContainer(), makeSettingContainer(), makeSettingContainer(), makeSettingContainer(),
-                                makeSettingContainer(), makeSettingContainer(), makeSettingContainer(), makeSettingContainer()))
+                        .items(makeSettingContainer()/*, makeSettingContainer(), makeSettingContainer(), makeSettingContainer(),
+                                makeSettingContainer(), makeSettingContainer(), makeSettingContainer(), makeSettingContainer()*/))
                 .scrollBehavior(new ScrollBehavior.Builder().length(500))
                 .build();
 
@@ -103,13 +106,27 @@ public class MainGuiScreen extends BaseGuiScreen
     private FlexItem makeSettingContainer()
     {
         GuiContainer labelContainer = new GuiBasicContainer.Builder("labelContainer")
-                .size(100, 40)
+                .size(200, 30)
                 .flexBehavior(new FlexBehavior.Builder()
                         .direction(FlexDirection.ROW)
                         .justify(FlexJustify.CENTER)
                         .align(FlexAlign.CENTER)
-                        .item(new FlexItem(new GuiLabel.Builder("label")/*.size(1, 1)*/
-                                .text("Lorem ipsum something something something 123").build())/*.setGrow(1)*/))
+                        .item(new FlexItem(new GuiLabel.Builder("label").padding(new Spacing(5))/*.size(1, 1)*/
+                                .text("Lorem ipsum something something something 123").build())/*.setGrow(1)*/)
+                )
+                .scrollBehavior(new ScrollBehavior.Builder().length(60))
+                .build();
+
+        GuiContainer textFieldContainer = new GuiBasicContainer.Builder("fieldContainer")
+                .size(300, 40)
+                .flexBehavior(new FlexBehavior.Builder()
+                        .direction(FlexDirection.ROW)
+                        .justify(FlexJustify.CENTER)
+                        .align(FlexAlign.CENTER)
+                        .items(new FlexItem(new GuiTextField.Builder("textField").size(170, 20).padding(new Spacing(5)).build()),
+                                new FlexItem(new GuiDropdown.Builder("fieldDropdown").size(75, 10).options(Arrays.asList("1", "2", "3")).build()),
+                                new FlexItem(new GuiLabeledButton.Builder("fieldButton").label("Add").mouseDownBehavior(this::addBehavior).build()))
+                )
                 .build();
 
         return new FlexItem(new GuiBasicContainer.Builder("settingContainer")
@@ -118,10 +135,40 @@ public class MainGuiScreen extends BaseGuiScreen
                 .padding(new Spacing(5, 5, 5, 5))
                 .flexBehavior(new FlexBehavior.Builder()
                         .direction(FlexDirection.ROW)
-                        .justify(FlexJustify.BETWEEN)
+                        .justify(FlexJustify.AROUND)
                         .align(FlexAlign.CENTER)
-                        .items(new FlexItem(labelContainer).setGrow(1),
-                                new FlexItem(new GuiSingleSlider.Builder("slider").size(170, 20).bounds(0, 100).startValue(MathUtils.randomIntInclusiveRange(0, 100)).build()))
+                        .items(new FlexItem(labelContainer)/*.setGrow(1)*/, new FlexItem(textFieldContainer)/*,
+                                new FlexItem(new GuiBasicContainer.Builder("a").build())*/)
                 ).build());
+    }
+
+    private void addBehavior(GuiElement element)
+    {
+        GuiContainer container = (GuiContainer) rootContainer.getElementByName("mainContent");
+
+        String text = ((GuiTextField) rootContainer.getElementByName("textField")).getText();
+        ((GuiTextField) rootContainer.getElementByName("textField")).clearText();
+
+        GuiLabel label = new GuiLabel.Builder("label").padding(new Spacing(2)).text(text).build();
+
+        GuiElement element1 = new GuiDropdown.Builder("aDropdown").size(75, 10).options(Arrays.asList("1", "2", "3")).build();
+
+        addToContainer(element1, container);
+
+        container.getFlexBehavior().updateItemsLayout();
+    }
+
+    private void addToContainer(GuiElement addedElement, GuiContainer container)
+    {
+        if (container.getFlexBehavior() != null)
+        {
+            container.getFlexBehavior().addItem(new FlexItem(addedElement), container.getChildren().size() - 2);
+        }
+        else
+        {
+            container.addChild(addedElement, container.getChildren().size() - 2);
+        }
+
+//        System.out.println(container.getChildren());
     }
 }

@@ -3,7 +3,6 @@ package io.jonuuh.basis.lib.gui.element.container.behavior;
 import io.jonuuh.basis.lib.gui.element.GuiElement;
 import io.jonuuh.basis.lib.gui.element.container.GuiContainer;
 import io.jonuuh.basis.lib.gui.element.slider.GuiScrollSlider;
-import io.jonuuh.basis.lib.gui.listener.input.InputListener;
 
 import java.util.List;
 
@@ -73,16 +72,16 @@ public class ScrollBehavior
 
             element.setLocalYPos(element.getLocalYPos() - sliderValue);
 
-            // TODO: safest behavior would be to disable an element if ANY of it is out of bounds,
-            //  otherwise unintended wins/losses of greatest z element calc could arise when clicking around the edges of a
-            //  container whose children are partially scrolled out of bounds
-            boolean isOutOfBottomBound = (element.getBottomBound() - host.getBottomBound()) > 0;
-            boolean isOutOfTopBound = (host.getTopBound() - element.getTopBound()) > 0;
-
-            if (element instanceof InputListener)
-            {
-                ((InputListener) element).setEnabled(!isOutOfBottomBound && !isOutOfTopBound);
-            }
+//            // TODO: safest behavior would be to disable an element if ANY of it is out of bounds,
+//            //  otherwise unintended wins/losses of greatest z element calc could arise when clicking around the edges of a
+//            //  container whose children are partially scrolled out of bounds
+//            boolean isOutOfBottomBound = (element.getBottomBound() - host.getBottomBound()) > 0;
+//            boolean isOutOfTopBound = (host.getTopBound() - element.getTopBound()) > 0;
+//
+//            if (element instanceof InputListener)
+//            {
+//                ((InputListener) element).setEnabled(!isOutOfBottomBound && !isOutOfTopBound);
+//            }
         }
     }
 

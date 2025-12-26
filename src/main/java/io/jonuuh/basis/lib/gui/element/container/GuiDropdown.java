@@ -23,6 +23,7 @@ public class GuiDropdown extends GuiContainer implements MouseClickListener, Clo
 {
     private final Map<Class<? extends GuiEvent>, Consumer<GuiElement>> postBehaviors;
     protected GuiContainer optionsContainer;
+    // TODO: make header a generic GuiElement instead? support guiTexturedButtons for example? maybe just make it a GuiButton type
     protected GuiLabeledButton header;
     private boolean enabled;
     private boolean mouseDown;
@@ -32,6 +33,9 @@ public class GuiDropdown extends GuiContainer implements MouseClickListener, Clo
     public GuiDropdown(Builder builder)
     {
         super(builder);
+
+        this.shouldScissor = false;
+
         this.enabled = builder.enabled;
         this.header = builder.header;
         this.optionsContainer = builder.optionsContainer;
@@ -88,7 +92,11 @@ public class GuiDropdown extends GuiContainer implements MouseClickListener, Clo
     {
         super.onMouseDown(event);
         // TODO: class cast exception if target is ever something other than a GuiButton
-        header.setLabel(((GuiLabel) event.target).getText());
+
+        if (event.target instanceof GuiLabel)
+        {
+            header.setLabel(((GuiLabel) event.target).getText());
+        }
         optionsContainer.setVisible(!optionsContainer.isVisible());
         tryApplyPostEventBehavior(event.getClass());
 
@@ -99,7 +107,8 @@ public class GuiDropdown extends GuiContainer implements MouseClickListener, Clo
     @Override
     public void onCloseGui(CloseGuiEvent event)
     {
-        optionsContainer.setVisible(!optionsContainer.isVisible());
+//        optionsContainer.setVisible(!optionsContainer.isVisible());
+        optionsContainer.setVisible(false);
     }
 
     @Override

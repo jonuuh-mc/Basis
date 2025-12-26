@@ -375,6 +375,40 @@ public abstract class GuiElement
 
         setHovered(isPointWithinBounds(mouseX, mouseY));
 
+//        this.debug = true; // TODO:
+//        mc.getTextureManager().bindTexture(mc.getNetHandler().getPlayerInfo(mc.thePlayer.getUniqueID()).getLocationSkin());
+//        System.out.println(mc.getNetHandler().getPlayerInfo(mc.thePlayer.getUniqueID()).getLocationSkin());
+//        Gui.drawScaledCustomSizeModalRect(0, 0, 8, 8, 8, 8, 50, 50, 64F, 64F); // base
+//        Gui.drawScaledCustomSizeModalRect(0, 0, 40, 8, 8, 8, textureSize, textureSize, 64.0F, 64.0F); // hat
+
+//        ResourceLocation texture = mc.getNetHandler().getPlayerInfo(mc.thePlayer.getUniqueID()).getLocationSkin();
+////        ResourceLocation texture = new ResourceLocation("minecraft:textures/entity/end_portal.png");
+//        RenderUtils.drawTexturedRect(texture, 0, 0, getZLevel(), 300, 300, 100, false, new Color());
+//
+//        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+//        GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
+//        GL11.glLineWidth(2F);
+//        RenderUtils.drawRoundedRect(GL11.GL_LINE_STRIP, 0, 0, 300, 300, 100, new Color());
+//        GL11.glLineWidth(1F);
+//        GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_DONT_CARE);
+//        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+
+//        System.out.println(texture);
+
+//        // TODO: safest behavior would be to disable an element if ANY of it is out of bounds,
+//        //  otherwise unintended wins/losses of greatest z element calc could arise when clicking around the edges of a
+//        //  container whose children are partially scrolled out of bounds
+//        if (this instanceof InputListener && hasParent())
+//        {
+//            boolean isBelowTopBound = this.getTopBound() > getParent().getTopBound();
+//            boolean isAboveBottomBound = this.getBottomBound() < getParent().getBottomBound();
+//
+////            System.out.println(this.elementName + " below top:" + isBelowTopBound + " above bottom:" + isAboveBottomBound);
+//
+//            ((InputListener) this).setEnabled(isBelowTopBound && isAboveBottomBound);
+////            System.out.println(elementName + " " + ((InputListener) this).isEnabled());
+//        }
+
         // Temporary; draw dark tint over disabled elements
         if (this instanceof InputListener && !((InputListener) this).isEnabled())
         {
