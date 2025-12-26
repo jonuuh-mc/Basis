@@ -1,0 +1,125 @@
+package io.jonuuh.basis.v000309.lib.gui.element.container.behavior;
+
+import io.jonuuh.basis.v000309.lib.gui.element.GuiElement;
+import io.jonuuh.basis.v000309.lib.gui.element.container.GuiContainer;
+import io.jonuuh.basis.v000309.lib.gui.element.slider.GuiScrollSlider;
+
+import java.util.List;
+
+public class ScrollBehavior
+{
+    private final GuiContainer host;
+    private final GuiScrollSlider scrollSlider;
+    private float sliderEdgeOffset;
+    private float sliderWidth;
+
+    public ScrollBehavior(Builder builder)
+    {
+        this.host = builder.host;
+        this.sliderWidth = builder.sliderWidth;
+        this.sliderEdgeOffset = builder.sliderEdgeOffset;
+
+        this.scrollSlider = new GuiScrollSlider.Builder(host.elementName + "$sliderVertical")
+                .localPosition(host.getWidth() - sliderWidth - sliderEdgeOffset, sliderEdgeOffset)
+                .size(sliderWidth, host.getHeight() - (sliderEdgeOffset * 2))
+                .vertical(true)
+                .stateChangeBehavior(element -> slideChildrenVertically())
+                .bounds(0, builder.scrollLength).build();
+
+        host.addChild(scrollSlider);
+    }
+
+    // make this abstract maybe; a container might only want to scroll some elements for some reason
+    // (definitely don't want to scroll the scroll slider itself, at least)
+    public List<GuiElement> getScrollElements()
+    {
+        return host.getChildren();
+    }
+
+    public GuiScrollSlider getSlider()
+    {
+        return scrollSlider;
+    }
+
+    public void setSliderEdgeOffset(int sliderEdgeOffset)
+    {
+        this.sliderEdgeOffset = sliderEdgeOffset;
+    }
+
+    public void setSliderWidth(int sliderWidth)
+    {
+        this.sliderWidth = sliderWidth;
+    }
+
+    public void updateSlider()
+    {
+        getSlider().setLocalXPos(host.getWidth() - sliderWidth - sliderEdgeOffset);
+        getSlider().setHeight(host.getHeight() - (sliderEdgeOffset * 2));
+        getSlider().updateScrollBarLength();
+//        getSlider().setValue(0);
+    }
+
+    public void slideChildrenVertically()
+    {
+        float sliderValue = getSlider().getLastChange();
+
+        for (GuiElement element : getScrollElements())
+        {
+            if (element.equals(scrollSlider))
+            {
+                continue;
+            }
+
+            element.setLocalYPos(element.getLocalYPos() - sliderValue);
+
+//            // TODO: safest behavior would be to disable an element if ANY of it is out of bounds,
+//            //  otherwise unintended wins/losses of greatest z element calc could arise when clicking around the edges of a
+//            //  container whose children are partially scrolled out of bounds
+//            boolean isOutOfBottomBound = (element.getBottomBound() - host.getBottomBound()) > 0;
+//            boolean isOutOfTopBound = (host.getTopBound() - element.getTopBound()) > 0;
+//
+//            if (element instanceof InputListener)
+//            {
+//                ((InputListener) element).setEnabled(!isOutOfBottomBound && !isOutOfTopBound);
+//            }
+        }
+    }
+
+    public static class Builder
+    {
+        protected GuiContainer host = null;
+        protected float scrollLength = 0;
+        protected float sliderWidth = 6;
+        protected float sliderEdgeOffset = 2;
+
+        public Builder host(GuiContainer host)
+        {
+            this.host = host;
+            return this;
+        }
+
+        public Builder length(float scrollLength)
+        {
+            this.scrollLength = scrollLength;
+            return this;
+        }
+
+        public Builder sliderWidth(float sliderWidth)
+        {
+            this.sliderWidth = sliderWidth;
+            return this;
+        }
+
+        public Builder sliderEdgeOffset(float sliderEdgeOffset)
+        {
+            this.sliderEdgeOffset = sliderEdgeOffset;
+            return this;
+        }
+
+        public ScrollBehavior build()
+        {
+            return new ScrollBehavior(this);
+        }
+    }
+}
+
