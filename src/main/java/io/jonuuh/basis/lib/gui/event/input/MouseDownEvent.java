@@ -22,7 +22,7 @@ public class MouseDownEvent extends GuiTargetedEvent
     {
         if (!((InputListener) element).isEnabled())
         {
-            this.stopPropagation();
+//            this.stopPropagation();
             return;
         }
 

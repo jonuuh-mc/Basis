@@ -20,7 +20,7 @@ public class MouseScrollEvent extends GuiTargetedEvent
     {
         if (!((InputListener) element).isEnabled())
         {
-            this.stopPropagation();
+//            this.stopPropagation();
             return;
         }
 

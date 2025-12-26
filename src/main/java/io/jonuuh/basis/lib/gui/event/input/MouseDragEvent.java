@@ -26,7 +26,7 @@ public class MouseDragEvent extends GuiTargetedEvent
     {
         if (!((InputListener) element).isEnabled())
         {
-            this.stopPropagation();
+//            this.stopPropagation();
             return;
         }
 
