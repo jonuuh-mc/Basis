@@ -25,8 +25,12 @@ public interface MouseClickListener extends InputListener
     default void onMouseDown(MouseDownEvent event)
     {
         setMouseDown(true);
-        // TODO: find a better solution than this call to Minecraft.getMinecraft()
-        playClickSound(Minecraft.getMinecraft().getSoundHandler());
+        
+        if (event.target == this)
+        {
+            // TODO: find a better solution than this call to Minecraft.getMinecraft()
+            playClickSound(Minecraft.getMinecraft().getSoundHandler());
+        }
     }
 
     default void onMouseUp(MouseUpEvent event)
