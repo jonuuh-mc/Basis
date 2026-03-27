@@ -19,10 +19,12 @@ import java.util.function.Consumer;
 abstract class GuiSlider extends GuiElement implements MouseClickListener, MouseScrollListener, ScreenTickListener, PostEventBehaviorHost
 {
     private final Map<Class<? extends GuiEvent>, Consumer<GuiElement>> postBehaviors;
+    // min and max are (as of writing this) only non-final so that a scroll slider of a list view element
+    // can change the slider's max length when more elements are added to the list
     /** The minimum value of this slider (not normalized; readable value) */
-    protected final float min;
+    protected float min;
     /** The maximum value of this slider (not normalized; readable value) */
-    protected final float max;
+    protected float max;
     protected final boolean isVertical; // TODO: refactor all instances of isVertical to isHorizontal?
     protected final boolean isInteger;
     protected final DecimalFormat decimalFormat;

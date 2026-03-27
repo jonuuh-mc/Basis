@@ -379,10 +379,10 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
             flexBehavior.updateItemsLayout();
         }
 
-        if (scrollBehavior != null)
-        {
-            scrollBehavior.updateSlider();
-        }
+//        if (scrollBehavior != null)
+//        {
+//            scrollBehavior.updateSlider();
+//        }
     }
 
     @Override

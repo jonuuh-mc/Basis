@@ -4,6 +4,7 @@ import io.jonuuh.basis.lib.gui.element.ElementUtils;
 import io.jonuuh.basis.lib.gui.element.GuiElement;
 import io.jonuuh.basis.lib.gui.element.container.FlexItem;
 import io.jonuuh.basis.lib.gui.element.container.GuiContainer;
+import io.jonuuh.basis.lib.gui.element.slider.GuiScrollSlider;
 import io.jonuuh.basis.lib.gui.properties.FlexAlign;
 import io.jonuuh.basis.lib.gui.properties.FlexDirection;
 import io.jonuuh.basis.lib.gui.properties.FlexJustify;
@@ -175,17 +176,26 @@ public class FlexBehavior
 
         if (doJustify)
         {
-            if (getHost().getScrollBehavior() == null)
+            ScrollBehavior hostScroll = getHost().getScrollBehavior();
+
+            if (hostScroll == null)
             {
                 justifyMainAxis();
             }
             else
             {
-                // TODO: dumb
-                float sliderValue = getHost().getScrollBehavior().getSlider().getNormalizedValue();
-                getHost().getScrollBehavior().getSlider().setNormalizedValue(0);
+                GuiScrollSlider hostSlider = hostScroll.getSlider();
+
+                // Hold the actual slider value, then set slider value to 0 before justifying elements
+                float sliderValue = hostSlider.getNormalizedValue();
+                hostSlider.setNormalizedValue(0);
+
                 justifyMainAxis();
-                getHost().getScrollBehavior().getSlider().setNormalizedValue(sliderValue);
+                hostScroll.updateSlider();
+
+                // After justifying and updating positions and size of slider based on new host position/size,
+                // set the slider value back to what it was
+                hostSlider.setNormalizedValue(sliderValue);
             }
         }
 
