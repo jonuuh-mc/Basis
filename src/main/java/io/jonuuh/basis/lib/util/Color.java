@@ -49,7 +49,6 @@ public class Color
     public static final Color LIGHT_PURPLE = new Color("#FF55FF");
     public static final Color YELLOW = new Color("#FFFF55");
     public static final Color WHITE = new Color("#FFFFFF");
-
     public static final Color TRANSPARENT = new Color("#FFFFFF", 0.0F);
 
     /** The max value a color component can hold as an int (255) */
@@ -191,7 +190,7 @@ public class Color
      */
     public Color(String rgbHexStr, float a)
     {
-        this(Integer.toHexString((int) (MAX_COMPONENT_INT * a)) + trimPrefixes(rgbHexStr));
+        this(toHexStr((int) (MAX_COMPONENT_INT * a)) + trimPrefixes(rgbHexStr));
     }
 
     /**
@@ -329,15 +328,10 @@ public class Color
         return byteToHexStr(a) + byteToHexStr(r) + byteToHexStr(g) + byteToHexStr(b);
     }
 
-    private String byteToHexStr(byte component)
-    {
-        return String.format("%02X", toInt(component));
-    }
-
     /**
      * Performs {@code ((int) component) & 0xff} internally.
      * <p>
-     * Also, IIRC casting to (int) is actually unnecessary but just clearer to what's happening in the conversion
+     * Also, IIRC casting to (int) is actually unnecessary but just clearer to illustrate what's happening in the conversion
      */
     private int toInt(byte colorComponentByte)
     {
@@ -347,6 +341,20 @@ public class Color
     private float toFloat(byte colorComponentByte)
     {
         return (colorComponentByte & MAX_COMPONENT_INT) / 255.0F;
+    }
+
+    private String byteToHexStr(byte component)
+    {
+        return String.format("%02X", toInt(component));
+    }
+
+    /**
+     * Fix for Integer.toHexString() returning single digits if integer is less than 16.
+     * This causes problems when trying to interpret pairs of hex chars as color component bytes.
+     */
+    private static String toHexStr(int i)
+    {
+        return i < 16 ? String.format("%02X", i) : Integer.toHexString(i);
     }
 
     /**
@@ -400,9 +408,9 @@ public class Color
      */
     public static Color getRandomRGBWithOpacity(float a)
     {
-        String alphaStr = Integer.toHexString((int) (MAX_COMPONENT_INT * a));
+        String alphaStr = toHexStr((int) (MAX_COMPONENT_INT * a));
         int randomInt = ThreadLocalRandom.current().nextInt(0xFFFFFF + 1);
-        return new Color(alphaStr + Integer.toHexString(randomInt));
+        return new Color(alphaStr + toHexStr(randomInt));
     }
 
     @Override
