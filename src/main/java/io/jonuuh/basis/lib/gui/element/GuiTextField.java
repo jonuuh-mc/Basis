@@ -300,7 +300,7 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
 
                 default:
                     // Enabled + not one of first ascii reserved 0-31, + not DEL or section sign
-                    if (isEnabled() && ChatAllowedCharacters.isAllowedCharacter(event.typedChar))
+                    if (isEnabled() && isAllowedChar(event.typedChar))
                     {
                         writeString(Character.toString(event.typedChar));
                         break;
@@ -309,6 +309,15 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         }
 
         isTyping = false;
+    }
+
+    /**
+     * This wraps the ChatAllowedCharacters function instead of calling it directly
+     * where needed to allow potential subclasses to change char filtering behavior
+     */
+    protected boolean isAllowedChar(char character)
+    {
+        return ChatAllowedCharacters.isAllowedCharacter(character);
     }
 
     public void writeString(String str)
