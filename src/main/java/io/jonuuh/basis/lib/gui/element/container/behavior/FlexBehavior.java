@@ -33,18 +33,17 @@ public class FlexBehavior
     protected boolean doResize;
     protected boolean doJustify;
     protected boolean doAlign;
-    //    protected List<FlexItem> resizeExcludes;
-//    protected List<FlexItem> justifyExcludes;
-//    protected List<FlexItem> alignExcludes;
+    /**
+     * Optional custom main axis size.
+     * <p>
+     * This was implemented to tell a container with both flex and scroll behavior to use
+     * the scroll behavior's scrollable length as the main axis length rather than the host's actual length
+     */
     protected Float mainAxisSize;
 
     protected FlexBehavior(Builder builder)
     {
-//        this.container = container;
         this.flexItems = builder.flexItems;
-//        addItems(builder.flexItems);
-//        this.flexItems = new ArrayList<>();
-////        addItems(builder.flexItems);
         this.direction = builder.direction;
         this.justify = builder.justify;
         this.align = builder.align;
@@ -206,6 +205,24 @@ public class FlexBehavior
         }
     }
 
+    public void updateItemsLayoutRecursive()
+    {
+        updateItemsLayout();
+
+        for (FlexItem item : this.flexItems)
+        {
+            if (item.getElement() instanceof GuiContainer)
+            {
+                GuiContainer container = (GuiContainer) item.getElement();
+                FlexBehavior behavior = container.getFlexBehavior();
+
+                if (behavior != null)
+                {
+                    behavior.updateItemsLayoutRecursive();
+                }
+            }
+        }
+    }
     // note: if an element has a basis of 0, it won't ever grow - is this a problem?
     // what if an element is shrunk to the point of being 0 and then cannot grow back up again
     private void resizeMainAxisItems(float freeLength, ResizeType resizeType)
@@ -426,11 +443,15 @@ public class FlexBehavior
         return direction == FlexDirection.ROW_REVERSE || direction == FlexDirection.COLUMN_REVERSE;
     }
 
+    public void setMainAxisSize(float mainAxisSize)
+    {
+        this.mainAxisSize = mainAxisSize;
+    }
+
     protected float getMainAxisSize()
     {
         if (mainAxisSize != null)
         {
-//            System.out.println(mainAxisSize);
             return isHorizontal()
                     ? mainAxisSize - getHost().getPadding().left() - getHost().getPadding().right()
                     : mainAxisSize - getHost().getPadding().top() - getHost().getPadding().bottom();
