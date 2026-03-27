@@ -25,12 +25,14 @@ minecraft {
     makeObfSourceJar = false
 }
 
-// TODO: Use this when building or publishing
-jar {
-    sourceSets {
-        main {
-            java {
-                exclude 'io/jonuuh/basis/local/**', 'io/jonuuh/basis/local'
+// Exclude local testing files when building or publishing
+if (!gradle.startParameter.taskNames.contains("runClient")) {
+    jar {
+        sourceSets {
+            main {
+                java {
+                    exclude 'io/jonuuh/basis/local/**', 'io/jonuuh/basis/local'
+                }
             }
         }
     }
@@ -71,7 +73,6 @@ publishing {
             artifact file("${buildDir}/libs/${archivesBaseName}-${version}.jar")
 
             // Include sources
-//            artifact file("${buildDir}/libs/${archivesBaseName}-${version}-sources.jar")
             artifact sourcesJar
         }
     }
