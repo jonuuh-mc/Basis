@@ -56,7 +56,6 @@ public class ScrollBehavior
         getSlider().setLocalXPos(host.getWidth() - sliderWidth - sliderEdgeOffset);
         getSlider().setHeight(host.getHeight() - (sliderEdgeOffset * 2));
         getSlider().updateScrollBarLength();
-//        getSlider().setValue(0);
     }
 
     public void slideChildrenVertically()
