@@ -409,20 +409,20 @@ public abstract class GuiElement
 ////            System.out.println(elementName + " " + ((InputListener) this).isEnabled());
 //        }
 
-        // Temporary; draw dark tint over disabled elements
-        if (this instanceof InputListener && !((InputListener) this).isEnabled())
-        {
-            RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), new Color("#aa181818"));
-        }
-
         if (debug)
         {
+            // Draw dark tint over disabled elements
+            if (this instanceof InputListener && !((InputListener) this).isEnabled())
+            {
+                RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), new Color("#43110D", 0.33F));
+            }
+
             // Draw element outline
             RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), getWidth(), getHeight(),
                     isFocused() ? new Color("#00ff00") : new Color("#ff55ff"));
 
             // Draw padding rectangles
-            Color padColor = new Color("#36ff0000");
+            Color padColor = new Color("#6260ff", 0.2F);
             // Left
             RenderUtils.drawRectangle(worldXPos(), worldYPos(), getPadding().left(), getHeight(), padColor);
             // Right
