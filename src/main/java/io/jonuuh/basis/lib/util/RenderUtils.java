@@ -328,7 +328,7 @@ public final class RenderUtils
         GL11.glDisable(GL11.GL_BLEND);
     }
 
-    public static void drawSphere(boolean blend, boolean cullFace, boolean wireframe, Color color)
+    public static void drawSphere(float radius, int slices, int stacks, boolean blend, boolean cullFace, boolean wireframe, Color color)
     {
         GL11.glColor4ub(color.r, color.g, color.b, color.a);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
@@ -338,7 +338,7 @@ public final class RenderUtils
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         }
-        if (cullFace)
+        if (!cullFace)
         {
             GL11.glDisable(GL11.GL_CULL_FACE);
         }
@@ -349,7 +349,7 @@ public final class RenderUtils
 
         GL11.glPushMatrix();
         GL11.glRotatef(90, 1.0F, 0.0F, 0.0F);
-        new Sphere().draw(2, 12, 12);
+        new Sphere().draw(radius, slices, stacks);
         GL11.glPopMatrix();
 
         if (wireframe)
@@ -357,7 +357,7 @@ public final class RenderUtils
             // TODO: what is the default that this global state should be reset to? is this fine?
             GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
         }
-        if (cullFace)
+        if (!cullFace)
         {
             GL11.glEnable(GL11.GL_CULL_FACE);
         }
