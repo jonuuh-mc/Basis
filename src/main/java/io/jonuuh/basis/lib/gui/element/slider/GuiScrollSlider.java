@@ -55,9 +55,25 @@ public class GuiScrollSlider extends GuiSlider implements MouseDragListener
         return getValue() - (float) MathUtils.denormalize(lastValue, min, max);
     }
 
+    public float getScrollBarLength()
+    {
+        return scrollBarLength;
+    }
+
     public void updateScrollBarLength()
     {
-        this.scrollBarLength = isVertical ? getHeight() / max : getWidth() / max;
+        this.scrollBarLength = Math.max(1, (isVertical ? getHeight() / max : getWidth() / max));
+
+        // No need to set isEnabled here due to upstream (BaseGuiScreen#mouseClicked())
+        // not allowing clicking on elements if invisible
+        if (scrollBarLength == 1)
+        {
+            this.setVisible(false);
+        }
+        else if (!this.isVisible())
+        {
+            this.setVisible(true);
+        }
     }
 
 //    @Override
