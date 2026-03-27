@@ -72,15 +72,12 @@ public class ScrollBehavior
 
             element.setLocalYPos(element.getLocalYPos() - sliderValue);
 
-            // TODO: safest behavior would be to disable an element if ANY of it is out of bounds,
-            //  otherwise unintended wins/losses of greatest z element calc could arise when clicking around the edges of a
-            //  container whose children are partially scrolled out of bounds
-            boolean isOutOfBottomBound = (element.getBottomBound() - host.getBottomBound()) > 0;
-            boolean isOutOfTopBound = (host.getTopBound() - element.getTopBound()) > 0;
+            boolean isFullyOutsideBottomBound = element.getTopBound() > host.getBottomBound();
+            boolean isFullyOutsideTopBound = element.getBottomBound() < host.getTopBound();
 
             if (element instanceof InputListener)
             {
-                ((InputListener) element).setEnabled(!isOutOfBottomBound && !isOutOfTopBound);
+                ((InputListener) element).setEnabled(!isFullyOutsideBottomBound && !isFullyOutsideTopBound);
             }
         }
     }

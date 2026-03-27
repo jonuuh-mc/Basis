@@ -166,10 +166,36 @@ public abstract class BaseGuiScreen extends GuiScreen
 
         if (!clickable.isEmpty())
         {
-            // TODO: if the clickable elements contains a scroll slider, reverse order to get min z level instead?
-            //  desired behavior may be that when a click is performed on two overlapping scroll sliders from a parent container and its child container,
-            //  the parent container's scroll slider wins (parent scroll slider z level would be lower than the child scroll slider if zLevel=numParents)
             GuiElement mouseDownTarget = CollectionUtils.getMax(clickable, Comparator.comparingInt(GuiElement::getZLevel));
+
+            boolean isTargetParentHovered = false;
+
+            // The isEnabled check from canClickOn(element) combined with a process to disable
+            // fully out of bounds elements (in ScrollBehavior#slideChildrenVertically) handles
+            // most cases involving clicking 'out of bounds' elements.
+            //
+            // This extra process here is for the edge case of an element being partially outside
+            // its parent's bounds, and that partially outside part being clicked on.
+            //
+            // Continually make sure that the target's parent is actually hovered.
+            // If it's not, keep trying to find another clickable target whose parent is hovered.
+            while (!isTargetParentHovered && !clickable.isEmpty())
+            {
+                if (mouseDownTarget.hasParent())
+                {
+                    isTargetParentHovered = mouseDownTarget.getParent().isHovered();
+
+                    if (!isTargetParentHovered)
+                    {
+                        clickable.remove(mouseDownTarget);
+                        mouseDownTarget = CollectionUtils.getMax(clickable, Comparator.comparingInt(GuiElement::getZLevel));
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
 
             MouseDownEvent event = new MouseDownEvent(mouseDownTarget, mouseX, mouseY);
             dispatchTargetedEvent(event);
