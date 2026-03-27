@@ -24,6 +24,16 @@ public class GuiScrollSlider extends GuiSlider implements MouseDragListener
         updateScrollBarLength();
     }
 
+    public void setMin(float min)
+    {
+        this.min = min;
+    }
+
+    public void setMax(float max)
+    {
+        this.max = max;
+    }
+
     /**
      * A normalized value from 0-1: where on the slider the start (top if vertical, left if horizontal) of the scroll bar is
      */
