@@ -197,6 +197,11 @@ public abstract class BaseGuiScreen extends GuiScreen
                 }
             }
 
+            if (mouseDownTarget == null)
+            {
+                return;
+            }
+
             MouseDownEvent event = new MouseDownEvent(mouseDownTarget, mouseX, mouseY);
             dispatchTargetedEvent(event);
 
