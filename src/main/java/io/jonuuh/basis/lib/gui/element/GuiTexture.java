@@ -1,41 +1,29 @@
-package io.jonuuh.basis.lib.gui.element.button;
+package io.jonuuh.basis.lib.gui.element;
 
-import io.jonuuh.basis.lib.gui.element.ElementUtils;
 import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.RenderUtils;
 import net.minecraft.util.ResourceLocation;
 
 /**
- * An interactable texture display element.
- * <p>
- * This is more or less identical in display functionality to {@link io.jonuuh.basis.lib.gui.element.GuiTexture GuiTexture},
- * however this one also extends {@link GuiButton} and so can be interacted with.
+ * A plain, un-interactable texture display element.
+ *
+ * @see io.jonuuh.basis.lib.gui.element.button.GuiTexturedButton
  */
-public class GuiTexturedButton extends GuiButton
+public class GuiTexture extends GuiElement
 {
     protected ResourceLocation texture;
     protected Color texColor;
     protected boolean smoothing;
     protected boolean drawBackground;
 
-    public GuiTexturedButton(Builder builder)
+    public GuiTexture(Builder builder)
     {
         super(builder);
         this.texture = builder.texture;
         this.texColor = builder.texColor;
         this.smoothing = builder.smoothing;
         this.drawBackground = builder.drawBackground;
-    }
-
-    public ResourceLocation getTexture()
-    {
-        return texture;
-    }
-
-    public void setTexture(ResourceLocation texture)
-    {
-        this.texture = texture;
     }
 
     @Override
@@ -60,7 +48,7 @@ public class GuiTexturedButton extends GuiButton
         }
     }
 
-    public static class Builder extends GuiButton.AbstractBuilder<Builder, GuiTexturedButton>
+    public static class Builder extends GuiElement.AbstractBuilder<Builder, GuiTexture>
     {
         protected ResourceLocation texture = null;
         protected Color texColor = Color.WHITE;
@@ -103,9 +91,9 @@ public class GuiTexturedButton extends GuiButton
         }
 
         @Override
-        public GuiTexturedButton build()
+        public GuiTexture build()
         {
-            return new GuiTexturedButton(this);
+            return new GuiTexture(this);
         }
     }
 }
