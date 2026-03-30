@@ -7,11 +7,9 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Sphere;
 
@@ -54,21 +52,6 @@ public final class RenderUtils
             return getFontRenderer().trimStringToWidth(str, width - ellipsisWidth).trim() + "...";
         }
         return str;
-    }
-
-    public static Vec3 getEntityPosForRender(EntityPlayer player, float partialTicks)
-    {
-        RenderManager renderManager = mc.getRenderManager();
-        if (player == mc.thePlayer && renderManager.livingPlayer == mc.thePlayer)
-        {
-            // viewer pos (usually client player pos) is cached by render manager during each render pass
-            return new Vec3(renderManager.viewerPosX, renderManager.viewerPosY, renderManager.viewerPosZ);
-        }
-
-        double x = (player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks);
-        double y = (player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks);
-        double z = (player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks);
-        return new Vec3(x, y, z);
     }
 
     public static void scissorFromTopLeft(int x, int y, int w, int h)
