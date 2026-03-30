@@ -42,9 +42,9 @@ public abstract class GuiElement
     private float localXPos;
     /** Element y position within its parent */
     private float localYPos;
-    /** The sum of all world xPos from this element's ancestors */
+    /** The sum of all local xPos from this element's ancestors */
     private float inheritedXPos;
-    /** The sum of all world yPos from this element's ancestors */
+    /** The sum of all local yPos from this element's ancestors */
     private float inheritedYPos;
 
     /** Width of this element */
@@ -52,7 +52,7 @@ public abstract class GuiElement
     /** Height of this element */
     private float height;
 
-    /** Which symbolic layer this element is on, should be equal to how many parents this element has */
+    /** Which logical layer this element is on, should be equal to how many parents this element has */
     private int zLevel;
     /** Whether this element is visible (should be drawn to screen) */
     private boolean visible;
@@ -95,6 +95,281 @@ public abstract class GuiElement
             setParent(builder.parent);
         }
     }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //                                              POSITIONAL
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    //                        World X
+    //                  ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ▶
+    //
+    //
+    //                  0      5                  20
+    //                0 ┌─── ──── ──── ──── ──── ──── ──── ──── ──── ──── ──── ──── ──── ──── ┐
+    //          │       │                                                                     │
+    //                  │                                                                     │
+    //          │       │      0                  15                                          │
+    //  World Y       5 │    0 ┌──────────────────┬────────────────────────────────────┐
+    //          │              │                                                       │      │
+    //                  │      │                  │                                    │      │
+    //          │       │      │                                                       │      │
+    //                  │      │                  ▼                                    │      │
+    //          │    10 │    5 │─ ─ ─ ─ ─ ─ ─ ─ ▶ ┌──────────────────────────┐         │
+    //                         │                  │      worldXPos: 20       │         │      │
+    //          │       │      │                  │      worldYPos: 10       │         │      │
+    //                  │      │                  │                          │         │      │
+    //          │       │      │                  │      localXPos: 15       │         │      │
+    //                  │      │                  │      localYPos: 5        │         │
+    //          │              │                  └──────────────────────────┘         │      │
+    //                  │      │                                                       │      │
+    //          │       │      │                                                       │      │
+    //                  │      └───────────────────────────────────────────────────────┘      │
+    //          │       │
+    //                                                                                        │
+    //          │       │                                                                     │
+    //          ▼       └── ──── ──── ──── ──── ──── ──── ──── ──── ──── ──── ──── ──── ──── ─┘
+    //
+    //
+    // Local positions are the element's position within its parent.
+    //
+    // Element world positions are an element's closest ancestor's world pos + it's own local pos.
+    // (In other words any element's world pos is the sum of all localPos from it to root)
+    //
+    // World pos is what is exclusively used for drawing elements.
+    // (e.g. when drawing a string or rectangle, world position is passed to drawing function)
+    //
+    // Local pos is not used for drawing elements, it's used for layout:
+    // As of writing this local pos is only accessed/changed in FlexBehavior and ScrollBehavior,
+    // most notably in FlexBehavior for justifying or aligning children within their parent
+    //
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //                                              DIMENSIONAL
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    //                       Left Pad                                         Right Pad
+    //                       ◀───────▶                                        ◀───────▶
+    //
+    //                     WorldX    Inner                                   Inner   Right
+    //                  (LeftBound)  Left                                    Right   Bound
+    //                       │       │                                        │       │
+    //
+    //                       │       │                                        │       │
+    //        ▲  WorldY ─ ─ ─|--------------------------------------------------------|─ ─ ─         ▲
+    //        │ (TopBound)   |▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒|              │
+    //    Top │              |▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒PADDING▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒|              │
+    //    Pad │              |▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒|              │
+    //        │              |▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒|              │
+    //        ▼   Inner ─ ─ ─|▒▒▒▒▒▒▒|----------------------------------------|▒▒▒▒▒▒▒|─ ─ ─    ▲  Height
+    //            Top        |▒▒▒▒▒▒▒|                                        |▒▒▒▒▒▒▒|         │    │
+    //                       |▒▒▒▒▒▒▒|                                        |▒▒▒▒▒▒▒|         │    │
+    //                       |▒▒▒▒▒▒▒|                CONTENT                 |▒▒▒▒▒▒▒|       Inner  │
+    //                       |▒▒▒▒▒▒▒|                                        |▒▒▒▒▒▒▒|      Height  │
+    //                       |▒▒▒▒▒▒▒|                                        |▒▒▒▒▒▒▒|         │    │
+    //                       |▒▒▒▒▒▒▒|                                        |▒▒▒▒▒▒▒|         │    │
+    //        ▲   Inner ─ ─ ─|▒▒▒▒▒▒▒|----------------------------------------|▒▒▒▒▒▒▒|─ ─ ─    ▼    │
+    //        │   Bottom     |▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒|              │
+    // Bottom │              |▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒|              │
+    //    Pad │              |▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒|              │
+    //        │              |▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒|              │
+    //        ▼  Bottom ─ ─ ─|--------------------------------------------------------|─ ─ ─         ▼
+    //            Bound      │       │                                        │       │
+    //
+    //                               ◀───────────────Inner─Width──────────────▶
+    //
+    //                       ◀──────────────────────────Width─────────────────────────▶
+    //
+    //
+
+    public float worldXPos()
+    {
+        return getLocalXPos() + inheritedXPos;
+    }
+
+    public float worldYPos()
+    {
+        return getLocalYPos() + inheritedYPos;
+    }
+
+    public float getLocalXPos()
+    {
+        return localXPos;
+    }
+
+    public float getLocalYPos()
+    {
+        return localYPos;
+    }
+
+    public void setLocalXPos(float localXPos)
+    {
+        this.localXPos = localXPos;
+    }
+
+    public void setLocalYPos(float localYPos)
+    {
+        this.localYPos = localYPos;
+    }
+
+//    public float getInheritedXPos()
+//    {
+//        return inheritedXPos;
+//    }
+//
+//    public float getInheritedYPos()
+//    {
+//        return inheritedYPos;
+//    }
+
+    public void setInheritedXPos(float inheritedXPos)
+    {
+        this.inheritedXPos = inheritedXPos;
+    }
+
+    public void setInheritedYPos(float inheritedYPos)
+    {
+        this.inheritedYPos = inheritedYPos;
+    }
+
+    public float getWidth()
+    {
+        return width;
+    }
+
+    public void setWidth(float width)
+    {
+        this.width = width;
+    }
+
+    public float getHeight()
+    {
+        return height;
+    }
+
+    public void setHeight(float height)
+    {
+        this.height = height;
+    }
+
+    public Spacing getMargin()
+    {
+        return margin;
+    }
+
+    public void setMargin(Spacing margin)
+    {
+        this.margin = margin;
+    }
+
+    public Spacing getPadding()
+    {
+        return padding;
+    }
+
+    public void setPadding(Spacing padding)
+    {
+        this.padding = padding;
+    }
+
+    public float getLeftBound()
+    {
+        return worldXPos();
+    }
+
+    public float getRightBound()
+    {
+        return worldXPos() + getWidth();
+    }
+
+    public float getTopBound()
+    {
+        return worldYPos();
+    }
+
+    public float getBottomBound()
+    {
+        return worldYPos() + getHeight();
+    }
+
+    public float getInnerLeftBound()
+    {
+        return getLeftBound() + getPadding().left();
+    }
+
+    public float getInnerRightBound()
+    {
+        return getRightBound() - getPadding().right();
+    }
+
+    public float getInnerWidth()
+    {
+        return getInnerRightBound() - getInnerLeftBound();
+    }
+
+    public float getInnerTopBound()
+    {
+        return getTopBound() + getPadding().top();
+    }
+
+    public float getInnerBottomBound()
+    {
+        return getBottomBound() - getPadding().bottom();
+    }
+
+    public float getInnerHeight()
+    {
+        return getInnerBottomBound() - getInnerTopBound();
+    }
+
+//    public static float getOuterLeftBound(GuiElement element)
+//    {
+//        return element.worldXPos() - element.getMargin().left();
+//    }
+//
+//    public static float getOuterRightBound(GuiElement element)
+//    {
+//        return element.worldXPos() + element.getWidth() + element.getMargin().right();
+//    }
+//
+//    public static float getOuterTopBound(GuiElement element)
+//    {
+//        return element.worldYPos() - element.getMargin().top();
+//    }
+//
+//    public static float getOuterBottomBound(GuiElement element)
+//    {
+//        return element.worldYPos() + element.getHeight() + element.getMargin().bottom();
+//    }
+//
+//    public static float getOuterWidth(GuiElement element)
+//    {
+//        return getOuterRightBound(element) - getOuterLeftBound(element);
+//    }
+//
+//    public static float getOuterHeight(GuiElement element)
+//    {
+//        return getOuterBottomBound(element) - getOuterTopBound(element);
+//    }
+
+    /** Whether a point in screen coordinates is within the bounds of this element */
+    public boolean isPointWithinBounds(float x, float y)
+    {
+        return (x > getLeftBound()) && (x < getRightBound())
+                && (y > getTopBound()) && (y < getBottomBound());
+    }
+
+    public int getZLevel()
+    {
+        return zLevel;
+    }
+
+    public void setZLevel(int zLevel)
+    {
+        this.zLevel = zLevel;
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public GuiContainer getParent()
     {
@@ -178,82 +453,6 @@ public abstract class GuiElement
         return new Color();
     }
 
-    /**
-     * Element x position in world space (local x pos + sum of all ancestors world x pos)
-     */
-    public float worldXPos()
-    {
-        return getLocalXPos() + inheritedXPos;
-    }
-
-    /**
-     * Element y position in world space (local y pos + sum of all ancestors world y pos)
-     */
-    public float worldYPos()
-    {
-        return getLocalYPos() + inheritedYPos;
-    }
-
-    public float getLocalXPos()
-    {
-        return localXPos;
-    }
-
-    public float getLocalYPos()
-    {
-        return localYPos;
-    }
-
-    public void setLocalXPos(float localXPos)
-    {
-        this.localXPos = localXPos;
-    }
-
-    public void setLocalYPos(float localYPos)
-    {
-        this.localYPos = localYPos;
-    }
-
-    public float getInheritedXPos()
-    {
-        return inheritedXPos;
-    }
-
-    public float getInheritedYPos()
-    {
-        return inheritedYPos;
-    }
-
-    public void setInheritedXPos(float inheritedXPos)
-    {
-        this.inheritedXPos = inheritedXPos;
-    }
-
-    public void setInheritedYPos(float inheritedYPos)
-    {
-        this.inheritedYPos = inheritedYPos;
-    }
-
-    public float getWidth()
-    {
-        return width;
-    }
-
-    public void setWidth(float width)
-    {
-        this.width = width;
-    }
-
-    public float getHeight()
-    {
-        return height;
-    }
-
-    public void setHeight(float height)
-    {
-        this.height = height;
-    }
-
     public boolean isVisible()
     {
         return visible;
@@ -274,49 +473,19 @@ public abstract class GuiElement
         this.hovered = hovered;
     }
 
-    public int getZLevel()
-    {
-        return zLevel;
-    }
-
-    public void setZLevel(int zLevel)
-    {
-        this.zLevel = zLevel;
-    }
-
-    public String getTooltipStr()
-    {
-        return tooltipStr;
-    }
-
-    public void setTooltipStr(String tooltipStr)
-    {
-        this.tooltipStr = tooltipStr;
-    }
+//    public String getTooltipStr()
+//    {
+//        return tooltipStr;
+//    }
+//
+//    public void setTooltipStr(String tooltipStr)
+//    {
+//        this.tooltipStr = tooltipStr;
+//    }
 
     public boolean isFocused()
     {
         return getGuiScreen().getCurrentFocus() == this;
-    }
-
-    public Spacing getMargin()
-    {
-        return margin;
-    }
-
-    public void setMargin(Spacing margin)
-    {
-        this.margin = margin;
-    }
-
-    public Spacing getPadding()
-    {
-        return padding;
-    }
-
-    public void setPadding(Spacing padding)
-    {
-        this.padding = padding;
     }
 
     public boolean isDebug()
@@ -351,32 +520,6 @@ public abstract class GuiElement
         this.cornerRadius = cornerRadius;
     }
 
-    public boolean isPointWithinBounds(float x, float y)
-    {
-        return (x > getLeftBound()) && (x < getRightBound())
-                && (y > getTopBound()) && (y < getBottomBound());
-    }
-
-    public float getLeftBound()
-    {
-        return worldXPos();
-    }
-
-    public float getRightBound()
-    {
-        return worldXPos() + getWidth();
-    }
-
-    public float getTopBound()
-    {
-        return worldYPos();
-    }
-
-    public float getBottomBound()
-    {
-        return worldYPos() + getHeight();
-    }
-
     public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
         if (!isVisible())
@@ -403,11 +546,11 @@ public abstract class GuiElement
             // Left
             RenderUtils.drawRectangle(worldXPos(), worldYPos(), getPadding().left(), getHeight(), padColor);
             // Right
-            RenderUtils.drawRectangle(worldXPos() + getWidth() - getPadding().right(), worldYPos(), getPadding().right(), getHeight(), padColor);
+            RenderUtils.drawRectangle(getInnerRightBound(), worldYPos(), getPadding().right(), getHeight(), padColor);
             // Top
             RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getPadding().top(), padColor);
             // Bottom
-            RenderUtils.drawRectangle(worldXPos(), worldYPos() + getHeight() - getPadding().bottom(), getWidth(), getPadding().bottom(), padColor);
+            RenderUtils.drawRectangle(worldXPos(), getInnerBottomBound(), getWidth(), getPadding().bottom(), padColor);
 
             // Draw z level string
             mc.fontRendererObj.drawString(String.valueOf(getZLevel()), getRightBound() - mc.fontRendererObj.getStringWidth(String.valueOf(getZLevel())),
