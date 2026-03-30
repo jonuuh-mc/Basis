@@ -34,9 +34,13 @@ public class GuiSingleSlider extends GuiSlider
         float pointerPos = getScreenPosAtNormalValue(getNormalizedValue());
 
         // Left track
-        RenderUtils.drawRoundedRectWithBorder(x, trackPos, pointerPos - x, trackThickness, getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
+        RenderUtils.drawRoundedRectWithBorder(x, trackPos,
+                pointerPos - x, trackThickness,
+                getCornerRadius(), 1, getColor(GuiColorType.BASE), getBorderColor());
         // Right track
-        RenderUtils.drawRoundedRectWithBorder(pointerPos, trackPos, getWidth() - (pointerPos - x), trackThickness, getCornerRadius(), 1, getColor(GuiColorType.ACCENT1), getColor(GuiColorType.BORDER));
+        RenderUtils.drawRoundedRectWithBorder(pointerPos, trackPos,
+                getWidth() - (pointerPos - x), trackThickness,
+                getCornerRadius(), 1, getColor(GuiColorType.ACCENT1), getBorderColor());
 
         drawPointer();
     }
@@ -52,9 +56,13 @@ public class GuiSingleSlider extends GuiSlider
         float pointerPos = getScreenPosAtNormalValue(getNormalizedValue());
 
         // Top track
-        RenderUtils.drawRoundedRectWithBorder(trackPos, y, trackThickness, pointerPos - y, getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
+        RenderUtils.drawRoundedRectWithBorder(trackPos, y,
+                trackThickness, pointerPos - y,
+                getCornerRadius(), 1, getColor(GuiColorType.BASE), getBorderColor());
         // Bottom track
-        RenderUtils.drawRoundedRectWithBorder(trackPos, pointerPos, trackThickness, getHeight() - (pointerPos - y), getCornerRadius(), 1, getColor(GuiColorType.ACCENT1), getColor(GuiColorType.BORDER));
+        RenderUtils.drawRoundedRectWithBorder(trackPos, pointerPos,
+                trackThickness, getHeight() - (pointerPos - y),
+                getCornerRadius(), 1, getColor(GuiColorType.ACCENT1), getBorderColor());
 
         drawPointer();
     }
@@ -77,7 +85,7 @@ public class GuiSingleSlider extends GuiSlider
         float x = isVertical ? trackPos - (Math.abs(getTrackThickness() - size) / 2) : pointerPos - (size / 2);
         float y = isVertical ? pointerPos - (size / 2) : trackPos - (Math.abs(getTrackThickness() - size) / 2);
 
-        RenderUtils.drawRoundedRectWithBorder(x, y, size, size, getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
+        RenderUtils.drawRoundedRectWithBorder(x, y, size, size, getCornerRadius(), 1, getColor(GuiColorType.BASE), getBorderColor());
 
         if (isDebug())
         {

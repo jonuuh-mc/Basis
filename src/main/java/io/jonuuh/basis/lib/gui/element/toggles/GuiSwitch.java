@@ -38,9 +38,13 @@ public class GuiSwitch extends GuiToggle
         Color trackColor = isToggled() ? getColor(GuiColorType.BASE) : getColor(GuiColorType.ACCENT2);
 
         // Track
-        RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), 1, trackColor, getColor(GuiColorType.BORDER));
+        RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(),
+                getWidth(), getHeight(),
+                getCornerRadius(), 1, trackColor, getBorderColor());
         // Pointer
-        RenderUtils.drawRoundedRectWithBorder(pointerX, worldYPos() + padding, getPointerSize(), getPointerSize(), getCornerRadius(), 1, getColor(GuiColorType.ACCENT1), getColor(GuiColorType.BORDER));
+        RenderUtils.drawRoundedRectWithBorder(pointerX, worldYPos() + padding,
+                getPointerSize(), getPointerSize(),
+                getCornerRadius(), 1, getColor(GuiColorType.ACCENT1), getBorderColor());
     }
 
     public static class Builder extends GuiToggle.AbstractBuilder<Builder, GuiSwitch>

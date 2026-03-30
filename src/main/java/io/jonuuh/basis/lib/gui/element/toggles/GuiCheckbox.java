@@ -28,7 +28,7 @@ public class GuiCheckbox extends GuiToggle
         if (isToggled())
         {
             RenderUtils.drawRoundedRectWithBorder(getInnerLeftBound(), getInnerTopBound(),
-                    getInnerWidth(), getInnerHeight(), getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
+                    getInnerWidth(), getInnerHeight(), getCornerRadius(), 1, getColor(GuiColorType.BASE), getBorderColor());
         }
     }
 
