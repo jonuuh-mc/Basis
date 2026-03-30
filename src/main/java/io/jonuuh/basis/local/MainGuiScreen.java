@@ -1,4 +1,4 @@
-package io.jonuuh.basis.lib.gui.screen;
+package io.jonuuh.basis.local;
 
 import io.jonuuh.basis.lib.config.setting.Settings;
 import io.jonuuh.basis.lib.gui.BaseGuiScreen;
@@ -111,11 +111,21 @@ public class MainGuiScreen extends BaseGuiScreen
                         .direction(FlexDirection.ROW)
                         .justify(FlexJustify.CENTER)
                         .align(FlexAlign.CENTER)
-                        .item(new FlexItem(new GuiLabel.Builder("label").padding(new Spacing(5))/*.size(1, 1)*/
-                                .text("Lorem ipsum something something something 123").build())/*.setGrow(1)*/)
+                        .item(new FlexItem(
+                                        new GuiLabel.Builder("label")
+                                                .padding(new Spacing(5))/*.size(1, 1)*/
+                                                .text("Lorem ipsum testing" /** something something something 123 */)
+                                                .textScale(1.6F)
+                                                .doShadow(false)
+                                                .debug(true)
+                                                .build()
+                                )/*.setGrow(1)*/
+                        )
                 )
-                .scrollBehavior(new ScrollBehavior.Builder().length(60))
+//                .scrollBehavior(new ScrollBehavior.Builder().length(60))
                 .build();
+//        labelContainer.debug = true;
+//        labelContainer.performAction(element -> element.setDebug(true));
 
         GuiContainer textFieldContainer = new GuiBasicContainer.Builder("fieldContainer")
                 .size(300, 40)
