@@ -79,18 +79,18 @@ public final class RenderUtils
     }
 
     /**
-     * Used for scaling objects in place.
+     * Pass in the object's center X and Y if using this to scale an object in place.
      * <p>
      * AFTER pushing a new matrix to the GL11 stack, call this method, then the draw object
      */
-    public static void scaleCurrentMatrixAroundObject(float objectCenterX, float objectCenterY, float scaleX, float scaleY)
+    public static void scaleCurrentMatrixAroundPoint(float x, float y, float scaleX, float scaleY)
     {
-        // Move current matrix origin to the object's center, so any scaling will effectively not change the object's visual position
-        GL11.glTranslatef(objectCenterX, objectCenterY, 0);
+        // Move current matrix origin to the point, so any scaling will effectively be done around that point
+        GL11.glTranslatef(x, y, 0);
         // Scale the matrix
         GL11.glScalef(scaleX, scaleY, 0);
         // Move current matrix origin back to original position
-        GL11.glTranslatef(-objectCenterX, -objectCenterY, 0);
+        GL11.glTranslatef(-x, -y, 0);
     }
 
     /**
