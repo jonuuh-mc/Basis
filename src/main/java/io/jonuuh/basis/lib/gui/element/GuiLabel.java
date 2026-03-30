@@ -120,7 +120,7 @@ public class GuiLabel extends GuiElement
             float hPad = padding.left() + padding.right();
             float vPad = padding.top() + padding.bottom();
 
-            float strW = (mc.fontRendererObj.getStringWidth(text) - 1) * textScale;
+            float strW = (mc.fontRendererObj.getStringWidth(text) /*- 1*/) * textScale;
             float strH = (mc.fontRendererObj.FONT_HEIGHT - 1) * textScale;
 
             this.width = strW + hPad;
