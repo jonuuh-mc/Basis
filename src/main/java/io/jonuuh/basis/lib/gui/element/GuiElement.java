@@ -21,7 +21,7 @@ import java.util.function.Predicate;
 
 public abstract class GuiElement
 {
-    /** A reference to the static minecraft instance */
+    /** A reference to the static minecraft instance. Currently only used to access font renderer */
     public static final Minecraft mc = Minecraft.getMinecraft();
     protected static final float DEFAULT_WIDTH = 100;
     protected static final float DEFAULT_HEIGHT = 20;
@@ -59,6 +59,7 @@ public abstract class GuiElement
     /** Whether this element is currently hovered; Updated constantly via onScreenDraw (not via onScreenTick because mouse pos is needed) */
     private boolean hovered;
 
+    /** Margin is currently unused */
     private Spacing margin;
     private Spacing padding;
 
