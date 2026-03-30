@@ -399,7 +399,7 @@ public abstract class GuiElement
                     isFocused() ? new Color("#00ff00") : new Color("#ff55ff"));
 
             // Draw padding rectangles
-            Color padColor = new Color("#6260ff", 0.2F);
+            Color padColor = new Color("#ff4a2f", 0.5F);
             // Left
             RenderUtils.drawRectangle(worldXPos(), worldYPos(), getPadding().left(), getHeight(), padColor);
             // Right
