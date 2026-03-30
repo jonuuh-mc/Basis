@@ -168,8 +168,11 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         }
         super.onScreenDraw(mouseX, mouseY, partialTicks);
 
-        RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(),
-                getCornerRadius(), 1, getColor(GuiColorType.BACKGROUND), getColor(GuiColorType.BORDER));
+        if (shouldDrawBackground())
+        {
+            RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(),
+                    getCornerRadius(), 1, getBackgroundColor(), getBorderColor());
+        }
 
         if (isMouseDown())
         {

@@ -35,9 +35,6 @@ public abstract class GuiElement
      */
     protected GuiContainer parent;
 
-    /** A map of colors that may be used by this element */
-    protected Map<GuiColorType, Color> colorMap;
-
     /** Element x position within its parent */
     private float localXPos;
     /** Element y position within its parent */
@@ -58,6 +55,13 @@ public abstract class GuiElement
     private boolean visible;
     /** Whether this element is currently hovered; Updated constantly via onScreenDraw (not via onScreenTick because mouse pos is needed) */
     private boolean hovered;
+
+    /** A map of colors that may be used by this element */
+    protected Map<GuiColorType, Color> colorMap;
+    private Color backgroundColor;
+    private Color borderColor;
+
+    private boolean drawBackground;
 
     /** Margin is currently unused */
     private Spacing margin;
@@ -87,6 +91,9 @@ public abstract class GuiElement
         this.visible = builder.visible;
 
         this.colorMap = builder.colorMap;
+        this.backgroundColor = builder.backgroundColor;
+        this.borderColor = builder.borderColor;
+        this.drawBackground = builder.drawBackground;
 
         this.debug = builder.debug;
 
@@ -453,6 +460,36 @@ public abstract class GuiElement
         return new Color();
     }
 
+    public Color getBackgroundColor()
+    {
+        return backgroundColor;
+    }
+
+    public void setBackgroundColor(Color backgroundColor)
+    {
+        this.backgroundColor = backgroundColor;
+    }
+
+    public Color getBorderColor()
+    {
+        return borderColor;
+    }
+
+    public void setBorderColor(Color borderColor)
+    {
+        this.borderColor = borderColor;
+    }
+
+    public boolean shouldDrawBackground()
+    {
+        return drawBackground;
+    }
+
+    public void setDrawBackground(boolean drawBackground)
+    {
+        this.drawBackground = drawBackground;
+    }
+
     public boolean isVisible()
     {
         return visible;
@@ -623,7 +660,11 @@ public abstract class GuiElement
         protected final String elementName;
 
         protected GuiContainer parent = null;
+
         protected Map<GuiColorType, Color> colorMap = new HashMap<>();
+        protected Color backgroundColor = Color.WHITE;
+        protected Color borderColor = Color.BLACK;
+        protected boolean drawBackground = true;
 
         protected float localXPos, localYPos;
         protected float width = DEFAULT_WIDTH;
@@ -698,6 +739,24 @@ public abstract class GuiElement
         public T color(GuiColorType type, Color color)
         {
             this.colorMap.put(type, color);
+            return self();
+        }
+
+        public T backgroundColor(Color color)
+        {
+            this.backgroundColor = color;
+            return self();
+        }
+
+        public T borderColor(Color color)
+        {
+            this.borderColor = color;
+            return self();
+        }
+
+        public T drawBackground(boolean drawBackground)
+        {
+            this.drawBackground = drawBackground;
             return self();
         }
 

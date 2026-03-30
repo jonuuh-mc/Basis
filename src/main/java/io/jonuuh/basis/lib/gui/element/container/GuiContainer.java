@@ -280,29 +280,35 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
     @Override
     public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
-        // TODO: because of this, any container that is invisible will make all its children invisible too.
-        //  is this a problem or should this be the intended behavior
+        // Note that because of this, any invisible container will effectively make all it's children invisible too
+        // (but without changing their `visible` field)
         if (!isVisible())
         {
             return;
         }
 
-        // TODO: dumb solution to making root invisible?
-        //  split only the actual draw textured rect into a protected funct which can be overridden to prevent drawing?
-        //  still drawing debug info for root is prob okay
-        if (!(this instanceof GuiRootContainer))
+        // Draw this container
+        if (shouldDrawBackground())
         {
-            // Handle screen draw for this element
-            RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), 1, getColor(GuiColorType.BACKGROUND), getColor(GuiColorType.BORDER));
-
-            if (isDebug() && flexBehavior != null)
-            {
-                flexBehavior.drawInspector();
-            }
-
-            super.onScreenDraw(mouseX, mouseY, partialTicks);
+            RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(),
+                    getCornerRadius(), 1, getBackgroundColor(), getBorderColor());
+        }
+        if (isDebug() && flexBehavior != null)
+        {
+            flexBehavior.drawInspector();
         }
 
+        // Debatable whether this should be before or after drawing the children?
+        // Right now super.onScreenDraw() draws debug info and updates element's `hovered`.
+        // Whether a container is hovered being updated 1 frame before or after its children are updated
+        // might not matter?
+        // Debug info being drawn on top of the children or not is probably the main difference.
+        // Probably should not be drawn on top of the children, some evidence for this being the debug zLevel
+        // string. If drawing parent debug after it's children, the parent's zLevel str could draw on top of
+        // zLevel str of its child, which is definitely counterintuitive.
+        super.onScreenDraw(mouseX, mouseY, partialTicks);
+
+        // Draw children
         drawChildren(mouseX, mouseY, partialTicks);
     }
 
@@ -416,11 +422,6 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         {
             flexBehavior.updateItemsLayout();
         }
-
-//        if (scrollBehavior != null)
-//        {
-//            scrollBehavior.updateSlider();
-//        }
     }
 
     @Override
@@ -525,6 +526,20 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         protected AbstractBuilder(String elementName)
         {
             super(elementName);
+            // This pattern of overriding defaults in the builder's constructor is used in
+            // a few places. It's useful because it allows the overridden defaults
+            // to be exactly that, just new defaults - they can still be overridden AGAIN by
+            // any instance of the Builder.
+            //
+            // That should seem obvious but the only reason I'm making a note is to contrast
+            // with what's been another common design for me: To put some arbitrary
+            // setup or default behavior in the build() function of an element's Builder.
+            //
+            // In this case that of course wouldn't work because build() is the last function
+            // called when creating an element, so it would be impossible for any Builder instance
+            // to override the already overridden defaults.
+            backgroundColor(Color.TRANSPARENT);
+            borderColor(Color.TRANSPARENT);
         }
 
         public T colorMap(Map<GuiColorType, Color> colorMap)

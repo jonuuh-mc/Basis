@@ -51,8 +51,11 @@ public class GuiLabeledButton extends GuiButton
         super.onScreenDraw(mouseX, mouseY, partialTicks);
 
         // Draw button background
-        RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(),
-                getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
+        if (shouldDrawBackground())
+        {
+            RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(),
+                    getCornerRadius(), 1, getBackgroundColor(), getBorderColor());
+        }
 
         // See comment in GuiLabel regarding more or less identical functionality
         String trimmedText = RenderUtils.trimStringToWidthWithEllipsis(label, (int) (getInnerWidth() * (1 / textScale)));

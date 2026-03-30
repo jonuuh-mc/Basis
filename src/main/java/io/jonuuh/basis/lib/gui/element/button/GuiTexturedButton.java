@@ -1,6 +1,5 @@
 package io.jonuuh.basis.lib.gui.element.button;
 
-import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.RenderUtils;
 import net.minecraft.util.ResourceLocation;
@@ -16,7 +15,6 @@ public class GuiTexturedButton extends GuiButton
     protected ResourceLocation texture;
     protected Color texColor;
     protected boolean smoothing;
-    protected boolean drawBackground;
 
     public GuiTexturedButton(Builder builder)
     {
@@ -24,7 +22,6 @@ public class GuiTexturedButton extends GuiButton
         this.texture = builder.texture;
         this.texColor = builder.texColor;
         this.smoothing = builder.smoothing;
-        this.drawBackground = builder.drawBackground;
     }
 
     public ResourceLocation getTexture()
@@ -46,10 +43,10 @@ public class GuiTexturedButton extends GuiButton
         }
         super.onScreenDraw(mouseX, mouseY, partialTicks);
 
-        if (drawBackground)
+        if (shouldDrawBackground())
         {
-            RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(),
-                    1, getColor(GuiColorType.BACKGROUND), getColor(GuiColorType.BORDER));
+            RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(),
+                    getCornerRadius(), 1, getBackgroundColor(), getBorderColor());
         }
 
         if (texture != null && !texture.getResourcePath().isEmpty())
@@ -64,11 +61,19 @@ public class GuiTexturedButton extends GuiButton
         protected ResourceLocation texture = null;
         protected Color texColor = Color.WHITE;
         protected boolean smoothing = false;
-        protected boolean drawBackground = true;
 
         public Builder(String elementName)
         {
             super(elementName);
+            // Override GuiElement's default of drawing the background
+            // TODO: Also it doesn't even make sense for a GuiTexturedButton to be able to
+            //  draw a solid background given that this element's entire width/height is
+            //  covered by the texture.
+            //  When implementing design in future to draw solid
+            //  vs textured mode for every element, it would make sense to make a new, more
+            //  generic GuiButton that can be either solid or textured (and also optionally
+            //  labeled too, maybe? combine all buttons into one)
+            drawBackground(false);
         }
 
         public Builder texture(ResourceLocation texture)
@@ -86,12 +91,6 @@ public class GuiTexturedButton extends GuiButton
         public Builder smoothing(boolean smoothing)
         {
             this.smoothing = smoothing;
-            return self();
-        }
-
-        public Builder drawBackground(boolean drawBackground)
-        {
-            this.drawBackground = drawBackground;
             return self();
         }
 

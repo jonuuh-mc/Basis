@@ -27,6 +27,12 @@ public class GuiSwitch extends GuiToggle
 
         super.onScreenDraw(mouseX, mouseY, partialTicks);
 
+        if (shouldDrawBackground())
+        {
+            RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(),
+                    getCornerRadius(), 1, getBackgroundColor(), getBorderColor());
+        }
+
         float padding = ((getHeight() - getPointerSize()) / 2F);
         float pointerX = isToggled() ? (worldXPos() + getWidth() - getPointerSize() - padding) : worldXPos() + padding;
         Color trackColor = isToggled() ? getColor(GuiColorType.BASE) : getColor(GuiColorType.ACCENT2);
@@ -44,6 +50,8 @@ public class GuiSwitch extends GuiToggle
             super(elementName);
             this.width = DEFAULT_HEIGHT * 2;
             this.height = DEFAULT_HEIGHT;
+            // Override GuiElement's default of drawing the background
+            drawBackground(false);
         }
 
         @Override

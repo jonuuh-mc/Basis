@@ -50,6 +50,12 @@ public class GuiLabel extends GuiElement
         }
         super.onScreenDraw(mouseX, mouseY, partialTicks);
 
+        if (shouldDrawBackground())
+        {
+            RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(),
+                    getCornerRadius(), 1, getBackgroundColor(), getBorderColor());
+        }
+
         // A label is designed to change its width and height to exactly fit the text plus any padding around it.
         // That on its own would render trimming the text unnecessary, however in combination with a FlexBehavior
         // independently changing the size of elements, this trimming will actually happen very frequently
@@ -88,6 +94,8 @@ public class GuiLabel extends GuiElement
         public Builder(String elementName)
         {
             super(elementName);
+            // Override GuiElement's default of drawing the background
+            drawBackground(false);
         }
 
         public Builder text(String text)

@@ -10,6 +10,7 @@ import io.jonuuh.basis.lib.gui.listener.input.MouseClickListener;
 import io.jonuuh.basis.lib.gui.listener.input.MouseScrollListener;
 import io.jonuuh.basis.lib.gui.listener.lifecycle.ScreenTickListener;
 import io.jonuuh.basis.lib.util.MathUtils;
+import io.jonuuh.basis.lib.util.RenderUtils;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -191,6 +192,12 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
         }
         super.onScreenDraw(mouseX, mouseY, partialTicks);
 
+        if (shouldDrawBackground())
+        {
+            RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(),
+                    getCornerRadius(), 1, getBackgroundColor(), getBorderColor());
+        }
+
         if (isVertical)
         {
             drawVerticalSlider();
@@ -262,6 +269,8 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
         protected AbstractBuilder(String elementName)
         {
             super(elementName);
+            // Override GuiElement's default of drawing the background
+            drawBackground(false);
         }
 
         public T bounds(float min, float max)
