@@ -162,7 +162,7 @@ public abstract class BaseGuiScreen extends GuiScreen
         }
 
         List<GuiElement> clickable = new ArrayList<>();
-        rootContainer.collectMatchingElements(clickable, element -> (element.isVisible() && element.isHovered() && canClickOn(element)));
+        rootContainer.collectMatchingElements(clickable, element -> (element.isVisible() && element.isHovered() && isEnabledClickListener(element)));
 
         if (!clickable.isEmpty())
         {
@@ -222,7 +222,7 @@ public abstract class BaseGuiScreen extends GuiScreen
             return;
         }
 
-        if (hasCurrentFocus() && canClickOn(currentFocus) && ((MouseClickListener) currentFocus).isMouseDown())
+        if (hasCurrentFocus() && isEnabledClickListener(currentFocus) && ((MouseClickListener) currentFocus).isMouseDown())
         {
             dispatchTargetedEvent(new MouseUpEvent(currentFocus, mouseX, mouseY));
         }
@@ -235,18 +235,18 @@ public abstract class BaseGuiScreen extends GuiScreen
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long msHeld)
     {
-        if (hasCurrentFocus() && canClickOn(currentFocus) && ((MouseClickListener) currentFocus).isMouseDown())
+        if (hasCurrentFocus() && isEnabledClickListener(currentFocus) && ((MouseClickListener) currentFocus).isMouseDown())
         {
             dispatchTargetedEvent(new MouseDragEvent(currentFocus, mouseX, mouseY, clickedMouseButton, msHeld));
         }
     }
 
-    private static boolean canClickOn(GuiElement element)
+    private static boolean isEnabledClickListener(GuiElement element)
     {
         return element instanceof MouseClickListener && ((InputListener) element).isEnabled();
     }
 
-    private static boolean canScrollOn(GuiElement element)
+    private static boolean isEnabledScrollListener(GuiElement element)
     {
         return element instanceof MouseScrollListener && ((InputListener) element).isEnabled();
     }
