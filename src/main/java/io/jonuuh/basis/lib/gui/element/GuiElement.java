@@ -591,7 +591,7 @@ public abstract class GuiElement
 
             // Draw z level string
             mc.fontRendererObj.drawString(String.valueOf(getZLevel()), getRightBound() - mc.fontRendererObj.getStringWidth(String.valueOf(getZLevel())),
-                    getBottomBound() - mc.fontRendererObj.FONT_HEIGHT, getColor(GuiColorType.ACCENT2).toPackedARGB(), true);
+                    getBottomBound() - mc.fontRendererObj.FONT_HEIGHT, Color.GREEN.toPackedARGB(), true);
         }
     }
 
