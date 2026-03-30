@@ -308,31 +308,65 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
 
     protected void drawChildren(int mouseX, int mouseY, float partialTicks)
     {
-        List<GuiContainer> containers = new ArrayList<>();
-        collectScissoringParents(containers);
+        // Collect all parents of this element (and including this element) who should scissor.
+        // In general this can be expected to only be containers who have ScrollBehaviors.
+        List<GuiContainer> scissoringContainers = new ArrayList<>();
+        collectScissoringContainers(scissoringContainers);
 
         int scissorX = 0;
         int scissorY = 0;
         int scissorWidth = 0;
         int scissorHeight = 0;
 
-        if (!containers.isEmpty())
+        // Because only one scissor box can be active at a time, something needs to be done
+        // when there are multiple nested containers that each want to scissor some area.
+        //
+        // The solution here is to create a frankenstein scissor box, taking into account
+        // all 'proposed' scissor boxes (given by left, top, right, and bottom bounds of each
+        // potentially scissoring container).
+        //
+        // It's like zooming in a camera on a scene: find each bound (left, top, right, bottom)
+        // which is closest to the center of the screen, then use those bounds as the scissor box.
+        if (!scissoringContainers.isEmpty())
         {
-            int greatestLeftBound = (int) CollectionUtils.getMax(containers, Comparator.comparingDouble(GuiElement::getLeftBound)).getLeftBound();
-            int greatestTopBound = (int) CollectionUtils.getMax(containers, Comparator.comparingDouble(GuiElement::getTopBound)).getTopBound();
+            float greatestLeftBound =
+                    CollectionUtils.getMax(scissoringContainers, Comparator.comparingDouble(GuiElement::getLeftBound))
+                            .getLeftBound();
 
-            int leastRightBound = (int) CollectionUtils.getMin(containers, Comparator.comparingDouble(GuiElement::getRightBound)).getRightBound();
-            int leastBottomBound = (int) CollectionUtils.getMin(containers, Comparator.comparingDouble(GuiElement::getBottomBound)).getBottomBound();
+            float greatestTopBound =
+                    CollectionUtils.getMax(scissoringContainers, Comparator.comparingDouble(GuiElement::getTopBound))
+                            .getTopBound();
 
-            scissorX = greatestLeftBound;
-            scissorY = greatestTopBound;
-            scissorWidth = leastRightBound - greatestLeftBound;
-            scissorHeight = leastBottomBound - greatestTopBound;
+            float leastRightBound =
+                    CollectionUtils.getMin(scissoringContainers, Comparator.comparingDouble(GuiElement::getRightBound))
+                            .getRightBound();
+
+            float leastBottomBound =
+                    CollectionUtils.getMin(scissoringContainers, Comparator.comparingDouble(GuiElement::getBottomBound))
+                            .getBottomBound();
+
+            scissorX = (int) greatestLeftBound;
+            scissorY = (int) greatestTopBound;
+            scissorWidth = (int) (leastRightBound - greatestLeftBound);
+            scissorHeight = (int) (leastBottomBound - greatestTopBound);
         }
 
+        // Now that the scissor bounds have been determined (if there even were any parent
+        // containers wanting to scissor), draw the children of this container, scissoring
+        // around the bounds for each individual child.
+        //
+        // Each child must be scissored individually because any downstream child could potentially
+        // create another unique scissor box if it's also a scissoring container.
+        // - (Since containers draw themselves first and then their children, when the child container
+        //    draws itself it would use the still-active parent's scissor container, then when drawing its children
+        //    recalculate a new "greatest zoomed in scissor box", push a matrix and call GL11.glScissor() again,
+        //    wiping the parent's scissor box as only once can be active at a time)
+        //
+        // If glScissor() was not invoked on each child individually, when a child called GL11.glScissor() again
+        // (erasing parent's scissor box) the next children in the loop would have no more parent scissor box.
         for (GuiElement child : children)
         {
-            if (!containers.isEmpty())
+            if (!scissoringContainers.isEmpty())
             {
                 // Prevent trying to scissor an area with zero width/height
                 if (scissorWidth <= 0 || scissorHeight <= 0)
@@ -343,14 +377,17 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
                 GL11.glPushMatrix();
                 GL11.glEnable(GL11.GL_SCISSOR_TEST);
 
-//                RenderUtils.drawRectangle(scissorX, scissorY, scissorWidth, scissorHeight, new Color("#4400ff00"));
+                if (isDebug())
+                {
+                    RenderUtils.drawRectangle(scissorX, scissorY, scissorWidth, scissorHeight, new Color("#d5ff34", 0.2F));
+                }
                 RenderUtils.scissorFromTopLeft(scissorX, scissorY, scissorWidth, scissorHeight);
             }
 
             // If the child is another container, this will continue propagating the draw to any additional children
             child.onScreenDraw(mouseX, mouseY, partialTicks);
 
-            if (!containers.isEmpty())
+            if (!scissoringContainers.isEmpty())
             {
                 GL11.glDisable(GL11.GL_SCISSOR_TEST);
                 GL11.glPopMatrix();
@@ -358,7 +395,8 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         }
     }
 
-    protected void collectScissoringParents(List<GuiContainer> containers)
+    // Collect all containers among this container and its parents that should scissor
+    protected void collectScissoringContainers(List<GuiContainer> containers)
     {
         if (shouldScissor())
         {
@@ -367,7 +405,7 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
 
         if (hasParent())
         {
-            getParent().collectScissoringParents(containers);
+            getParent().collectScissoringContainers(containers);
         }
     }
 
