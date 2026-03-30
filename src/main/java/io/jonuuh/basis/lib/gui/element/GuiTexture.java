@@ -43,8 +43,8 @@ public class GuiTexture extends GuiElement
 
         if (texture != null && !texture.getResourcePath().isEmpty())
         {
-            RenderUtils.drawTexturedRect(texture, ElementUtils.getInnerLeftBound(this), ElementUtils.getInnerTopBound(this),
-                    getZLevel(), ElementUtils.getInnerWidth(this), ElementUtils.getInnerHeight(this), 0, smoothing, texColor);
+            RenderUtils.drawTexturedRect(texture, getInnerLeftBound(), getInnerTopBound(), getZLevel(),
+                    getInnerWidth(), getInnerHeight(), 0, smoothing, texColor);
         }
     }
 

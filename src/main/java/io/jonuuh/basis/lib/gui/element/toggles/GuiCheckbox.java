@@ -1,6 +1,5 @@
 package io.jonuuh.basis.lib.gui.element.toggles;
 
-import io.jonuuh.basis.lib.gui.element.ElementUtils;
 import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.util.RenderUtils;
 
@@ -22,14 +21,19 @@ public class GuiCheckbox extends GuiToggle
 
 //        Color boxColor = isChecked ? getColor(GuiColorType.BASE) : getColor(GuiColorType.ACCENT1);
 
-        RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), 1, getColor(GuiColorType.ACCENT1), getColor(GuiColorType.BORDER));
+        RenderUtils.drawRoundedRectWithBorder(
+                worldXPos(), worldYPos(),
+                getWidth(), getHeight(),
+                getCornerRadius(), 1, getColor(GuiColorType.ACCENT1), getColor(GuiColorType.BORDER)
+        );
 
         if (isToggled())
         {
             RenderUtils.drawRoundedRectWithBorder(
-                    ElementUtils.getInnerLeftBound(this), ElementUtils.getInnerTopBound(this),
-                    ElementUtils.getInnerWidth(this), ElementUtils.getInnerHeight(this),
-                    getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
+                    getInnerLeftBound(), getInnerTopBound(),
+                    getInnerWidth(), getInnerHeight(),
+                    getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER)
+            );
         }
     }
 

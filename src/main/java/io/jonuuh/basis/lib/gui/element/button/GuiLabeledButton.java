@@ -1,6 +1,5 @@
 package io.jonuuh.basis.lib.gui.element.button;
 
-import io.jonuuh.basis.lib.gui.element.ElementUtils;
 import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.util.RenderUtils;
 import net.minecraft.client.gui.FontRenderer;
@@ -56,7 +55,7 @@ public class GuiLabeledButton extends GuiButton
                 getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
 
         // See comment in GuiLabel regarding more or less identical functionality
-        String trimmedText = RenderUtils.trimStringToWidthWithEllipsis(label, (int) (ElementUtils.getInnerWidth(this) * (1 / textScale)));
+        String trimmedText = RenderUtils.trimStringToWidthWithEllipsis(label, (int) (getInnerWidth() * (1 / textScale)));
 
         if (textScale != 1F)
         {
@@ -64,13 +63,13 @@ public class GuiLabeledButton extends GuiButton
 
             // Scale matrix around top left corner of element's drawable area (inner bound)
             RenderUtils.scaleCurrentMatrixAroundPoint(
-                    ElementUtils.getInnerLeftBound(this), ElementUtils.getInnerTopBound(this),
+                    getInnerLeftBound(), getInnerTopBound(),
                     textScale, textScale
             );
         }
 
         fontRenderer.drawString(trimmedText,
-                ElementUtils.getInnerLeftBound(this), ElementUtils.getInnerTopBound(this),
+                getInnerLeftBound(), getInnerTopBound(),
                 getColor(GuiColorType.ACCENT1).toPackedARGB(), doShadow);
 
         if (textScale != 1F)

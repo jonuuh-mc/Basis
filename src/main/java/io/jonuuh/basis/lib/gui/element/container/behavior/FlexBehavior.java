@@ -1,6 +1,5 @@
 package io.jonuuh.basis.lib.gui.element.container.behavior;
 
-import io.jonuuh.basis.lib.gui.element.ElementUtils;
 import io.jonuuh.basis.lib.gui.element.GuiElement;
 import io.jonuuh.basis.lib.gui.element.container.FlexItem;
 import io.jonuuh.basis.lib.gui.element.container.GuiContainer;
@@ -223,6 +222,7 @@ public class FlexBehavior
             }
         }
     }
+
     // note: if an element has a basis of 0, it won't ever grow - is this a problem?
     // what if an element is shrunk to the point of being 0 and then cannot grow back up again
     private void resizeMainAxisItems(float freeLength, ResizeType resizeType)
@@ -456,12 +456,12 @@ public class FlexBehavior
                     ? mainAxisSize - getHost().getPadding().left() - getHost().getPadding().right()
                     : mainAxisSize - getHost().getPadding().top() - getHost().getPadding().bottom();
         }
-        return isHorizontal() ? ElementUtils.getInnerWidth(getHost()) : ElementUtils.getInnerHeight(getHost());
+        return isHorizontal() ? getHost().getInnerWidth() : getHost().getInnerHeight();
     }
 
     private float getCrossAxisSize()
     {
-        return isHorizontal() ? ElementUtils.getInnerHeight(getHost()) : ElementUtils.getInnerWidth(getHost());
+        return isHorizontal() ? getHost().getInnerHeight() : getHost().getInnerWidth();
     }
 
     // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
@@ -559,8 +559,8 @@ public class FlexBehavior
         drawArrow(alignDir, new Color(EnumChatFormatting.WHITE), 5);
 
         String info = direction.toString() + ", " + justify.toString() + ", " + align.toString();
-        float textX = ElementUtils.getInnerLeftBound(getHost()) + 1;
-        float textY = ElementUtils.getInnerBottomBound(getHost()) - mc.fontRendererObj.FONT_HEIGHT;
+        float textX = getHost().getInnerLeftBound() + 1;
+        float textY = getHost().getInnerBottomBound() - mc.fontRendererObj.FONT_HEIGHT;
         mc.fontRendererObj.drawString(info, textX, textY, -1, true);
     }
 
@@ -574,10 +574,10 @@ public class FlexBehavior
         float[] headEdge1 = new float[2];
         float[] headEdge2 = new float[2];
 
-        float hostX = ElementUtils.getInnerLeftBound(getHost());
-        float hostY = ElementUtils.getInnerTopBound(getHost());
-        float hostWidth = ElementUtils.getInnerWidth(getHost());
-        float hostHeight = ElementUtils.getInnerHeight(getHost());
+        float hostX = getHost().getInnerLeftBound();
+        float hostY = getHost().getInnerTopBound();
+        float hostWidth = getHost().getInnerWidth();
+        float hostHeight = getHost().getInnerHeight();
 
         switch (direction)
         {

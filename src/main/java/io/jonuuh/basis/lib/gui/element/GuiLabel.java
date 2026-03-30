@@ -57,7 +57,7 @@ public class GuiLabel extends GuiElement
         // To account for text scale here, apply reverse scaling to the given width that should be trimmed to.
         // Note that trying to somehow apply scaling to other param (text) would not work because text scaling
         // would also need to be applied to the "..." string used within the called function
-        String trimmedText = RenderUtils.trimStringToWidthWithEllipsis(text, (int) (ElementUtils.getInnerWidth(this) * (1 / textScale)));
+        String trimmedText = RenderUtils.trimStringToWidthWithEllipsis(text, (int) (getInnerWidth() * (1 / textScale)));
 
         if (textScale != 1F)
         {
@@ -65,13 +65,12 @@ public class GuiLabel extends GuiElement
 
             // Scale matrix around top left corner of element's drawable area (inner bound)
             RenderUtils.scaleCurrentMatrixAroundPoint(
-                    ElementUtils.getInnerLeftBound(this), ElementUtils.getInnerTopBound(this),
+                    getInnerLeftBound(), getInnerTopBound(),
                     textScale, textScale
             );
         }
 
-        fontRenderer.drawString(trimmedText,
-                ElementUtils.getInnerLeftBound(this), ElementUtils.getInnerTopBound(this),
+        fontRenderer.drawString(trimmedText, getInnerLeftBound(), getInnerTopBound(),
                 getColor(GuiColorType.ACCENT1).toPackedARGB(), doShadow);
 
         if (textScale != 1F)

@@ -1,6 +1,5 @@
 package io.jonuuh.basis.lib.gui.element.button;
 
-import io.jonuuh.basis.lib.gui.element.ElementUtils;
 import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.RenderUtils;
@@ -55,8 +54,8 @@ public class GuiTexturedButton extends GuiButton
 
         if (texture != null && !texture.getResourcePath().isEmpty())
         {
-            RenderUtils.drawTexturedRect(texture, ElementUtils.getInnerLeftBound(this), ElementUtils.getInnerTopBound(this),
-                    getZLevel(), ElementUtils.getInnerWidth(this), ElementUtils.getInnerHeight(this), 0, smoothing, texColor);
+            RenderUtils.drawTexturedRect(texture, getInnerLeftBound(), getInnerTopBound(), getZLevel(),
+                    getInnerWidth(), getInnerHeight(), 0, smoothing, texColor);
         }
     }
 
