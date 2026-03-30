@@ -26,10 +26,19 @@ public class GuiLabel extends GuiElement
         return text;
     }
 
-    public GuiLabel setText(String text)
+    public void setText(String text)
     {
         this.text = text;
-        return this;
+
+        // Resize width and height of the label given the new text
+        float hPad = getPadding().left() + getPadding().right();
+        float vPad = getPadding().top() + getPadding().bottom();
+
+        float strW = (fontRenderer.getStringWidth(text) - 1) * textScale;
+        float strH = (fontRenderer.FONT_HEIGHT - 1) * textScale;
+
+        this.setWidth(strW + hPad);
+        this.setHeight(strH + vPad);
     }
 
     @Override
@@ -41,18 +50,23 @@ public class GuiLabel extends GuiElement
         }
         super.onScreenDraw(mouseX, mouseY, partialTicks);
 
-        String trimmedText = RenderUtils.trimStringToWidthWithEllipsis(text, (int) ElementUtils.getInnerWidth(this));
+        // A label is designed to change its width and height to exactly fit the text plus any padding around it.
+        // That on its own would render trimming the text unnecessary, however in combination with a FlexBehavior
+        // independently changing the size of elements, this trimming will actually happen very frequently
+        //
+        // To account for text scale here, apply reverse scaling to the given width that should be trimmed to.
+        // Note that trying to somehow apply scaling to other param (text) would not work because text scaling
+        // would also need to be applied to the "..." string used within the called function
+        String trimmedText = RenderUtils.trimStringToWidthWithEllipsis(text, (int) (ElementUtils.getInnerWidth(this) * (1 / textScale)));
 
         if (textScale != 1F)
         {
-            int textWidth = fontRenderer.getStringWidth(trimmedText);
             GL11.glPushMatrix();
 
-            RenderUtils.scaleCurrentMatrixAroundObject(
-                    ElementUtils.getInnerLeftBound(this) + (textWidth / 2F),
-                    ElementUtils.getInnerTopBound(this) + (fontRenderer.FONT_HEIGHT / 2F),
-                    textScale,
-                    textScale
+            // Scale matrix around top left corner of element's drawable area (inner bound)
+            RenderUtils.scaleCurrentMatrixAroundPoint(
+                    ElementUtils.getInnerLeftBound(this), ElementUtils.getInnerTopBound(this),
+                    textScale, textScale
             );
         }
 
@@ -80,8 +94,6 @@ public class GuiLabel extends GuiElement
         public Builder text(String text)
         {
             this.text = text;
-            this.width = mc.fontRendererObj.getStringWidth(text) + padding.left() + padding.right();
-            this.height = (mc.fontRendererObj.FONT_HEIGHT - 1) + padding.top() + padding.bottom();
             return self();
         }
 
@@ -106,6 +118,15 @@ public class GuiLabel extends GuiElement
         @Override
         public GuiLabel build()
         {
+            float hPad = padding.left() + padding.right();
+            float vPad = padding.top() + padding.bottom();
+
+            float strW = (mc.fontRendererObj.getStringWidth(text) - 1) * textScale;
+            float strH = (mc.fontRendererObj.FONT_HEIGHT - 1) * textScale;
+
+            this.width = strW + hPad;
+            this.height = strH + vPad;
+
             return new GuiLabel(this);
         }
     }
