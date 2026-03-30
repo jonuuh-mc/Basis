@@ -13,7 +13,6 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Sphere;
 
-import javax.vecmath.Vector2f;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -615,19 +614,19 @@ public final class RenderUtils
         return vertices;
     }
 
-    public static List<Vector2f> getRadialVertices(int numPoints, float radius)
-    {
-        List<Vector2f> points = new ArrayList<>();
-        float oneEightyRad = (float) (Math.PI);
-//        float start = (float) (Math.toRadians(360) - Math.toRadians(arcAngle / 2D));
-
-//        for (float angle = start; angle + start >= 0; angle -= oneEightyRad / (numPoints / 2F))
-        for (float angle = 0; angle <= 360; angle += oneEightyRad / (numPoints / 2F))
-        {
-            points.add(new Vector2f(radius * MathHelper.cos(angle), radius * MathHelper.sin(angle)));
-        }
-        return points;
-    }
+//    public static List<Vector2f> getRadialVertices(int numPoints, float radius)
+//    {
+//        List<Vector2f> points = new ArrayList<>();
+//        float oneEightyRad = (float) (Math.PI);
+////        float start = (float) (Math.toRadians(360) - Math.toRadians(arcAngle / 2D));
+//
+////        for (float angle = start; angle + start >= 0; angle -= oneEightyRad / (numPoints / 2F))
+//        for (float angle = 0; angle <= 360; angle += oneEightyRad / (numPoints / 2F))
+//        {
+//            points.add(new Vector2f(radius * MathHelper.cos(angle), radius * MathHelper.sin(angle)));
+//        }
+//        return points;
+//    }
 
     private void drawOutlinedBox(AxisAlignedBB bb)
     {
