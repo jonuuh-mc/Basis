@@ -10,6 +10,7 @@ public class GuiLabel extends GuiElement
     protected final FontRenderer fontRenderer;
     protected String text;
     protected float textScale;
+    protected boolean doShadow;
 
     public GuiLabel(Builder builder)
     {
@@ -17,6 +18,7 @@ public class GuiLabel extends GuiElement
         this.fontRenderer = mc.fontRendererObj;
         this.text = builder.text;
         this.textScale = builder.textScale;
+        this.doShadow = builder.doShadow;
     }
 
     public String getText()
@@ -54,8 +56,9 @@ public class GuiLabel extends GuiElement
             );
         }
 
-        fontRenderer.drawString(trimmedText, ElementUtils.getInnerLeftBound(this), ElementUtils.getInnerTopBound(this),
-                getColor(GuiColorType.ACCENT1).toPackedARGB(), true);
+        fontRenderer.drawString(trimmedText,
+                ElementUtils.getInnerLeftBound(this), ElementUtils.getInnerTopBound(this),
+                getColor(GuiColorType.ACCENT1).toPackedARGB(), doShadow);
 
         if (textScale != 1F)
         {
@@ -67,6 +70,7 @@ public class GuiLabel extends GuiElement
     {
         protected String text = "";
         protected float textScale = 1F;
+        protected boolean doShadow = true;
 
         public Builder(String elementName)
         {
@@ -84,6 +88,12 @@ public class GuiLabel extends GuiElement
         public Builder textScale(float textScale)
         {
             this.textScale = textScale;
+            return self();
+        }
+
+        public Builder doShadow(boolean doShadow)
+        {
+            this.doShadow = doShadow;
             return self();
         }
 
