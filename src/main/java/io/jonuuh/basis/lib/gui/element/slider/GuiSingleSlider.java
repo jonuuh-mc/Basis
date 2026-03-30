@@ -79,7 +79,7 @@ public class GuiSingleSlider extends GuiSlider
 
         RenderUtils.drawRoundedRectWithBorder(x, y, size, size, getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
 
-        if (debug)
+        if (isDebug())
         {
             RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, x, y, size, size, isFocused() ? new Color("#00ff00") : new Color("#ff55ff"));
         }

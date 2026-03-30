@@ -198,7 +198,7 @@ public class GuiDualSlider extends GuiSlider
             }
         }
 
-        if (debug)
+        if (isDebug())
         {
             RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, x, y, size, size, isFocused() ? new Color("#00ff00") : new Color("#ff55ff"));
         }

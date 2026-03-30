@@ -295,7 +295,7 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
             // Handle screen draw for this element
             RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), 1, getColor(GuiColorType.BACKGROUND), getColor(GuiColorType.BORDER));
 
-            if (debug && flexBehavior != null)
+            if (isDebug() && flexBehavior != null)
             {
                 flexBehavior.drawInspector();
             }
