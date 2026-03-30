@@ -27,6 +27,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * A gui screen base for all functionality offered by this custom gui framework.
+ * <p>
+ * Mostly this class takes just device IO signals from inherited GuiScreen functions,
+ * transforms them into {@link io.jonuuh.basis.lib.gui.event.GuiEvent GuiEvents},
+ * and starts propagating them down the element tree from the root container
+ */
 public abstract class BaseGuiScreen extends GuiScreen
 {
     protected GuiRootContainer rootContainer;
