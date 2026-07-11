@@ -9,6 +9,7 @@ import io.jonuuh.basis.lib.gui.event.lifecycle.ScreenTickEvent;
 import io.jonuuh.basis.lib.gui.listener.input.MouseClickListener;
 import io.jonuuh.basis.lib.gui.listener.input.MouseScrollListener;
 import io.jonuuh.basis.lib.gui.listener.lifecycle.ScreenTickListener;
+import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.MathUtils;
 import io.jonuuh.basis.lib.util.RenderUtils;
 
@@ -26,8 +27,10 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
     protected float min;
     /** The maximum value of this slider (not normalized; readable value) */
     protected float max;
-    protected final boolean isVertical; // TODO: refactor all instances of isVertical to isHorizontal?
+    protected final boolean isVertical;
     protected final boolean isInteger;
+    protected Color pointerColor;
+    protected Color trackColor;
     protected final DecimalFormat decimalFormat;
     protected float normalValue;
     /** This slider will be treated as 'moving' for this many more screen ticks */
@@ -45,6 +48,8 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
         this.max = builder.max;
         this.isVertical = builder.isVertical;
         this.isInteger = builder.isInteger;
+        this.pointerColor = builder.pointerColor;
+        this.trackColor = builder.trackColor;
         this.decimalFormat = builder.decimalFormat;
         this.enabled = builder.enabled;
 
@@ -111,6 +116,16 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
     protected float getTrackThickness()
     {
         return isVertical ? (getWidth() / 3F) : (getHeight() / 3F);
+    }
+
+    protected Color getPointerColor()
+    {
+        return pointerColor;
+    }
+
+    protected Color getTrackColor()
+    {
+        return trackColor;
     }
 
     protected float scaleWheelDelta(int wheelDelta)
@@ -262,6 +277,8 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
         protected float startValue = 0;
         protected boolean isVertical = false;
         protected boolean isInteger = false;
+        protected Color pointerColor = Color.GRAY;
+        protected Color trackColor = Color.WHITE;
         protected DecimalFormat decimalFormat = new DecimalFormat("#.##");
         protected boolean enabled = true;
         protected Consumer<GuiElement> valueChangeBehavior = null;
@@ -295,6 +312,18 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
         public T integer(boolean isInteger)
         {
             this.isInteger = isInteger;
+            return self();
+        }
+
+        public T pointerColor(Color color)
+        {
+            this.pointerColor = color;
+            return self();
+        }
+
+        public T trackColor(Color color)
+        {
+            this.trackColor = color;
             return self();
         }
 

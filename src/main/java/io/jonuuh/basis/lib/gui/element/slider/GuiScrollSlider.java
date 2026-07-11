@@ -3,7 +3,6 @@ package io.jonuuh.basis.lib.gui.element.slider;
 import io.jonuuh.basis.lib.gui.event.input.MouseDownEvent;
 import io.jonuuh.basis.lib.gui.event.input.MouseDragEvent;
 import io.jonuuh.basis.lib.gui.listener.input.MouseDragListener;
-import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.util.MathUtils;
 import io.jonuuh.basis.lib.util.RenderUtils;
 
@@ -127,13 +126,13 @@ public class GuiScrollSlider extends GuiSlider implements MouseDragListener
         {
             RenderUtils.drawRoundedRectWithBorder(worldXPos(), screenPosWindowStart,
                     getWidth(), screenPosWindowEnd - screenPosWindowStart,
-                    getCornerRadius(), 1, getColor(GuiColorType.BASE), getBorderColor());
+                    getCornerRadius(), 1, getPointerColor(), getBorderColor());
         }
         else
         {
             RenderUtils.drawRoundedRectWithBorder(screenPosWindowStart, worldYPos(),
                     screenPosWindowEnd - screenPosWindowStart, getHeight(),
-                    getCornerRadius(), 1, getColor(GuiColorType.BASE), getBorderColor());
+                    getCornerRadius(), 1, getPointerColor(), getBorderColor());
         }
     }
 

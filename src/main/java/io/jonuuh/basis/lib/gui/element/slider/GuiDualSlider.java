@@ -2,7 +2,6 @@ package io.jonuuh.basis.lib.gui.element.slider;
 
 import io.jonuuh.basis.lib.gui.event.input.MouseDownEvent;
 import io.jonuuh.basis.lib.gui.event.input.MouseScrollEvent;
-import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.MathUtils;
 import io.jonuuh.basis.lib.util.RenderUtils;
@@ -120,15 +119,15 @@ public class GuiDualSlider extends GuiSlider
         // Start
         RenderUtils.drawRoundedRectWithBorder(worldXPos(), trackY,
                 (leftPointerScreenPos - worldXPos()), trackHeight,
-                getCornerRadius(), 1, getColor(GuiColorType.ACCENT1), getBorderColor());
+                getCornerRadius(), 1, getTrackColor(), getBorderColor());
         // Middle
         RenderUtils.drawRoundedRectWithBorder(leftPointerScreenPos, trackY,
                 (rightPointerScreenPos - leftPointerScreenPos), trackHeight,
-                getCornerRadius(), 1, getColor(GuiColorType.BASE), getBorderColor());
+                getCornerRadius(), 1, getPointerColor(), getBorderColor());
         // End
         RenderUtils.drawRoundedRectWithBorder(rightPointerScreenPos, trackY,
                 getWidth() - (rightPointerScreenPos - worldXPos()), trackHeight,
-                getCornerRadius(), 1, getColor(GuiColorType.ACCENT1), getBorderColor());
+                getCornerRadius(), 1, getTrackColor(), getBorderColor());
 
         drawPointer(Pointer.START);
         drawPointer(Pointer.END);
@@ -146,15 +145,15 @@ public class GuiDualSlider extends GuiSlider
         // Start
         RenderUtils.drawRoundedRectWithBorder(trackX, worldYPos(),
                 trackWidth, (topPointerPos - worldYPos()),
-                getCornerRadius(), 1, getColor(GuiColorType.ACCENT1), getBorderColor());
+                getCornerRadius(), 1, getTrackColor(), getBorderColor());
         // Middle
         RenderUtils.drawRoundedRectWithBorder(trackX, topPointerPos,
                 trackWidth, (bottomPointerPos - topPointerPos),
-                getCornerRadius(), 1, getColor(GuiColorType.BASE), getBorderColor());
+                getCornerRadius(), 1, getPointerColor(), getBorderColor());
         // End
         RenderUtils.drawRoundedRectWithBorder(trackX, bottomPointerPos,
                 trackWidth, getHeight() - (bottomPointerPos - worldYPos()),
-                getCornerRadius(), 1, getColor(GuiColorType.ACCENT1), getBorderColor());
+                getCornerRadius(), 1, getTrackColor(), getBorderColor());
 
         drawPointer(Pointer.START);
         drawPointer(Pointer.END);
@@ -192,23 +191,23 @@ public class GuiDualSlider extends GuiSlider
         {
             GL11.glPushMatrix();
             RenderUtils.rotateCurrentMatrixAroundObject(rotateX, rotateY, (isStartPointer ? 90 : -90), 0, 0, 1);
-            RenderUtils.drawRoundedRectWithBorder(x, y, size, size, getCornerRadius(), 1,
-                    getColor(GuiColorType.ACCENT1), getBorderColor());
+            RenderUtils.drawRoundedRectWithBorder(x, y, size, size,
+                    getCornerRadius(), 1, getTrackColor(), getBorderColor());
             GL11.glPopMatrix();
         }
         else
         {
             if (isStartPointer)
             {
-                RenderUtils.drawRoundedRectWithBorder(x, y, size, size, getCornerRadius(), 1,
-                        getColor(GuiColorType.ACCENT1), getBorderColor());
+                RenderUtils.drawRoundedRectWithBorder(x, y, size, size,
+                        getCornerRadius(), 1, getTrackColor(), getBorderColor());
             }
             else
             {
                 GL11.glPushMatrix();
                 RenderUtils.rotateCurrentMatrixAroundObject(rotateX, rotateY, 180, 0, 0, 1);
-                RenderUtils.drawRoundedRectWithBorder(x, y, size, size, getCornerRadius(), 1,
-                        getColor(GuiColorType.ACCENT1), getBorderColor());
+                RenderUtils.drawRoundedRectWithBorder(x, y, size, size,
+                        getCornerRadius(), 1, getTrackColor(), getBorderColor());
                 GL11.glPopMatrix();
             }
         }
