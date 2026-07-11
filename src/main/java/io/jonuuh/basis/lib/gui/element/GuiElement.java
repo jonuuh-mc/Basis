@@ -662,7 +662,7 @@ public abstract class GuiElement
         protected GuiContainer parent = null;
 
         protected Map<GuiColorType, Color> colorMap = new HashMap<>();
-        protected Color backgroundColor = Color.WHITE;
+        protected Color backgroundColor = Color.DARK_GRAY;
         protected Color borderColor = Color.BLACK;
         protected boolean drawBackground = true;
 
