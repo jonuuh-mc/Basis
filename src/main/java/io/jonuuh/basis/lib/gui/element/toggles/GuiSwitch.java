@@ -34,6 +34,9 @@ public class GuiSwitch extends GuiToggle
 
         super.onScreenDraw(mouseX, mouseY, partialTicks);
 
+        // TODO: this is redundant (same as track rectangle)
+        //  maybe still fine to do this twice though? otherwise you would have a pair of background color
+        //  and an enabled track color, or vice versa disabled track and background color
         if (shouldDrawBackground())
         {
             RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(),
@@ -45,8 +48,7 @@ public class GuiSwitch extends GuiToggle
         Color trackColor = isToggled() ? enabledTrackColor : disabledTrackColor;
 
         // Track
-        RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(),
-                getWidth(), getHeight(),
+        RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(),
                 getCornerRadius(), 1, trackColor, getBorderColor());
 
         // Pointer
