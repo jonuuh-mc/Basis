@@ -186,6 +186,11 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         this.performAction(element -> element.setZLevel(element.getNumParents()));
     }
 
+    /**
+     * This is NOT recursive, removing a child will not affect grandchildren
+     *
+     * @param child
+     */
     public void removeChild(GuiElement child)
     {
         if (!children.contains(child))
@@ -200,6 +205,14 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         if (this == child.getParent())
         {
             child.setParent(null);
+        }
+    }
+
+    public void clearChildren()
+    {
+        for (GuiElement child : this.getChildren())
+        {
+            removeChild(child);
         }
     }
 

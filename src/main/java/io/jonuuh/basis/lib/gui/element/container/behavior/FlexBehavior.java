@@ -24,6 +24,10 @@ import java.util.Map;
 public class FlexBehavior
 {
     private final GuiContainer host;
+    /**
+     * FlexItems are wrappers for GuiElements which can be resized and repositioned by a FlexBehavior.
+     * The element inside a FlexItem is used for actually drawing the element, interacting with it via clicking, etc.
+     */
     protected final List<FlexItem> flexItems;
     protected FlexDirection direction;
     protected FlexJustify justify;
@@ -139,6 +143,12 @@ public class FlexBehavior
     {
         getHost().removeChild(item.getElement());
         flexItems.remove(item);
+    }
+
+    public void clearItems()
+    {
+        getHost().clearChildren();
+        flexItems.clear();
     }
 
     public void updateItemsLayout()
