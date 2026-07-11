@@ -6,7 +6,7 @@ import io.jonuuh.basis.lib.gui.event.lifecycle.ScreenTickEvent;
 import io.jonuuh.basis.lib.gui.listener.input.KeyInputListener;
 import io.jonuuh.basis.lib.gui.listener.input.MouseClickListener;
 import io.jonuuh.basis.lib.gui.listener.lifecycle.ScreenTickListener;
-import io.jonuuh.basis.lib.gui.properties.GuiColorType;
+import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.MathUtils;
 import io.jonuuh.basis.lib.util.RenderUtils;
 import net.minecraft.client.gui.FontRenderer;
@@ -36,12 +36,19 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
     protected boolean enabled;
     protected boolean mouseDown;
 
+    protected Color textColor;
+    protected Color cursorColor;
+    protected Color selectionColor;
+
     public GuiTextField(Builder builder)
     {
         super(builder);
         this.text = builder.text;
         this.maxTextLength = builder.maxTextLength;
         this.enabled = builder.enabled;
+        this.textColor = builder.textColor;
+        this.cursorColor = builder.cursorColor;
+        this.selectionColor = builder.selectionColor;
 
         setHeight((mc.fontRendererObj.FONT_HEIGHT - 1) + getPadding().top() + getPadding().bottom());
     }
@@ -81,12 +88,12 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
 
     public float getCursorScreenPos()
     {
-        return ElementUtils.getInnerLeftBound(this) + fontRenderer.getStringWidth(getTextBeforeCursor()) - 1;
+        return getInnerLeftBound() + fontRenderer.getStringWidth(getTextBeforeCursor()) - 1;
     }
 
     public String getTextBelowMouseX(int mouseX)
     {
-        return fontRenderer.trimStringToWidth(text, (int) (mouseX - ElementUtils.getInnerLeftBound(this) + 1));
+        return fontRenderer.trimStringToWidth(text, (int) (mouseX - getInnerLeftBound() + 1));
     }
 
     public String getTextBeforeCursor()
@@ -168,8 +175,11 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         }
         super.onScreenDraw(mouseX, mouseY, partialTicks);
 
-        RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(),
-                getCornerRadius(), 1, getColor(GuiColorType.BACKGROUND), getColor(GuiColorType.BORDER));
+        if (shouldDrawBackground())
+        {
+            RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(),
+                    getCornerRadius(), 1, getBackgroundColor(), getBorderColor());
+        }
 
         if (isMouseDown())
         {
@@ -190,7 +200,7 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
 
         if (Display.isActive() && isFocused() && (cursorFlashCounter % 20 < 10 || isTyping))
         {
-            RenderUtils.drawRectangle(getCursorScreenPos(), ElementUtils.getInnerTopBound(this) - 2, 1, fontRenderer.FONT_HEIGHT + 2, getColor(GuiColorType.BASE));
+            RenderUtils.drawRectangle(getCursorScreenPos(), getInnerTopBound() - 2, 1, fontRenderer.FONT_HEIGHT + 2, cursorColor);
         }
 
 //        RenderUtils.drawRoundedRectWithBorder(
@@ -198,8 +208,8 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
 //                ElementUtils.getInnerWidth(this), ElementUtils.getInnerHeight(this),
 //                getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
 
-        String trimmedText = RenderUtils.trimStringToWidthWithEllipsis(text, (int) ElementUtils.getInnerWidth(this));
-        fontRenderer.drawString(trimmedText, ElementUtils.getInnerLeftBound(this), ElementUtils.getInnerTopBound(this), -1, false);
+        String trimmedText = RenderUtils.trimStringToWidthWithEllipsis(text, (int) getInnerWidth());
+        fontRenderer.drawString(trimmedText, getInnerLeftBound(), getInnerTopBound(), textColor.toPackedARGB(), false);
     }
 
     protected void drawSelectionHighlight()
@@ -208,7 +218,7 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         int rectWidth = fontRenderer.getStringWidth(getSelectedText()) - 1;
         float rectX = isSelectionForward() ? cursorX + 1 : cursorX - rectWidth;
 
-        RenderUtils.drawRectangle(rectX, ElementUtils.getInnerTopBound(this), rectWidth, fontRenderer.FONT_HEIGHT - 1, getColor(GuiColorType.BASE).addA(-0.2F));
+        RenderUtils.drawRectangle(rectX, getInnerTopBound(), rectWidth, fontRenderer.FONT_HEIGHT - 1, selectionColor.addA(-0.4F));
     }
 
     @Override
@@ -300,7 +310,7 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
 
                 default:
                     // Enabled + not one of first ascii reserved 0-31, + not DEL or section sign
-                    if (isEnabled() && ChatAllowedCharacters.isAllowedCharacter(event.typedChar))
+                    if (isEnabled() && isAllowedChar(event.typedChar))
                     {
                         writeString(Character.toString(event.typedChar));
                         break;
@@ -309,6 +319,15 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         }
 
         isTyping = false;
+    }
+
+    /**
+     * This wraps the ChatAllowedCharacters function instead of calling it directly
+     * where needed to allow potential subclasses to change char filtering behavior
+     */
+    protected boolean isAllowedChar(char character)
+    {
+        return ChatAllowedCharacters.isAllowedCharacter(character);
     }
 
     public void writeString(String str)
@@ -382,7 +401,7 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         // Filter the string
         String filteredStr = ChatAllowedCharacters.filterAllowedCharacters(str);
 
-        float availableWidth = ElementUtils.getInnerWidth(this) - fontRenderer.getStringWidth(text);
+        float availableWidth = getInnerWidth() - fontRenderer.getStringWidth(text);
 
         // If there's a selection, it will be replaced by the new string after it's cleaned,
         // so it can be treated as empty (available space)
@@ -405,6 +424,9 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         protected String text = "";
         protected int maxTextLength = 32;
         protected boolean enabled = true;
+        protected Color textColor = Color.WHITE;
+        protected Color cursorColor = Color.BLUE;
+        protected Color selectionColor = Color.BLUE;
 
         public Builder(String elementName)
         {
@@ -426,6 +448,24 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         public Builder enabled(boolean enabled)
         {
             this.enabled = enabled;
+            return self();
+        }
+
+        public Builder textColor(Color textColor)
+        {
+            this.textColor = textColor;
+            return self();
+        }
+
+        public Builder cursorColor(Color cursorColor)
+        {
+            this.cursorColor = cursorColor;
+            return self();
+        }
+
+        public Builder selectionColor(Color selectionColor)
+        {
+            this.selectionColor = selectionColor;
             return self();
         }
 

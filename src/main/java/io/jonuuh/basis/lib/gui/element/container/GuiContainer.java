@@ -10,7 +10,6 @@ import io.jonuuh.basis.lib.gui.event.lifecycle.InitGuiEvent;
 import io.jonuuh.basis.lib.gui.listener.input.MouseClickListener;
 import io.jonuuh.basis.lib.gui.listener.input.MouseScrollListener;
 import io.jonuuh.basis.lib.gui.listener.lifecycle.InitGuiListener;
-import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.util.CollectionUtils;
 import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.RenderUtils;
@@ -21,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -188,6 +186,11 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         this.performAction(element -> element.setZLevel(element.getNumParents()));
     }
 
+    /**
+     * This is NOT recursive, removing a child will not affect grandchildren
+     *
+     * @param child
+     */
     public void removeChild(GuiElement child)
     {
         if (!children.contains(child))
@@ -202,6 +205,14 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         if (this == child.getParent())
         {
             child.setParent(null);
+        }
+    }
+
+    public void clearChildren()
+    {
+        for (GuiElement child : this.getChildren())
+        {
+            removeChild(child);
         }
     }
 
@@ -280,59 +291,99 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
     @Override
     public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
-        // TODO: because of this, any container that is invisible will make all its children invisible too.
-        //  is this a problem or should this be the intended behavior
+        // Note that because of this, any invisible container will effectively make all it's children invisible too
+        // (but without changing their `visible` field)
         if (!isVisible())
         {
             return;
         }
 
-        // TODO: dumb solution to making root invisible?
-        //  split only the actual draw textured rect into a protected funct which can be overridden to prevent drawing?
-        //  still drawing debug info for root is prob okay
-        if (!(this instanceof GuiRootContainer))
+        // Draw this container
+        if (shouldDrawBackground())
         {
-            // Handle screen draw for this element
-            RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(), 1, getColor(GuiColorType.BACKGROUND), getColor(GuiColorType.BORDER));
-
-            if (debug && flexBehavior != null)
-            {
-                flexBehavior.drawInspector();
-            }
-
-            super.onScreenDraw(mouseX, mouseY, partialTicks);
+            RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(),
+                    getCornerRadius(), 1, getBackgroundColor(), getBorderColor());
+        }
+        if (isDebug() && flexBehavior != null)
+        {
+            flexBehavior.drawInspector();
         }
 
+        // Debatable whether this should be before or after drawing the children?
+        // Right now super.onScreenDraw() draws debug info and updates element's `hovered`.
+        // Whether a container is hovered being updated 1 frame before or after its children are updated
+        // might not matter?
+        // Debug info being drawn on top of the children or not is probably the main difference.
+        // Probably should not be drawn on top of the children, some evidence for this being the debug zLevel
+        // string. If drawing parent debug after it's children, the parent's zLevel str could draw on top of
+        // zLevel str of its child, which is definitely counterintuitive.
+        super.onScreenDraw(mouseX, mouseY, partialTicks);
+
+        // Draw children
         drawChildren(mouseX, mouseY, partialTicks);
     }
 
     protected void drawChildren(int mouseX, int mouseY, float partialTicks)
     {
-        List<GuiContainer> containers = new ArrayList<>();
-        collectScissoringParents(containers);
+        // Collect all parents of this element (and including this element) who should scissor.
+        // In general this can be expected to only be containers who have ScrollBehaviors.
+        List<GuiContainer> scissoringContainers = new ArrayList<>();
+        collectScissoringContainers(scissoringContainers);
 
         int scissorX = 0;
         int scissorY = 0;
         int scissorWidth = 0;
         int scissorHeight = 0;
 
-        if (!containers.isEmpty())
+        // Because only one scissor box can be active at a time, something needs to be done
+        // when there are multiple nested containers that each want to scissor some area.
+        //
+        // The solution here is to create a frankenstein scissor box, taking into account
+        // all 'proposed' scissor boxes (given by left, top, right, and bottom bounds of each
+        // potentially scissoring container).
+        //
+        // It's like zooming in a camera on a scene: find each bound (left, top, right, bottom)
+        // which is closest to the center of the screen, then use those bounds as the scissor box.
+        if (!scissoringContainers.isEmpty())
         {
-            int greatestLeftBound = (int) CollectionUtils.getMax(containers, Comparator.comparingDouble(GuiElement::getLeftBound)).getLeftBound();
-            int greatestTopBound = (int) CollectionUtils.getMax(containers, Comparator.comparingDouble(GuiElement::getTopBound)).getTopBound();
+            float greatestLeftBound =
+                    CollectionUtils.getMax(scissoringContainers, Comparator.comparingDouble(GuiElement::getLeftBound))
+                            .getLeftBound();
 
-            int leastRightBound = (int) CollectionUtils.getMin(containers, Comparator.comparingDouble(GuiElement::getRightBound)).getRightBound();
-            int leastBottomBound = (int) CollectionUtils.getMin(containers, Comparator.comparingDouble(GuiElement::getBottomBound)).getBottomBound();
+            float greatestTopBound =
+                    CollectionUtils.getMax(scissoringContainers, Comparator.comparingDouble(GuiElement::getTopBound))
+                            .getTopBound();
 
-            scissorX = greatestLeftBound;
-            scissorY = greatestTopBound;
-            scissorWidth = leastRightBound - greatestLeftBound;
-            scissorHeight = leastBottomBound - greatestTopBound;
+            float leastRightBound =
+                    CollectionUtils.getMin(scissoringContainers, Comparator.comparingDouble(GuiElement::getRightBound))
+                            .getRightBound();
+
+            float leastBottomBound =
+                    CollectionUtils.getMin(scissoringContainers, Comparator.comparingDouble(GuiElement::getBottomBound))
+                            .getBottomBound();
+
+            scissorX = (int) greatestLeftBound;
+            scissorY = (int) greatestTopBound;
+            scissorWidth = (int) (leastRightBound - greatestLeftBound);
+            scissorHeight = (int) (leastBottomBound - greatestTopBound);
         }
 
+        // Now that the scissor bounds have been determined (if there even were any parent
+        // containers wanting to scissor), draw the children of this container, scissoring
+        // around the bounds for each individual child.
+        //
+        // Each child must be scissored individually because any downstream child could potentially
+        // create another unique scissor box if it's also a scissoring container.
+        // - (Since containers draw themselves first and then their children, when the child container
+        //    draws itself it would use the still-active parent's scissor container, then when drawing its children
+        //    recalculate a new "greatest zoomed in scissor box", push a matrix and call GL11.glScissor() again,
+        //    wiping the parent's scissor box as only once can be active at a time)
+        //
+        // If glScissor() was not invoked on each child individually, when a child called GL11.glScissor() again
+        // (erasing parent's scissor box) the next children in the loop would have no more parent scissor box.
         for (GuiElement child : children)
         {
-            if (!containers.isEmpty())
+            if (!scissoringContainers.isEmpty())
             {
                 // Prevent trying to scissor an area with zero width/height
                 if (scissorWidth <= 0 || scissorHeight <= 0)
@@ -343,14 +394,17 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
                 GL11.glPushMatrix();
                 GL11.glEnable(GL11.GL_SCISSOR_TEST);
 
-//                RenderUtils.drawRectangle(scissorX, scissorY, scissorWidth, scissorHeight, new Color("#4400ff00"));
+                if (isDebug())
+                {
+                    RenderUtils.drawRectangle(scissorX, scissorY, scissorWidth, scissorHeight, new Color("#d5ff34", 0.2F));
+                }
                 RenderUtils.scissorFromTopLeft(scissorX, scissorY, scissorWidth, scissorHeight);
             }
 
             // If the child is another container, this will continue propagating the draw to any additional children
             child.onScreenDraw(mouseX, mouseY, partialTicks);
 
-            if (!containers.isEmpty())
+            if (!scissoringContainers.isEmpty())
             {
                 GL11.glDisable(GL11.GL_SCISSOR_TEST);
                 GL11.glPopMatrix();
@@ -358,7 +412,8 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         }
     }
 
-    protected void collectScissoringParents(List<GuiContainer> containers)
+    // Collect all containers among this container and its parents that should scissor
+    protected void collectScissoringContainers(List<GuiContainer> containers)
     {
         if (shouldScissor())
         {
@@ -367,7 +422,7 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
 
         if (hasParent())
         {
-            getParent().collectScissoringParents(containers);
+            getParent().collectScissoringContainers(containers);
         }
     }
 
@@ -378,11 +433,6 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         {
             flexBehavior.updateItemsLayout();
         }
-
-//        if (scrollBehavior != null)
-//        {
-//            scrollBehavior.updateSlider();
-//        }
     }
 
     @Override
@@ -476,6 +526,24 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         return null;
     }
 
+    @Override
+    public void buildSubtreeString(StringBuilder sb, String prefix, boolean isLastChild)
+    {
+        super.buildSubtreeString(sb, prefix, isLastChild);
+
+        List<GuiElement> children = getChildren();
+
+        for (int i = 0; i < children.size(); i++)
+        {
+            GuiElement child = children.get(i);
+
+            child.buildSubtreeString(sb,
+                    prefix + (isLastChild ? "    " : "│   "),
+                    i == children.size() - 1
+            );
+        }
+    }
+
     protected static abstract class AbstractBuilder<T extends AbstractBuilder<T, R>, R extends GuiContainer> extends GuiElement.AbstractBuilder<T, R>
     {
         protected final List<GuiElement> children = new ArrayList<>();
@@ -487,12 +555,20 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         protected AbstractBuilder(String elementName)
         {
             super(elementName);
-        }
-
-        public T colorMap(Map<GuiColorType, Color> colorMap)
-        {
-            this.colorMap = colorMap;
-            return self();
+            // This pattern of overriding defaults in the builder's constructor is used in
+            // a few places. It's useful because it allows the overridden defaults
+            // to be exactly that, just new defaults - they can still be overridden AGAIN by
+            // any instance of the Builder.
+            //
+            // That should seem obvious but the only reason I'm making a note is to contrast
+            // with what's been another common design for me: To put some arbitrary
+            // setup or default behavior in the build() function of an element's Builder.
+            //
+            // In this case that of course wouldn't work because build() is the last function
+            // called when creating an element, so it would be impossible for any Builder instance
+            // to override the already overridden defaults.
+            backgroundColor(Color.TRANSPARENT);
+            borderColor(Color.TRANSPARENT);
         }
 
         public T scissor(boolean shouldScissor)

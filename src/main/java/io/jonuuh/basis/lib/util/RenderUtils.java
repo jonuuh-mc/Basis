@@ -7,14 +7,12 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Sphere;
 
-import javax.vecmath.Vector2f;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,21 +53,6 @@ public final class RenderUtils
         return str;
     }
 
-    public static Vec3 getEntityPosForRender(EntityPlayer player, float partialTicks)
-    {
-        RenderManager renderManager = mc.getRenderManager();
-        if (player == mc.thePlayer && renderManager.livingPlayer == mc.thePlayer)
-        {
-            // viewer pos (usually client player pos) is cached by render manager during each render pass
-            return new Vec3(renderManager.viewerPosX, renderManager.viewerPosY, renderManager.viewerPosZ);
-        }
-
-        double x = (player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks);
-        double y = (player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks);
-        double z = (player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks);
-        return new Vec3(x, y, z);
-    }
-
     public static void scissorFromTopLeft(int x, int y, int w, int h)
     {
         ScaledResolution sr = new ScaledResolution(mc);
@@ -78,18 +61,18 @@ public final class RenderUtils
     }
 
     /**
-     * Used for scaling objects in place.
+     * Pass in the object's center X and Y if using this to scale an object in place.
      * <p>
      * AFTER pushing a new matrix to the GL11 stack, call this method, then the draw object
      */
-    public static void scaleCurrentMatrixAroundObject(float objectCenterX, float objectCenterY, float scaleX, float scaleY)
+    public static void scaleCurrentMatrixAroundPoint(float x, float y, float scaleX, float scaleY)
     {
-        // Move current matrix origin to the object's center, so any scaling will effectively not change the object's visual position
-        GL11.glTranslatef(objectCenterX, objectCenterY, 0);
+        // Move current matrix origin to the point, so any scaling will effectively be done around that point
+        GL11.glTranslatef(x, y, 0);
         // Scale the matrix
         GL11.glScalef(scaleX, scaleY, 0);
         // Move current matrix origin back to original position
-        GL11.glTranslatef(-objectCenterX, -objectCenterY, 0);
+        GL11.glTranslatef(-x, -y, 0);
     }
 
     /**
@@ -327,7 +310,7 @@ public final class RenderUtils
         GL11.glDisable(GL11.GL_BLEND);
     }
 
-    public static void drawSphere(boolean blend, boolean cullFace, boolean wireframe, Color color)
+    public static void drawSphere(float radius, int slices, int stacks, boolean blend, boolean cullFace, boolean wireframe, Color color)
     {
         GL11.glColor4ub(color.r, color.g, color.b, color.a);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
@@ -337,7 +320,7 @@ public final class RenderUtils
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         }
-        if (cullFace)
+        if (!cullFace)
         {
             GL11.glDisable(GL11.GL_CULL_FACE);
         }
@@ -348,7 +331,7 @@ public final class RenderUtils
 
         GL11.glPushMatrix();
         GL11.glRotatef(90, 1.0F, 0.0F, 0.0F);
-        new Sphere().draw(2, 12, 12);
+        new Sphere().draw(radius, slices, stacks);
         GL11.glPopMatrix();
 
         if (wireframe)
@@ -356,7 +339,7 @@ public final class RenderUtils
             // TODO: what is the default that this global state should be reset to? is this fine?
             GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
         }
-        if (cullFace)
+        if (!cullFace)
         {
             GL11.glEnable(GL11.GL_CULL_FACE);
         }
@@ -631,17 +614,93 @@ public final class RenderUtils
         return vertices;
     }
 
-    public static List<Vector2f> getRadialVertices(int numPoints, float radius)
-    {
-        List<Vector2f> points = new ArrayList<>();
-        float oneEightyRad = (float) (Math.PI);
-//        float start = (float) (Math.toRadians(360) - Math.toRadians(arcAngle / 2D));
+//    public static List<Vector2f> getRadialVertices(int numPoints, float radius)
+//    {
+//        List<Vector2f> points = new ArrayList<>();
+//        float oneEightyRad = (float) (Math.PI);
+////        float start = (float) (Math.toRadians(360) - Math.toRadians(arcAngle / 2D));
+//
+////        for (float angle = start; angle + start >= 0; angle -= oneEightyRad / (numPoints / 2F))
+//        for (float angle = 0; angle <= 360; angle += oneEightyRad / (numPoints / 2F))
+//        {
+//            points.add(new Vector2f(radius * MathHelper.cos(angle), radius * MathHelper.sin(angle)));
+//        }
+//        return points;
+//    }
 
-//        for (float angle = start; angle + start >= 0; angle -= oneEightyRad / (numPoints / 2F))
-        for (float angle = 0; angle <= 360; angle += oneEightyRad / (numPoints / 2F))
-        {
-            points.add(new Vector2f(radius * MathHelper.cos(angle), radius * MathHelper.sin(angle)));
-        }
-        return points;
+    private void drawOutlinedBox(AxisAlignedBB bb)
+    {
+        GL11.glBegin(GL11.GL_LINES);
+        GL11.glVertex3d(bb.minX, bb.minY, bb.minZ);
+        GL11.glVertex3d(bb.maxX, bb.minY, bb.minZ);
+
+        GL11.glVertex3d(bb.maxX, bb.minY, bb.minZ);
+        GL11.glVertex3d(bb.maxX, bb.minY, bb.maxZ);
+
+        GL11.glVertex3d(bb.maxX, bb.minY, bb.maxZ);
+        GL11.glVertex3d(bb.minX, bb.minY, bb.maxZ);
+
+        GL11.glVertex3d(bb.minX, bb.minY, bb.maxZ);
+        GL11.glVertex3d(bb.minX, bb.minY, bb.minZ);
+        //////////
+        GL11.glVertex3d(bb.minX, bb.minY, bb.minZ);
+        GL11.glVertex3d(bb.minX, bb.maxY, bb.minZ);
+
+        GL11.glVertex3d(bb.maxX, bb.minY, bb.minZ);
+        GL11.glVertex3d(bb.maxX, bb.maxY, bb.minZ);
+
+        GL11.glVertex3d(bb.maxX, bb.minY, bb.maxZ);
+        GL11.glVertex3d(bb.maxX, bb.maxY, bb.maxZ);
+
+        GL11.glVertex3d(bb.minX, bb.minY, bb.maxZ);
+        GL11.glVertex3d(bb.minX, bb.maxY, bb.maxZ);
+        //////////
+        GL11.glVertex3d(bb.minX, bb.maxY, bb.minZ);
+        GL11.glVertex3d(bb.maxX, bb.maxY, bb.minZ);
+
+        GL11.glVertex3d(bb.maxX, bb.maxY, bb.minZ);
+        GL11.glVertex3d(bb.maxX, bb.maxY, bb.maxZ);
+
+        GL11.glVertex3d(bb.maxX, bb.maxY, bb.maxZ);
+        GL11.glVertex3d(bb.minX, bb.maxY, bb.maxZ);
+
+        GL11.glVertex3d(bb.minX, bb.maxY, bb.maxZ);
+        GL11.glVertex3d(bb.minX, bb.maxY, bb.minZ);
+        GL11.glEnd();
+    }
+
+    private void drawSolidBox(AxisAlignedBB bb)
+    {
+        GL11.glBegin(GL11.GL_QUADS);
+        GL11.glVertex3d(bb.minX, bb.minY, bb.minZ);
+        GL11.glVertex3d(bb.maxX, bb.minY, bb.minZ);
+        GL11.glVertex3d(bb.maxX, bb.minY, bb.maxZ);
+        GL11.glVertex3d(bb.minX, bb.minY, bb.maxZ);
+
+        GL11.glVertex3d(bb.minX, bb.maxY, bb.minZ);
+        GL11.glVertex3d(bb.minX, bb.maxY, bb.maxZ);
+        GL11.glVertex3d(bb.maxX, bb.maxY, bb.maxZ);
+        GL11.glVertex3d(bb.maxX, bb.maxY, bb.minZ);
+
+        GL11.glVertex3d(bb.minX, bb.minY, bb.minZ);
+        GL11.glVertex3d(bb.minX, bb.maxY, bb.minZ);
+        GL11.glVertex3d(bb.maxX, bb.maxY, bb.minZ);
+        GL11.glVertex3d(bb.maxX, bb.minY, bb.minZ);
+
+        GL11.glVertex3d(bb.maxX, bb.minY, bb.minZ);
+        GL11.glVertex3d(bb.maxX, bb.maxY, bb.minZ);
+        GL11.glVertex3d(bb.maxX, bb.maxY, bb.maxZ);
+        GL11.glVertex3d(bb.maxX, bb.minY, bb.maxZ);
+
+        GL11.glVertex3d(bb.minX, bb.minY, bb.maxZ);
+        GL11.glVertex3d(bb.maxX, bb.minY, bb.maxZ);
+        GL11.glVertex3d(bb.maxX, bb.maxY, bb.maxZ);
+        GL11.glVertex3d(bb.minX, bb.maxY, bb.maxZ);
+
+        GL11.glVertex3d(bb.minX, bb.minY, bb.minZ);
+        GL11.glVertex3d(bb.minX, bb.minY, bb.maxZ);
+        GL11.glVertex3d(bb.minX, bb.maxY, bb.maxZ);
+        GL11.glVertex3d(bb.minX, bb.maxY, bb.minZ);
+        GL11.glEnd();
     }
 }

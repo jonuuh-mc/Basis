@@ -1,6 +1,5 @@
 package io.jonuuh.basis.lib.gui.element.container.behavior;
 
-import io.jonuuh.basis.lib.gui.element.ElementUtils;
 import io.jonuuh.basis.lib.gui.element.GuiElement;
 import io.jonuuh.basis.lib.gui.element.container.FlexItem;
 import io.jonuuh.basis.lib.gui.element.container.GuiContainer;
@@ -25,6 +24,10 @@ import java.util.Map;
 public class FlexBehavior
 {
     private final GuiContainer host;
+    /**
+     * FlexItems are wrappers for GuiElements which can be resized and repositioned by a FlexBehavior.
+     * The element inside a FlexItem is used for actually drawing the element, interacting with it via clicking, etc.
+     */
     protected final List<FlexItem> flexItems;
     protected FlexDirection direction;
     protected FlexJustify justify;
@@ -33,18 +36,17 @@ public class FlexBehavior
     protected boolean doResize;
     protected boolean doJustify;
     protected boolean doAlign;
-    //    protected List<FlexItem> resizeExcludes;
-//    protected List<FlexItem> justifyExcludes;
-//    protected List<FlexItem> alignExcludes;
+    /**
+     * Optional custom main axis size.
+     * <p>
+     * This was implemented to tell a container with both flex and scroll behavior to use
+     * the scroll behavior's scrollable length as the main axis length rather than the host's actual length
+     */
     protected Float mainAxisSize;
 
     protected FlexBehavior(Builder builder)
     {
-//        this.container = container;
         this.flexItems = builder.flexItems;
-//        addItems(builder.flexItems);
-//        this.flexItems = new ArrayList<>();
-////        addItems(builder.flexItems);
         this.direction = builder.direction;
         this.justify = builder.justify;
         this.align = builder.align;
@@ -143,6 +145,12 @@ public class FlexBehavior
         flexItems.remove(item);
     }
 
+    public void clearItems()
+    {
+        getHost().clearChildren();
+        flexItems.clear();
+    }
+
     public void updateItemsLayout()
     {
         if (flexItems.isEmpty())
@@ -203,6 +211,25 @@ public class FlexBehavior
         {
             scaleCrossAxisOverflow(); // TODO:
             alignCrossAxis();
+        }
+    }
+
+    public void updateItemsLayoutRecursive()
+    {
+        updateItemsLayout();
+
+        for (FlexItem item : this.flexItems)
+        {
+            if (item.getElement() instanceof GuiContainer)
+            {
+                GuiContainer container = (GuiContainer) item.getElement();
+                FlexBehavior behavior = container.getFlexBehavior();
+
+                if (behavior != null)
+                {
+                    behavior.updateItemsLayoutRecursive();
+                }
+            }
         }
     }
 
@@ -426,21 +453,25 @@ public class FlexBehavior
         return direction == FlexDirection.ROW_REVERSE || direction == FlexDirection.COLUMN_REVERSE;
     }
 
+    public void setMainAxisSize(float mainAxisSize)
+    {
+        this.mainAxisSize = mainAxisSize;
+    }
+
     protected float getMainAxisSize()
     {
         if (mainAxisSize != null)
         {
-//            System.out.println(mainAxisSize);
             return isHorizontal()
                     ? mainAxisSize - getHost().getPadding().left() - getHost().getPadding().right()
                     : mainAxisSize - getHost().getPadding().top() - getHost().getPadding().bottom();
         }
-        return isHorizontal() ? ElementUtils.getInnerWidth(getHost()) : ElementUtils.getInnerHeight(getHost());
+        return isHorizontal() ? getHost().getInnerWidth() : getHost().getInnerHeight();
     }
 
     private float getCrossAxisSize()
     {
-        return isHorizontal() ? ElementUtils.getInnerHeight(getHost()) : ElementUtils.getInnerWidth(getHost());
+        return isHorizontal() ? getHost().getInnerHeight() : getHost().getInnerWidth();
     }
 
     // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
@@ -538,8 +569,8 @@ public class FlexBehavior
         drawArrow(alignDir, new Color(EnumChatFormatting.WHITE), 5);
 
         String info = direction.toString() + ", " + justify.toString() + ", " + align.toString();
-        float textX = ElementUtils.getInnerLeftBound(getHost()) + 1;
-        float textY = ElementUtils.getInnerBottomBound(getHost()) - mc.fontRendererObj.FONT_HEIGHT;
+        float textX = getHost().getInnerLeftBound() + 1;
+        float textY = getHost().getInnerBottomBound() - mc.fontRendererObj.FONT_HEIGHT;
         mc.fontRendererObj.drawString(info, textX, textY, -1, true);
     }
 
@@ -553,10 +584,10 @@ public class FlexBehavior
         float[] headEdge1 = new float[2];
         float[] headEdge2 = new float[2];
 
-        float hostX = ElementUtils.getInnerLeftBound(getHost());
-        float hostY = ElementUtils.getInnerTopBound(getHost());
-        float hostWidth = ElementUtils.getInnerWidth(getHost());
-        float hostHeight = ElementUtils.getInnerHeight(getHost());
+        float hostX = getHost().getInnerLeftBound();
+        float hostY = getHost().getInnerTopBound();
+        float hostWidth = getHost().getInnerWidth();
+        float hostHeight = getHost().getInnerHeight();
 
         switch (direction)
         {

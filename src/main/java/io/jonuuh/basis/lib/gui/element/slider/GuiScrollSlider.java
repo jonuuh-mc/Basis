@@ -3,7 +3,6 @@ package io.jonuuh.basis.lib.gui.element.slider;
 import io.jonuuh.basis.lib.gui.event.input.MouseDownEvent;
 import io.jonuuh.basis.lib.gui.event.input.MouseDragEvent;
 import io.jonuuh.basis.lib.gui.listener.input.MouseDragListener;
-import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.util.MathUtils;
 import io.jonuuh.basis.lib.util.RenderUtils;
 
@@ -55,9 +54,25 @@ public class GuiScrollSlider extends GuiSlider implements MouseDragListener
         return getValue() - (float) MathUtils.denormalize(lastValue, min, max);
     }
 
+    public float getScrollBarLength()
+    {
+        return scrollBarLength;
+    }
+
     public void updateScrollBarLength()
     {
-        this.scrollBarLength = isVertical ? getHeight() / max : getWidth() / max;
+        this.scrollBarLength = Math.min(1, (isVertical ? getHeight() / max : getWidth() / max));
+
+        // No need to set isEnabled here due to upstream (BaseGuiScreen#mouseClicked())
+        // not allowing clicking on elements if invisible
+        if (scrollBarLength == 1)
+        {
+            this.setVisible(false);
+        }
+        else if (!this.isVisible())
+        {
+            this.setVisible(true);
+        }
     }
 
 //    @Override
@@ -109,11 +124,15 @@ public class GuiScrollSlider extends GuiSlider implements MouseDragListener
 
         if (isVertical)
         {
-            RenderUtils.drawRoundedRectWithBorder(worldXPos(), screenPosWindowStart, getWidth(), screenPosWindowEnd - screenPosWindowStart, getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
+            RenderUtils.drawRoundedRectWithBorder(worldXPos(), screenPosWindowStart,
+                    getWidth(), screenPosWindowEnd - screenPosWindowStart,
+                    getCornerRadius(), 1, getPointerColor(), getBorderColor());
         }
         else
         {
-            RenderUtils.drawRoundedRectWithBorder(screenPosWindowStart, worldYPos(), screenPosWindowEnd - screenPosWindowStart, getHeight(), getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
+            RenderUtils.drawRoundedRectWithBorder(screenPosWindowStart, worldYPos(),
+                    screenPosWindowEnd - screenPosWindowStart, getHeight(),
+                    getCornerRadius(), 1, getPointerColor(), getBorderColor());
         }
     }
 

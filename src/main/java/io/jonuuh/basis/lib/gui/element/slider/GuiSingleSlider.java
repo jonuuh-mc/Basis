@@ -1,6 +1,5 @@
 package io.jonuuh.basis.lib.gui.element.slider;
 
-import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.RenderUtils;
 import org.lwjgl.opengl.GL11;
@@ -34,9 +33,13 @@ public class GuiSingleSlider extends GuiSlider
         float pointerPos = getScreenPosAtNormalValue(getNormalizedValue());
 
         // Left track
-        RenderUtils.drawRoundedRectWithBorder(x, trackPos, pointerPos - x, trackThickness, getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
+        RenderUtils.drawRoundedRectWithBorder(x, trackPos,
+                pointerPos - x, trackThickness,
+                getCornerRadius(), 1, getPointerColor(), getBorderColor());
         // Right track
-        RenderUtils.drawRoundedRectWithBorder(pointerPos, trackPos, getWidth() - (pointerPos - x), trackThickness, getCornerRadius(), 1, getColor(GuiColorType.ACCENT1), getColor(GuiColorType.BORDER));
+        RenderUtils.drawRoundedRectWithBorder(pointerPos, trackPos,
+                getWidth() - (pointerPos - x), trackThickness,
+                getCornerRadius(), 1, getTrackColor(), getBorderColor());
 
         drawPointer();
     }
@@ -52,9 +55,13 @@ public class GuiSingleSlider extends GuiSlider
         float pointerPos = getScreenPosAtNormalValue(getNormalizedValue());
 
         // Top track
-        RenderUtils.drawRoundedRectWithBorder(trackPos, y, trackThickness, pointerPos - y, getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
+        RenderUtils.drawRoundedRectWithBorder(trackPos, y,
+                trackThickness, pointerPos - y,
+                getCornerRadius(), 1, getPointerColor(), getBorderColor());
         // Bottom track
-        RenderUtils.drawRoundedRectWithBorder(trackPos, pointerPos, trackThickness, getHeight() - (pointerPos - y), getCornerRadius(), 1, getColor(GuiColorType.ACCENT1), getColor(GuiColorType.BORDER));
+        RenderUtils.drawRoundedRectWithBorder(trackPos, pointerPos,
+                trackThickness, getHeight() - (pointerPos - y),
+                getCornerRadius(), 1, getTrackColor(), getBorderColor());
 
         drawPointer();
     }
@@ -77,9 +84,9 @@ public class GuiSingleSlider extends GuiSlider
         float x = isVertical ? trackPos - (Math.abs(getTrackThickness() - size) / 2) : pointerPos - (size / 2);
         float y = isVertical ? pointerPos - (size / 2) : trackPos - (Math.abs(getTrackThickness() - size) / 2);
 
-        RenderUtils.drawRoundedRectWithBorder(x, y, size, size, getCornerRadius(), 1, getColor(GuiColorType.BASE), getColor(GuiColorType.BORDER));
+        RenderUtils.drawRoundedRectWithBorder(x, y, size, size, getCornerRadius(), 1, getPointerColor(), getBorderColor());
 
-        if (debug)
+        if (isDebug())
         {
             RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, x, y, size, size, isFocused() ? new Color("#00ff00") : new Color("#ff55ff"));
         }

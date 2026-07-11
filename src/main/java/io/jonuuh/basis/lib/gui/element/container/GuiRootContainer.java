@@ -29,21 +29,18 @@ public class GuiRootContainer extends GuiContainer
     @Override
     public void onInitGui(InitGuiEvent event)
     {
+        // This is essentially the furthest point upstream in the cascading
+        // resizing and reorganization of elements in a FlexBehavior.
+        // Without this, FlexBehaviors would do nothing - the resizing has to start somewhere.
+        //
+        // Also note that if the root container is not given a FlexBehavior,
+        // all flexing containers downstream will have no effect for the same reason.
         setWidth(event.sr.getScaledWidth());
         setHeight(event.sr.getScaledHeight());
+        // Now make the call to GuiContainer's onInitGui, which will call this
+        // element's flexBehavior#updateItemsLayout(), and thus the cascade begins.
         super.onInitGui(event);
     }
-
-//    @Override
-//    public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
-//    {
-//        if (!isVisible())
-//        {
-//            return;
-//        }
-//        super.onScreenDraw(mouseX, mouseY, partialTicks);
-////        RenderUtils.drawRoundedRect(GL11.GL_POLYGON, worldXPos(), worldYPos(), getWidth(), getHeight(), 3, new Color("#FFFFFF", 0.2F));
-//    }
 
     public static class Builder extends GuiContainer.AbstractBuilder<Builder, GuiRootContainer>
     {

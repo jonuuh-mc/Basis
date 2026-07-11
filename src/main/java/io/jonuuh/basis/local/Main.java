@@ -4,7 +4,6 @@ import io.jonuuh.basis.lib.config.setting.Settings;
 import io.jonuuh.basis.lib.config.setting.types.single.IntSetting;
 import io.jonuuh.basis.lib.config.setting.types.single.StringSetting;
 import io.jonuuh.basis.lib.gui.BaseGuiScreen;
-import io.jonuuh.basis.lib.gui.screen.MainGuiScreen;
 import io.jonuuh.basis.lib.util.logging.ChatLoggerManager;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.EnumChatFormatting;
