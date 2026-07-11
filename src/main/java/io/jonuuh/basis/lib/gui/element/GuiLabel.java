@@ -1,6 +1,6 @@
 package io.jonuuh.basis.lib.gui.element;
 
-import io.jonuuh.basis.lib.gui.properties.GuiColorType;
+import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.RenderUtils;
 import net.minecraft.client.gui.FontRenderer;
 import org.lwjgl.opengl.GL11;
@@ -9,6 +9,7 @@ public class GuiLabel extends GuiElement
 {
     protected final FontRenderer fontRenderer;
     protected String text;
+    protected Color textColor;
     protected float textScale;
     protected boolean doShadow;
 
@@ -17,6 +18,7 @@ public class GuiLabel extends GuiElement
         super(builder);
         this.fontRenderer = mc.fontRendererObj;
         this.text = builder.text;
+        this.textColor = builder.textColor;
         this.textScale = builder.textScale;
         this.doShadow = builder.doShadow;
     }
@@ -50,6 +52,12 @@ public class GuiLabel extends GuiElement
         }
         super.onScreenDraw(mouseX, mouseY, partialTicks);
 
+        if (shouldDrawBackground())
+        {
+            RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(),
+                    getCornerRadius(), 1, getBackgroundColor(), getBorderColor());
+        }
+
         // A label is designed to change its width and height to exactly fit the text plus any padding around it.
         // That on its own would render trimming the text unnecessary, however in combination with a FlexBehavior
         // independently changing the size of elements, this trimming will actually happen very frequently
@@ -71,7 +79,7 @@ public class GuiLabel extends GuiElement
         }
 
         fontRenderer.drawString(trimmedText, getInnerLeftBound(), getInnerTopBound(),
-                getColor(GuiColorType.ACCENT1).toPackedARGB(), doShadow);
+                textColor.toPackedARGB(), doShadow);
 
         if (textScale != 1F)
         {
@@ -82,17 +90,26 @@ public class GuiLabel extends GuiElement
     public static class Builder extends GuiElement.AbstractBuilder<Builder, GuiLabel>
     {
         protected String text = "";
+        protected Color textColor = Color.WHITE;
         protected float textScale = 1F;
         protected boolean doShadow = true;
 
         public Builder(String elementName)
         {
             super(elementName);
+            // Override GuiElement's default of drawing the background
+            drawBackground(false);
         }
 
         public Builder text(String text)
         {
             this.text = text;
+            return self();
+        }
+
+        public Builder textColor(Color color)
+        {
+            this.textColor = color;
             return self();
         }
 
@@ -120,7 +137,7 @@ public class GuiLabel extends GuiElement
             float hPad = padding.left() + padding.right();
             float vPad = padding.top() + padding.bottom();
 
-            float strW = (mc.fontRendererObj.getStringWidth(text) - 1) * textScale;
+            float strW = (mc.fontRendererObj.getStringWidth(text) /*- 1*/) * textScale;
             float strH = (mc.fontRendererObj.FONT_HEIGHT - 1) * textScale;
 
             this.width = strW + hPad;

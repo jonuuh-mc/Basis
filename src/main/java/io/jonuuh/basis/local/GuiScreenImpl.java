@@ -11,12 +11,7 @@ import io.jonuuh.basis.lib.gui.element.slider.GuiSingleSlider;
 import io.jonuuh.basis.lib.gui.properties.FlexAlign;
 import io.jonuuh.basis.lib.gui.properties.FlexDirection;
 import io.jonuuh.basis.lib.gui.properties.FlexJustify;
-import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.gui.properties.Spacing;
-import io.jonuuh.basis.lib.util.Color;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class GuiScreenImpl extends BaseGuiScreen
 {
@@ -47,12 +42,6 @@ public class GuiScreenImpl extends BaseGuiScreen
 
     protected GuiRootContainer initRootContainer()
     {
-        Map<GuiColorType, Color> colorMap = new HashMap<>();
-        colorMap.put(GuiColorType.ACCENT1, new Color("#bbe0e0e0"));
-        colorMap.put(GuiColorType.ACCENT2, new Color("#bb484848"));
-        colorMap.put(GuiColorType.BASE, new Color("#bb1450A0"));
-        colorMap.put(GuiColorType.BACKGROUND, new Color("#bb242424"));
-
         // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
         this.growItemSlider = new GuiSingleSlider.Builder("growSlider")
                 .size(100, 10)
@@ -117,32 +106,32 @@ public class GuiScreenImpl extends BaseGuiScreen
         // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
         GuiBasicContainer container1 = new GuiBasicContainer.Builder("container1")
                 .size(125, 40)
-                .color(GuiColorType.BACKGROUND, colorMap.get(GuiColorType.BASE))
+//                .color(GuiColorType.BACKGROUND, colorMap.get(GuiColorType.BASE))
                 .build();
 //        container1.assignPostEventBehavior(GuiEventType.MOUSE_DOWN, this::updateCurrFocusedContainer);
 
         GuiBasicContainer container2 = new GuiBasicContainer.Builder("container2")
                 .size(50, 100)
-                .color(GuiColorType.BACKGROUND, new Color("a6a6a6", 0.5F))
+//                .color(GuiColorType.BACKGROUND, new Color("a6a6a6", 0.5F))
                 .build();
 //        container2.assignPostEventBehavior(GuiEventType.MOUSE_DOWN, this::updateCurrFocusedContainer);
 
         GuiBasicContainer container3 = new GuiBasicContainer.Builder("container3")
                 .size(100, 30)
-                .color(GuiColorType.BACKGROUND, new Color("a6a6a6", 0.5F))
+//                .color(GuiColorType.BACKGROUND, new Color("a6a6a6", 0.5F))
                 .build();
 //        container3.assignPostEventBehavior(GuiEventType.MOUSE_DOWN, this::updateCurrFocusedContainer);
 
         GuiBasicContainer container4 = new GuiBasicContainer.Builder("container4")
                 .size(75, 50)
-                .color(GuiColorType.BACKGROUND, new Color("a6a6a6", 0.5F))
+//                .color(GuiColorType.BACKGROUND, new Color("a6a6a6", 0.5F))
                 .build();
 //        container4.assignPostEventBehavior(GuiEventType.MOUSE_DOWN, this::updateCurrFocusedContainer);
 //        currFocusedContainer = container1;
 
         this.mainFlex = new GuiBasicContainer.Builder("mainFlex")
                 .size(450, 270)
-                .color(GuiColorType.BACKGROUND, new Color("4d4d4d", 0.75F))
+//                .color(GuiColorType.BACKGROUND, new Color("4d4d4d", 0.75F))
                 .padding(new Spacing(10, 10/*250*/, 10, 10))
                 .flexBehavior(new FlexBehavior.Builder()
                         .direction(FlexDirection.COLUMN)
@@ -185,7 +174,6 @@ public class GuiScreenImpl extends BaseGuiScreen
         // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
         return new GuiRootContainer.Builder(this)
                 .padding(new Spacing(20, 20, 20, 20))
-                .colorMap(colorMap)
                 .flexBehavior(new FlexBehavior.Builder().justify(FlexJustify.CENTER).align(FlexAlign.CENTER).item(new FlexItem(content)))
                 .build();
     }

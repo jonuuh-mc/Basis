@@ -5,7 +5,6 @@ import io.jonuuh.basis.lib.gui.element.container.GuiContainer;
 import io.jonuuh.basis.lib.gui.element.container.GuiRootContainer;
 import io.jonuuh.basis.lib.gui.event.GuiEvent;
 import io.jonuuh.basis.lib.gui.listener.input.InputListener;
-import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.gui.properties.Spacing;
 import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.RenderUtils;
@@ -13,9 +12,7 @@ import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -34,9 +31,6 @@ public abstract class GuiElement
      * the element will be inaccessible via any events dispatched by the GuiScreen
      */
     protected GuiContainer parent;
-
-    /** A map of colors that may be used by this element */
-    protected Map<GuiColorType, Color> colorMap;
 
     /** Element x position within its parent */
     private float localXPos;
@@ -58,6 +52,11 @@ public abstract class GuiElement
     private boolean visible;
     /** Whether this element is currently hovered; Updated constantly via onScreenDraw (not via onScreenTick because mouse pos is needed) */
     private boolean hovered;
+
+    private Color backgroundColor;
+    private Color borderColor;
+
+    private boolean drawBackground;
 
     /** Margin is currently unused */
     private Spacing margin;
@@ -86,7 +85,9 @@ public abstract class GuiElement
 
         this.visible = builder.visible;
 
-        this.colorMap = builder.colorMap;
+        this.backgroundColor = builder.backgroundColor;
+        this.borderColor = builder.borderColor;
+        this.drawBackground = builder.drawBackground;
 
         this.debug = builder.debug;
 
@@ -429,28 +430,34 @@ public abstract class GuiElement
         }
     }
 
-    public void putColor(GuiColorType type, Color color)
+    public Color getBackgroundColor()
     {
-        colorMap.put(type, color);
+        return backgroundColor;
     }
 
-    public Color getColor(GuiColorType type)
+    public void setBackgroundColor(Color backgroundColor)
     {
-        if (colorMap.containsKey(type))
-        {
-            return colorMap.get(type);
-        }
-        else if (hasParent())
-        {
-            Color c = parent.getColor(type);
-            // TODO: is this really any more efficient or negligible
-            // propagate the color down the tree from whichever container has a key for it,
-            // caching it in more specific elements for (faster?) access in future
-            putColor(type, c);
-            return c;
-        }
+        this.backgroundColor = backgroundColor;
+    }
 
-        return new Color();
+    public Color getBorderColor()
+    {
+        return borderColor;
+    }
+
+    public void setBorderColor(Color borderColor)
+    {
+        this.borderColor = borderColor;
+    }
+
+    public boolean shouldDrawBackground()
+    {
+        return drawBackground;
+    }
+
+    public void setDrawBackground(boolean drawBackground)
+    {
+        this.drawBackground = drawBackground;
     }
 
     public boolean isVisible()
@@ -554,7 +561,7 @@ public abstract class GuiElement
 
             // Draw z level string
             mc.fontRendererObj.drawString(String.valueOf(getZLevel()), getRightBound() - mc.fontRendererObj.getStringWidth(String.valueOf(getZLevel())),
-                    getBottomBound() - mc.fontRendererObj.FONT_HEIGHT, getColor(GuiColorType.ACCENT2).toPackedARGB(), true);
+                    getBottomBound() - mc.fontRendererObj.FONT_HEIGHT, Color.GREEN.toPackedARGB(), true);
         }
     }
 
@@ -623,7 +630,10 @@ public abstract class GuiElement
         protected final String elementName;
 
         protected GuiContainer parent = null;
-        protected Map<GuiColorType, Color> colorMap = new HashMap<>();
+
+        protected Color backgroundColor = Color.DARK_GRAY;
+        protected Color borderColor = Color.BLACK;
+        protected boolean drawBackground = true;
 
         protected float localXPos, localYPos;
         protected float width = DEFAULT_WIDTH;
@@ -695,9 +705,21 @@ public abstract class GuiElement
             return self();
         }
 
-        public T color(GuiColorType type, Color color)
+        public T backgroundColor(Color color)
         {
-            this.colorMap.put(type, color);
+            this.backgroundColor = color;
+            return self();
+        }
+
+        public T borderColor(Color color)
+        {
+            this.borderColor = color;
+            return self();
+        }
+
+        public T drawBackground(boolean drawBackground)
+        {
+            this.drawBackground = drawBackground;
             return self();
         }
 

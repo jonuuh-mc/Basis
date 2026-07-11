@@ -1,6 +1,5 @@
 package io.jonuuh.basis.lib.gui.element;
 
-import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.RenderUtils;
 import net.minecraft.util.ResourceLocation;
@@ -15,7 +14,6 @@ public class GuiTexture extends GuiElement
     protected ResourceLocation texture;
     protected Color texColor;
     protected boolean smoothing;
-    protected boolean drawBackground;
 
     public GuiTexture(Builder builder)
     {
@@ -23,7 +21,6 @@ public class GuiTexture extends GuiElement
         this.texture = builder.texture;
         this.texColor = builder.texColor;
         this.smoothing = builder.smoothing;
-        this.drawBackground = builder.drawBackground;
     }
 
     @Override
@@ -35,10 +32,10 @@ public class GuiTexture extends GuiElement
         }
         super.onScreenDraw(mouseX, mouseY, partialTicks);
 
-        if (drawBackground)
+        if (shouldDrawBackground())
         {
-            RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(), getCornerRadius(),
-                    1, getColor(GuiColorType.BACKGROUND), getColor(GuiColorType.BORDER));
+            RenderUtils.drawRoundedRectWithBorder(worldXPos(), worldYPos(), getWidth(), getHeight(),
+                    getCornerRadius(), 1, getBackgroundColor(), getBorderColor());
         }
 
         if (texture != null && !texture.getResourcePath().isEmpty())
@@ -53,11 +50,12 @@ public class GuiTexture extends GuiElement
         protected ResourceLocation texture = null;
         protected Color texColor = Color.WHITE;
         protected boolean smoothing = false;
-        protected boolean drawBackground = true;
 
         public Builder(String elementName)
         {
             super(elementName);
+            // Override GuiElement's default of drawing the background
+            drawBackground(false);
         }
 
         public Builder texture(ResourceLocation texture)
@@ -75,12 +73,6 @@ public class GuiTexture extends GuiElement
         public Builder smoothing(boolean smoothing)
         {
             this.smoothing = smoothing;
-            return self();
-        }
-
-        public Builder drawBackground(boolean drawBackground)
-        {
-            this.drawBackground = drawBackground;
             return self();
         }
 

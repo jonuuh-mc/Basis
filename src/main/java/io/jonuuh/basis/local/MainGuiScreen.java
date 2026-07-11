@@ -17,13 +17,10 @@ import io.jonuuh.basis.lib.gui.element.toggles.GuiCheckbox;
 import io.jonuuh.basis.lib.gui.properties.FlexAlign;
 import io.jonuuh.basis.lib.gui.properties.FlexDirection;
 import io.jonuuh.basis.lib.gui.properties.FlexJustify;
-import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.gui.properties.Spacing;
 import io.jonuuh.basis.lib.util.Color;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class MainGuiScreen extends BaseGuiScreen
 {
@@ -49,15 +46,9 @@ public class MainGuiScreen extends BaseGuiScreen
     @Override
     protected GuiRootContainer initRootContainer()
     {
-        Map<GuiColorType, Color> colorMap = new HashMap<>();
-        colorMap.put(GuiColorType.ACCENT1, new Color("#bbe0e0e0"));
-        colorMap.put(GuiColorType.ACCENT2, new Color("#bb484848"));
-        colorMap.put(GuiColorType.BASE, new Color("#bb1450A0"));
-        colorMap.put(GuiColorType.BACKGROUND, new Color("#bb121212"));
-
         GuiBasicContainer menuBar = new GuiBasicContainer.Builder("menuBar")
                 .size(575, 25)
-                .color(GuiColorType.BACKGROUND, new Color("4d4d4d", 0.75F))
+//                .color(GuiColorType.BACKGROUND, new Color("4d4d4d", 0.75F))
                 .padding(new Spacing(50, 20, 0, 0))
                 .flexBehavior(new FlexBehavior.Builder()
                         .direction(FlexDirection.ROW)
@@ -70,9 +61,10 @@ public class MainGuiScreen extends BaseGuiScreen
 
         GuiBasicContainer mainContent = new GuiBasicContainer.Builder("mainContent")
                 .size(575, 330)
-                .color(GuiColorType.BACKGROUND, new Color("4d4d4d", 0.75F))
+//                .color(GuiColorType.BACKGROUND, new Color("4d4d4d", 0.75F))
                 .padding(new Spacing(10, 10, 10, 10))
-                .cornerRadius(5)
+                .backgroundColor(Color.DARK_GRAY.addA(-0.25F))
+//                .cornerRadius(5)
                 .flexBehavior(new FlexBehavior.Builder()
                         .direction(FlexDirection.COLUMN)
                         .justify(FlexJustify.BETWEEN)
@@ -86,7 +78,8 @@ public class MainGuiScreen extends BaseGuiScreen
         GuiBasicContainer content = new GuiBasicContainer.Builder("content")
                 .size(600, 400)
                 .padding(new Spacing(10, 10, 10, 10))
-                .margin(new Spacing(5))
+                .backgroundColor(Color.DARK_GRAY.addA(-0.25F))
+//                .margin(new Spacing(5))
                 .flexBehavior(new FlexBehavior.Builder()
                         .direction(FlexDirection.COLUMN)
                         .justify(FlexJustify.AROUND)
@@ -98,8 +91,8 @@ public class MainGuiScreen extends BaseGuiScreen
         // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
         return new GuiRootContainer.Builder(this)
                 .padding(new Spacing(20, 20, 20, 20))
-                .colorMap(colorMap)
                 .flexBehavior(new FlexBehavior.Builder().justify(FlexJustify.CENTER).align(FlexAlign.CENTER).item(new FlexItem(content)))
+                .debug(true)
                 .build();
     }
 
@@ -112,9 +105,9 @@ public class MainGuiScreen extends BaseGuiScreen
                         .justify(FlexJustify.CENTER)
                         .align(FlexAlign.CENTER)
                         .item(new FlexItem(
-                                        new GuiLabel.Builder("label")
+                                new GuiLabeledButton.Builder("label")
                                                 .padding(new Spacing(5))/*.size(1, 1)*/
-                                                .text("Lorem ipsum testing" /** something something something 123 */)
+                                        .label("Lorem ipsum" /** something something something 123 */)
                                                 .textScale(1.6F)
                                                 .doShadow(false)
                                                 .debug(true)
@@ -141,7 +134,8 @@ public class MainGuiScreen extends BaseGuiScreen
 
         return new FlexItem(new GuiBasicContainer.Builder("settingContainer")
                 .size(500, 50)
-                .color(GuiColorType.BACKGROUND, new Color("#bb242424"))
+                .backgroundColor(Color.GRAY.addA(-0.3F))
+//                .color(GuiColorType.BACKGROUND, new Color("#bb242424"))
                 .padding(new Spacing(5, 5, 5, 5))
                 .flexBehavior(new FlexBehavior.Builder()
                         .direction(FlexDirection.ROW)
@@ -178,7 +172,5 @@ public class MainGuiScreen extends BaseGuiScreen
         {
             container.addChild(addedElement, container.getChildren().size() - 2);
         }
-
-//        System.out.println(container.getChildren());
     }
 }
