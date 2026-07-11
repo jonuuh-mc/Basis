@@ -1,6 +1,6 @@
 package io.jonuuh.basis.lib.gui.element;
 
-import io.jonuuh.basis.lib.gui.properties.GuiColorType;
+import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.RenderUtils;
 import net.minecraft.client.gui.FontRenderer;
 import org.lwjgl.opengl.GL11;
@@ -9,6 +9,7 @@ public class GuiLabel extends GuiElement
 {
     protected final FontRenderer fontRenderer;
     protected String text;
+    protected Color textColor;
     protected float textScale;
     protected boolean doShadow;
 
@@ -17,6 +18,7 @@ public class GuiLabel extends GuiElement
         super(builder);
         this.fontRenderer = mc.fontRendererObj;
         this.text = builder.text;
+        this.textColor = builder.textColor;
         this.textScale = builder.textScale;
         this.doShadow = builder.doShadow;
     }
@@ -77,7 +79,7 @@ public class GuiLabel extends GuiElement
         }
 
         fontRenderer.drawString(trimmedText, getInnerLeftBound(), getInnerTopBound(),
-                getColor(GuiColorType.ACCENT1).toPackedARGB(), doShadow);
+                textColor.toPackedARGB(), doShadow);
 
         if (textScale != 1F)
         {
@@ -88,6 +90,7 @@ public class GuiLabel extends GuiElement
     public static class Builder extends GuiElement.AbstractBuilder<Builder, GuiLabel>
     {
         protected String text = "";
+        protected Color textColor = Color.WHITE;
         protected float textScale = 1F;
         protected boolean doShadow = true;
 
@@ -101,6 +104,12 @@ public class GuiLabel extends GuiElement
         public Builder text(String text)
         {
             this.text = text;
+            return self();
+        }
+
+        public Builder textColor(Color color)
+        {
+            this.textColor = color;
             return self();
         }
 
