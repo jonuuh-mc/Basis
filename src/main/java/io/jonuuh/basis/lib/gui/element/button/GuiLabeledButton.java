@@ -1,6 +1,6 @@
 package io.jonuuh.basis.lib.gui.element.button;
 
-import io.jonuuh.basis.lib.gui.properties.GuiColorType;
+import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.RenderUtils;
 import net.minecraft.client.gui.FontRenderer;
 import org.lwjgl.opengl.GL11;
@@ -9,6 +9,7 @@ public class GuiLabeledButton extends GuiButton
 {
     protected final FontRenderer fontRenderer;
     protected String label;
+    protected Color textColor;
     protected float textScale;
     protected boolean doShadow;
 
@@ -17,6 +18,7 @@ public class GuiLabeledButton extends GuiButton
         super(builder);
         this.fontRenderer = mc.fontRendererObj;
         this.label = builder.label;
+        this.textColor = builder.textColor;
         this.textScale = builder.textScale;
         this.doShadow = builder.doShadow;
     }
@@ -73,7 +75,7 @@ public class GuiLabeledButton extends GuiButton
 
         fontRenderer.drawString(trimmedText,
                 getInnerLeftBound(), getInnerTopBound(),
-                getColor(GuiColorType.ACCENT1).toPackedARGB(), doShadow);
+                textColor.toPackedARGB(), doShadow);
 
         if (textScale != 1F)
         {
@@ -84,6 +86,7 @@ public class GuiLabeledButton extends GuiButton
     public static class Builder extends GuiButton.AbstractBuilder<Builder, GuiLabeledButton>
     {
         protected String label = "";
+        protected Color textColor = Color.WHITE;
         protected float textScale = 1F;
         protected boolean doShadow = true;
 
@@ -95,6 +98,12 @@ public class GuiLabeledButton extends GuiButton
         public Builder label(String label)
         {
             this.label = label;
+            return self();
+        }
+
+        public Builder textColor(Color color)
+        {
+            this.textColor = color;
             return self();
         }
 
