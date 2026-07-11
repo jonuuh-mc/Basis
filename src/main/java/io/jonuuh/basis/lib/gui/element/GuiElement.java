@@ -611,10 +611,28 @@ public abstract class GuiElement
         return this.elementName.equals(elementName) ? this : null;
     }
 
+    public String toSubtreeString()
+    {
+        StringBuilder sb = new StringBuilder("\n");
+        buildSubtreeString(sb, "", true);
+        return sb.toString();
+    }
+
+    public void buildSubtreeString(StringBuilder sb, String prefix, boolean isLastChild)
+    {
+        if (!prefix.isEmpty())
+        {
+            sb.append(prefix);
+            sb.append(isLastChild ? "└── " : "├── ");
+        }
+
+        sb.append(this).append('\n');
+    }
+
     @Override
     public String toString()
     {
-        return this.getClass().getSimpleName() + "{" + "name='" + elementName + '\'' + ", parent=" + parent + '}';
+        return getClass().getSimpleName() + "(" + elementName + ")";
     }
 
     /**

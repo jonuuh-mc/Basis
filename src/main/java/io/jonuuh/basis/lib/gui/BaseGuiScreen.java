@@ -213,7 +213,7 @@ public abstract class BaseGuiScreen extends GuiScreen
             dispatchTargetedEvent(event);
 
             currentFocus = event.getLastCapture();
-            System.out.println("greatestZElement: " + currentFocus);
+            System.out.println("'currentFocus': " + currentFocus);
         }
     }
 

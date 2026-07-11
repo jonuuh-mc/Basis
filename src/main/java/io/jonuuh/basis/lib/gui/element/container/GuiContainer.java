@@ -526,6 +526,24 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         return null;
     }
 
+    @Override
+    public void buildSubtreeString(StringBuilder sb, String prefix, boolean isLastChild)
+    {
+        super.buildSubtreeString(sb, prefix, isLastChild);
+
+        List<GuiElement> children = getChildren();
+
+        for (int i = 0; i < children.size(); i++)
+        {
+            GuiElement child = children.get(i);
+
+            child.buildSubtreeString(sb,
+                    prefix + (isLastChild ? "    " : "│   "),
+                    i == children.size() - 1
+            );
+        }
+    }
+
     protected static abstract class AbstractBuilder<T extends AbstractBuilder<T, R>, R extends GuiContainer> extends GuiElement.AbstractBuilder<T, R>
     {
         protected final List<GuiElement> children = new ArrayList<>();
