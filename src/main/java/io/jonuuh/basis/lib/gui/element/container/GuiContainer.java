@@ -10,7 +10,6 @@ import io.jonuuh.basis.lib.gui.event.lifecycle.InitGuiEvent;
 import io.jonuuh.basis.lib.gui.listener.input.MouseClickListener;
 import io.jonuuh.basis.lib.gui.listener.input.MouseScrollListener;
 import io.jonuuh.basis.lib.gui.listener.lifecycle.InitGuiListener;
-import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.util.CollectionUtils;
 import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.RenderUtils;
@@ -21,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -540,12 +538,6 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
             // to override the already overridden defaults.
             backgroundColor(Color.TRANSPARENT);
             borderColor(Color.TRANSPARENT);
-        }
-
-        public T colorMap(Map<GuiColorType, Color> colorMap)
-        {
-            this.colorMap = colorMap;
-            return self();
         }
 
         public T scissor(boolean shouldScissor)

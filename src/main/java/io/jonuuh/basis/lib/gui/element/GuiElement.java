@@ -5,7 +5,6 @@ import io.jonuuh.basis.lib.gui.element.container.GuiContainer;
 import io.jonuuh.basis.lib.gui.element.container.GuiRootContainer;
 import io.jonuuh.basis.lib.gui.event.GuiEvent;
 import io.jonuuh.basis.lib.gui.listener.input.InputListener;
-import io.jonuuh.basis.lib.gui.properties.GuiColorType;
 import io.jonuuh.basis.lib.gui.properties.Spacing;
 import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.RenderUtils;
@@ -13,9 +12,7 @@ import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -56,8 +53,6 @@ public abstract class GuiElement
     /** Whether this element is currently hovered; Updated constantly via onScreenDraw (not via onScreenTick because mouse pos is needed) */
     private boolean hovered;
 
-    /** A map of colors that may be used by this element */
-    protected Map<GuiColorType, Color> colorMap;
     private Color backgroundColor;
     private Color borderColor;
 
@@ -90,7 +85,6 @@ public abstract class GuiElement
 
         this.visible = builder.visible;
 
-        this.colorMap = builder.colorMap;
         this.backgroundColor = builder.backgroundColor;
         this.borderColor = builder.borderColor;
         this.drawBackground = builder.drawBackground;
@@ -436,30 +430,6 @@ public abstract class GuiElement
         }
     }
 
-    public void putColor(GuiColorType type, Color color)
-    {
-        colorMap.put(type, color);
-    }
-
-    public Color getColor(GuiColorType type)
-    {
-        if (colorMap.containsKey(type))
-        {
-            return colorMap.get(type);
-        }
-        else if (hasParent())
-        {
-            Color c = parent.getColor(type);
-            // TODO: is this really any more efficient or negligible
-            // propagate the color down the tree from whichever container has a key for it,
-            // caching it in more specific elements for (faster?) access in future
-            putColor(type, c);
-            return c;
-        }
-
-        return new Color();
-    }
-
     public Color getBackgroundColor()
     {
         return backgroundColor;
@@ -661,7 +631,6 @@ public abstract class GuiElement
 
         protected GuiContainer parent = null;
 
-        protected Map<GuiColorType, Color> colorMap = new HashMap<>();
         protected Color backgroundColor = Color.DARK_GRAY;
         protected Color borderColor = Color.BLACK;
         protected boolean drawBackground = true;
@@ -733,12 +702,6 @@ public abstract class GuiElement
         public T cornerRadius(float cornerRadius)
         {
             this.cornerRadius = cornerRadius;
-            return self();
-        }
-
-        public T color(GuiColorType type, Color color)
-        {
-            this.colorMap.put(type, color);
             return self();
         }
 
