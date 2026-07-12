@@ -43,6 +43,36 @@ public class GuiLabel extends GuiElement
         this.setHeight(strH + vPad);
     }
 
+    public Color getTextColor()
+    {
+        return textColor;
+    }
+
+    public void setTextColor(Color textColor)
+    {
+        this.textColor = textColor;
+    }
+
+    public float getTextScale()
+    {
+        return textScale;
+    }
+
+    public void setTextScale(float textScale)
+    {
+        this.textScale = textScale;
+    }
+
+    public boolean isShadow()
+    {
+        return doShadow;
+    }
+
+    public void setShadow(boolean doShadow)
+    {
+        this.doShadow = doShadow;
+    }
+
     @Override
     public void onScreenDraw(int mouseX, int mouseY, float partialTicks)
     {
