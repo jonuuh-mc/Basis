@@ -406,7 +406,8 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
 
                 if (isDebug())
                 {
-                    RenderUtils.drawRectangle(scissorX, scissorY, scissorWidth, scissorHeight, new Color("#d5ff34", 0.1F));
+                    RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, scissorX, scissorY, scissorWidth, scissorHeight,
+                            new Color("#d5ff34", 1F));
                 }
                 RenderUtils.scissorFromTopLeft(scissorX, scissorY, scissorWidth, scissorHeight);
             }
