@@ -112,6 +112,11 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         this.flexBehavior = flexBehavior;
     }
 
+    public boolean hasFlexBehavior()
+    {
+        return getFlexBehavior() != null;
+    }
+
     public ScrollBehavior getScrollBehavior()
     {
         return scrollBehavior;
@@ -120,6 +125,11 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
     public void setScrollBehavior(ScrollBehavior scrollBehavior)
     {
         this.scrollBehavior = scrollBehavior;
+    }
+
+    public boolean hasScrollBehavior()
+    {
+        return getScrollBehavior() != null;
     }
 
     @Override

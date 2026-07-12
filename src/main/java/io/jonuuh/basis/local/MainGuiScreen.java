@@ -164,7 +164,7 @@ public class MainGuiScreen extends BaseGuiScreen
 
     private void addToContainer(GuiElement addedElement, GuiContainer container)
     {
-        if (container.getFlexBehavior() != null)
+        if (container.hasFlexBehavior())
         {
             container.getFlexBehavior().addItem(new FlexItem(addedElement), container.getChildren().size() - 2);
         }
