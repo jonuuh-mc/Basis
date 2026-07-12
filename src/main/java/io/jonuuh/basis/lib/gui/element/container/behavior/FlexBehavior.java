@@ -10,8 +10,6 @@ import io.jonuuh.basis.lib.gui.properties.FlexJustify;
 import io.jonuuh.basis.lib.gui.properties.Spacing;
 import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.RenderUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.EnumChatFormatting;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -562,19 +560,13 @@ public class FlexBehavior
 
     public void drawInspector()
     {
-        Minecraft mc = Minecraft.getMinecraft();
-        drawArrow(getDirection(), new Color("FFD700"), 8);
+        drawArrow(getDirection(), Color.GOLD, 8);
 
-        FlexDirection alignDir = (getDirection() == FlexDirection.ROW || getDirection() == FlexDirection.ROW_REVERSE) ? FlexDirection.COLUMN : FlexDirection.ROW;
-        drawArrow(alignDir, new Color(EnumChatFormatting.WHITE), 5);
-
-        String info = direction.toString() + ", " + justify.toString() + ", " + align.toString();
-        float textX = getHost().getInnerLeftBound() + 1;
-        float textY = getHost().getInnerBottomBound() - mc.fontRendererObj.FONT_HEIGHT;
-        mc.fontRendererObj.drawString(info, textX, textY, -1, true);
+        FlexDirection alignDir = (getDirection() == FlexDirection.ROW || getDirection() == FlexDirection.ROW_REVERSE)
+                ? FlexDirection.COLUMN : FlexDirection.ROW;
+        drawArrow(alignDir, Color.WHITE, 4);
     }
 
-    // TODO: debug
     private void drawArrow(FlexDirection direction, Color color, float headSize)
     {
         float tailX = 0;

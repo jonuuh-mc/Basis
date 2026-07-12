@@ -538,16 +538,6 @@ public abstract class GuiElement
 
         if (debug)
         {
-            // Draw dark tint over disabled elements
-            if (this instanceof InputListener && !((InputListener) this).isEnabled())
-            {
-                RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), new Color("#43110D", 0.33F));
-            }
-
-            // Draw element outline
-            RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), getWidth(), getHeight(),
-                    isFocused() ? new Color("#00ff00") : new Color("#ff55ff"));
-
             // Draw padding rectangles
             Color padColor = new Color("#ff4a2f", 0.5F);
             // Left
@@ -559,9 +549,50 @@ public abstract class GuiElement
             // Bottom
             RenderUtils.drawRectangle(worldXPos(), getInnerBottomBound(), getWidth(), getPadding().bottom(), padColor);
 
-            // Draw z level string
-            mc.fontRendererObj.drawString(String.valueOf(getZLevel()), getRightBound() - mc.fontRendererObj.getStringWidth(String.valueOf(getZLevel())),
-                    getBottomBound() - mc.fontRendererObj.FONT_HEIGHT, Color.GREEN.toPackedARGB(), true);
+            // Draw element outline
+            RenderUtils.drawRectangle(GL11.GL_LINE_LOOP, worldXPos(), worldYPos(), getWidth(), getHeight(),
+                    isFocused() ? new Color("#00ff00") : new Color("#ff55ff"));
+
+            // See comment in GuiLabel or GuiLabeledButton
+            float textScale = 0.55F;
+
+            String zLevelStr = String.valueOf(getZLevel());
+            String trimmedZLevelText = RenderUtils.trimStringToWidthWithEllipsis(
+                    zLevelStr, (int) (getInnerWidth() * (1 / textScale)));
+
+            String objectIdStr = "@" + Integer.toHexString(System.identityHashCode(this));
+            String trimmedObjectIdText = RenderUtils.trimStringToWidthWithEllipsis(
+                    objectIdStr, (int) (getInnerWidth() * (1 / textScale)));
+
+            // Draw object id string at top left corner of element
+            GL11.glPushMatrix();
+            RenderUtils.scaleCurrentMatrixAroundPoint(
+                    getLeftBound(), getTopBound(),
+                    textScale, textScale
+            );
+            mc.fontRendererObj.drawString(trimmedObjectIdText,
+                    getLeftBound(),
+                    getTopBound(),
+                    Color.GREEN.toPackedARGB(), true);
+            GL11.glPopMatrix();
+
+            // Draw z level string at bottom right corner of element
+            GL11.glPushMatrix();
+            RenderUtils.scaleCurrentMatrixAroundPoint(
+                    getRightBound(), getBottomBound(),
+                    textScale, textScale
+            );
+            mc.fontRendererObj.drawString(trimmedZLevelText,
+                    getRightBound() - mc.fontRendererObj.getStringWidth(trimmedZLevelText),
+                    getBottomBound() - mc.fontRendererObj.FONT_HEIGHT,
+                    Color.GREEN.toPackedARGB(), true);
+            GL11.glPopMatrix();
+
+            // Draw dark tint over disabled elements
+            if (this instanceof InputListener && !((InputListener) this).isEnabled())
+            {
+                RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), new Color("#430000", 0.33F));
+            }
         }
     }
 
@@ -632,7 +663,12 @@ public abstract class GuiElement
     @Override
     public String toString()
     {
-        return getClass().getSimpleName() + "(" + elementName + ")";
+        return getClass().getSimpleName()
+                + "@\033[92m" + Integer.toHexString(System.identityHashCode(this)) + "\033[0m"
+                + "(\033[31m" + elementName + "\033[0m)"
+                + " w(\033[93m" + worldXPos() + "," + worldYPos() + "\033[0m)"
+                + " l(\033[93m" + getLocalXPos() + "," + getLocalYPos() + "\033[0m)"
+                + " [\033[95m" + getWidth() + "x" + getHeight() + "\033[0m]";
     }
 
     /**

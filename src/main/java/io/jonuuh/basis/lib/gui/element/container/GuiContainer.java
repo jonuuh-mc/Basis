@@ -396,7 +396,7 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
 
                 if (isDebug())
                 {
-                    RenderUtils.drawRectangle(scissorX, scissorY, scissorWidth, scissorHeight, new Color("#d5ff34", 0.2F));
+                    RenderUtils.drawRectangle(scissorX, scissorY, scissorWidth, scissorHeight, new Color("#d5ff34", 0.1F));
                 }
                 RenderUtils.scissorFromTopLeft(scissorX, scissorY, scissorWidth, scissorHeight);
             }
@@ -542,6 +542,20 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
                     i == children.size() - 1
             );
         }
+    }
+
+    @Override
+    public String toString()
+    {
+        if (hasFlexBehavior())
+        {
+            String flexInfo = getFlexBehavior().getDirection().toString()
+                    + ", " + getFlexBehavior().getJustifyContent().toString()
+                    + ", " + getFlexBehavior().getAlignItems().toString();
+
+            return super.toString() + " (\033[94m" + flexInfo + "\033[0m)";
+        }
+        return super.toString();
     }
 
     protected static abstract class AbstractBuilder<T extends AbstractBuilder<T, R>, R extends GuiContainer> extends GuiElement.AbstractBuilder<T, R>

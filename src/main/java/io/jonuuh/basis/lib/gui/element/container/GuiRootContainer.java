@@ -1,7 +1,9 @@
 package io.jonuuh.basis.lib.gui.element.container;
 
 import io.jonuuh.basis.lib.gui.BaseGuiScreen;
+import io.jonuuh.basis.lib.gui.event.input.MouseDownEvent;
 import io.jonuuh.basis.lib.gui.event.lifecycle.InitGuiEvent;
+import org.lwjgl.input.Keyboard;
 
 public class GuiRootContainer extends GuiContainer
 {
@@ -40,6 +42,18 @@ public class GuiRootContainer extends GuiContainer
         // Now make the call to GuiContainer's onInitGui, which will call this
         // element's flexBehavior#updateItemsLayout(), and thus the cascade begins.
         super.onInitGui(event);
+    }
+
+    @Override
+    public void onMouseDown(MouseDownEvent event)
+    {
+        super.onMouseDown(event);
+
+        // "Cheat code" to print full element tree: Click in top left while holding left ctrl
+        if (this.isDebug() && event.mouseX <= 25 && event.mouseY <= 25 && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL))
+        {
+            System.out.println(this.toSubtreeString());
+        }
     }
 
     public static class Builder extends GuiContainer.AbstractBuilder<Builder, GuiRootContainer>
