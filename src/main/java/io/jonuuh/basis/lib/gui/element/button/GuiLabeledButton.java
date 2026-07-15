@@ -32,15 +32,15 @@ public class GuiLabeledButton extends GuiButton
     {
         this.label = label;
 
-        // Resize width and height of the button given the new label
-        float hPad = getPadding().left() + getPadding().right();
-        float vPad = getPadding().top() + getPadding().bottom();
-
-        float strW = (fontRenderer.getStringWidth(label) - 1) * textScale;
-        float strH = (fontRenderer.FONT_HEIGHT - 1) * textScale;
-
-        this.setWidth(strW + hPad);
-        this.setHeight(strH + vPad);
+//        // Resize width and height of the button given the new label
+//        float hPad = getPadding().left() + getPadding().right();
+//        float vPad = getPadding().top() + getPadding().bottom();
+//
+//        float strW = (fontRenderer.getStringWidth(label) - 1) * textScale;
+//        float strH = (fontRenderer.FONT_HEIGHT - 1) * textScale;
+//
+//        this.setWidth(strW + hPad);
+//        this.setHeight(strH + vPad);
     }
 
     public Color getTextColor()
@@ -158,14 +158,14 @@ public class GuiLabeledButton extends GuiButton
         @Override
         public GuiLabeledButton build()
         {
-            float hPad = padding.left() + padding.right();
-            float vPad = padding.top() + padding.bottom();
-
-            float strW = (mc.fontRendererObj.getStringWidth(label) /*- 1*/) * textScale;
-            float strH = (mc.fontRendererObj.FONT_HEIGHT - 1) * textScale;
-
-            this.width = strW + hPad;
-            this.height = strH + vPad;
+//            float hPad = padding.left() + padding.right();
+//            float vPad = padding.top() + padding.bottom();
+//
+//            float strW = (mc.fontRendererObj.getStringWidth(label) /*- 1*/) * textScale;
+//            float strH = (mc.fontRendererObj.FONT_HEIGHT - 1) * textScale;
+//
+//            this.width = strW + hPad;
+//            this.height = strH + vPad;
 
             return new GuiLabeledButton(this);
         }
