@@ -3,8 +3,8 @@ package io.jonuuh.basis.lib.gui.element;
 import io.jonuuh.basis.lib.gui.BaseGuiScreen;
 import io.jonuuh.basis.lib.gui.element.container.GuiContainer;
 import io.jonuuh.basis.lib.gui.element.container.GuiRootContainer;
+import io.jonuuh.basis.lib.gui.event.EventListener;
 import io.jonuuh.basis.lib.gui.event.GuiEvent;
-import io.jonuuh.basis.lib.gui.listener.input.InputListener;
 import io.jonuuh.basis.lib.gui.properties.Spacing;
 import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.RenderUtils;
@@ -12,7 +12,9 @@ import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -52,6 +54,8 @@ public abstract class GuiElement
     private boolean visible;
     /** Whether this element is currently hovered; Updated constantly via onScreenDraw (not via onScreenTick because mouse pos is needed) */
     private boolean hovered;
+    /** Whether this element can be interacted with via input events */
+    private boolean enabled;
 
     private Color backgroundColor;
     private Color borderColor;
@@ -67,6 +71,8 @@ public abstract class GuiElement
     private String tooltipStr;
 
     private boolean debug;
+
+    private final Map<Class<? extends GuiEvent>, List<EventListener<?>>> listeners;
 
     protected GuiElement(AbstractBuilder<?, ?> builder)
     {
@@ -84,12 +90,15 @@ public abstract class GuiElement
         this.cornerRadius = builder.cornerRadius;
 
         this.visible = builder.visible;
+        this.enabled = builder.enabled;
 
         this.backgroundColor = builder.backgroundColor;
         this.borderColor = builder.borderColor;
         this.drawBackground = builder.drawBackground;
 
         this.debug = builder.debug;
+
+        this.listeners = new HashMap<>();
 
         if (builder.parent != null)
         {
@@ -480,6 +489,15 @@ public abstract class GuiElement
         this.hovered = hovered;
     }
 
+    public boolean isEnabled()
+    {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
+    }
 //    public String getTooltipStr()
 //    {
 //        return tooltipStr;
@@ -589,10 +607,35 @@ public abstract class GuiElement
             GL11.glPopMatrix();
 
             // Draw dark tint over disabled elements
-            if (this instanceof InputListener && !((InputListener) this).isEnabled())
+            if (!this.isEnabled())
             {
                 RenderUtils.drawRectangle(worldXPos(), worldYPos(), getWidth(), getHeight(), new Color("#430000", 0.33F));
             }
+        }
+    }
+
+    public <T extends GuiEvent> boolean addEventListener(Class<T> type, EventListener<T> listener)
+    {
+        return listeners.computeIfAbsent(type, k -> new ArrayList<>()).add(listener);
+    }
+
+    public <T extends GuiEvent> boolean removeEventListener(Class<T> type, EventListener<T> listener)
+    {
+        return listeners.get(type).remove(listener);
+    }
+
+    protected <T extends GuiEvent> void notifyListenersFor(T event)
+    {
+        List<EventListener<?>> list = listeners.get(event.getClass());
+
+        if (list == null || list.isEmpty())
+        {
+            return;
+        }
+
+        for (EventListener<?> listener : list)
+        {
+            ((EventListener<T>) listener).onEvent(event);
         }
     }
 
@@ -695,6 +738,7 @@ public abstract class GuiElement
 
         //        public int zLevel = 0;
         protected boolean visible = true;
+        protected boolean enabled = true;
 
         protected Spacing margin = new Spacing(0);
         protected Spacing padding = new Spacing(0);
@@ -738,6 +782,12 @@ public abstract class GuiElement
         public T visible(boolean visible)
         {
             this.visible = visible;
+            return self();
+        }
+
+        public T enabled(boolean enabled)
+        {
+            this.enabled = enabled;
             return self();
         }
 

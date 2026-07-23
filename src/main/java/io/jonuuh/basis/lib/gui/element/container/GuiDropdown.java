@@ -1,32 +1,21 @@
 package io.jonuuh.basis.lib.gui.element.container;
 
-import io.jonuuh.basis.lib.gui.element.GuiElement;
 import io.jonuuh.basis.lib.gui.element.GuiLabel;
 import io.jonuuh.basis.lib.gui.element.button.GuiLabeledButton;
 import io.jonuuh.basis.lib.gui.element.container.behavior.FlexBehavior;
-import io.jonuuh.basis.lib.gui.event.GuiEvent;
-import io.jonuuh.basis.lib.gui.event.PostEventBehaviorHost;
 import io.jonuuh.basis.lib.gui.event.input.MouseDownEvent;
 import io.jonuuh.basis.lib.gui.event.lifecycle.CloseGuiEvent;
-import io.jonuuh.basis.lib.gui.listener.input.MouseClickListener;
-import io.jonuuh.basis.lib.gui.listener.lifecycle.CloseGuiListener;
 import io.jonuuh.basis.lib.gui.properties.FlexDirection;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
 
-public class GuiDropdown extends GuiContainer implements MouseClickListener, CloseGuiListener, PostEventBehaviorHost
+public class GuiDropdown extends GuiContainer
 {
-    private final Map<Class<? extends GuiEvent>, Consumer<GuiElement>> postBehaviors;
     protected GuiContainer optionsContainer;
     // TODO: make header a generic GuiElement instead? support guiTexturedButtons for example? maybe just make it a GuiButton type
     protected GuiLabeledButton header;
-    private boolean enabled;
-    private boolean mouseDown;
 
     // TODO: just make this one container instead of nested containers and dynamically add/remove children or make them visible/invisible?
     //  also should make flex alg account for invisible elements? add boolean in flexcontainer whether to ignore invisibles?
@@ -36,15 +25,11 @@ public class GuiDropdown extends GuiContainer implements MouseClickListener, Clo
 
         this.shouldScissor = false;
 
-        this.enabled = builder.enabled;
         this.header = builder.header;
         this.optionsContainer = builder.optionsContainer;
 
-        this.postBehaviors = new HashMap<>();
-        if (builder.mouseDownBehavior != null)
-        {
-            assignPostEventBehavior(MouseDownEvent.class, builder.mouseDownBehavior);
-        }
+        this.addEventListener(MouseDownEvent.class, this::onMouseDown);
+        this.addEventListener(CloseGuiEvent.class, this::onCloseGui);
     }
 
     public String getHeaderText()
@@ -57,40 +42,8 @@ public class GuiDropdown extends GuiContainer implements MouseClickListener, Clo
         header.setLabel(headerText);
     }
 
-    @Override
-    public boolean isEnabled()
-    {
-        return enabled;
-    }
-
-    @Override
-    public void setEnabled(boolean enabled)
-    {
-        this.enabled = enabled;
-    }
-
-    @Override
-    public boolean isMouseDown()
-    {
-        return mouseDown;
-    }
-
-    @Override
-    public void setMouseDown(boolean mouseDown)
-    {
-        this.mouseDown = mouseDown;
-    }
-
-    @Override
-    public Map<Class<? extends GuiEvent>, Consumer<GuiElement>> getPostEventBehaviors()
-    {
-        return postBehaviors;
-    }
-
-    @Override
     public void onMouseDown(MouseDownEvent event)
     {
-        super.onMouseDown(event);
         // TODO: class cast exception if target is ever something other than a GuiButton
 
         if (event.target instanceof GuiLabel)
@@ -98,13 +51,11 @@ public class GuiDropdown extends GuiContainer implements MouseClickListener, Clo
             header.setLabel(((GuiLabel) event.target).getText());
         }
         optionsContainer.setVisible(!optionsContainer.isVisible());
-        tryApplyPostEventBehavior(event.getClass());
 
         // Prevent the event from traveling to the clicked option GuiButton within the container
         event.stopPropagation();
     }
 
-    @Override
     public void onCloseGui(CloseGuiEvent event)
     {
 //        optionsContainer.setVisible(!optionsContainer.isVisible());
@@ -128,10 +79,8 @@ public class GuiDropdown extends GuiContainer implements MouseClickListener, Clo
 
     public static class Builder extends GuiContainer.AbstractBuilder<Builder, GuiDropdown>
     {
-        protected Consumer<GuiElement> mouseDownBehavior = null;
         protected String prompt = "Dropdown";
         protected Collection<String> options = new ArrayList<>();
-        protected boolean enabled = true;
         protected GuiContainer optionsContainer;
         protected GuiLabeledButton header;
 
@@ -149,18 +98,6 @@ public class GuiDropdown extends GuiContainer implements MouseClickListener, Clo
         public Builder options(Collection<String> options)
         {
             this.options = options;
-            return self();
-        }
-
-        public Builder enabled(boolean enabled)
-        {
-            this.enabled = enabled;
-            return self();
-        }
-
-        public Builder mouseDownBehavior(Consumer<GuiElement> mouseDownBehavior)
-        {
-            this.mouseDownBehavior = mouseDownBehavior;
             return self();
         }
 

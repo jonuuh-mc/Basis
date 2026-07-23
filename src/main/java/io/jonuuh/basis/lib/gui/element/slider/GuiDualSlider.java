@@ -31,6 +31,8 @@ public class GuiDualSlider extends GuiSlider
         double value = MathUtils.normalize(builder.endPointerValue, min, max);
         float clampAgainstStart = (float) MathUtils.clamp(value, getNormalizedValue(Pointer.START), 1);
         this.normalValueEnd = isInteger ? roundAgainstSliderRange(clampAgainstStart) : clampAgainstStart;
+
+        this.addEventListener(MouseDownEvent.class, this::onMouseDown);
     }
 
     public float getValue(Pointer pointer)
@@ -62,7 +64,7 @@ public class GuiDualSlider extends GuiSlider
             float clampAgainstStart = (float) MathUtils.clamp(normalValue, getNormalizedValue(Pointer.START), 1);
             // If an integer slider, round proportional to the max value
             normalValueEnd = isInteger ? roundAgainstSliderRange(clampAgainstStart) : clampAgainstStart;
-            tryApplyPostEventBehavior(MouseDownEvent.class);
+            // TODO: tryApplyPostEventBehavior(MouseDownEvent.class);
         }
     }
 
@@ -92,10 +94,8 @@ public class GuiDualSlider extends GuiSlider
         }
     }
 
-    @Override
-    public void onMouseDown(MouseDownEvent event)
+    protected void onMouseDown(MouseDownEvent event)
     {
-        super.onMouseDown(event);
         lastHeldPointer = closestPointerToMouse;
     }
 

@@ -1,35 +1,16 @@
 package io.jonuuh.basis.lib.gui.event.input;
 
 import io.jonuuh.basis.lib.gui.element.GuiElement;
-import io.jonuuh.basis.lib.gui.event.GuiTargetedEvent;
-import io.jonuuh.basis.lib.gui.listener.input.InputListener;
-import io.jonuuh.basis.lib.gui.listener.input.MouseClickListener;
 
-public class MouseDownEvent extends GuiTargetedEvent
+public class MouseDownEvent extends InputEvent
 {
     public final int mouseX;
     public final int mouseY;
 
-    public MouseDownEvent(GuiElement target, int mouseX, int mouseY)
+    public MouseDownEvent(GuiElement target, boolean bubbles, boolean cancelable, int mouseX, int mouseY)
     {
-        super(target);
+        super(target, bubbles, cancelable);
         this.mouseX = mouseX;
         this.mouseY = mouseY;
-    }
-
-    @Override
-    public void tryDispatchTo(GuiElement element)
-    {
-        if (!((InputListener) element).isEnabled())
-        {
-//            this.stopPropagation();
-            return;
-        }
-
-        if (element instanceof MouseClickListener)
-        {
-            ((MouseClickListener) element).onMouseDown(this);
-            lastCapture = element;
-        }
     }
 }

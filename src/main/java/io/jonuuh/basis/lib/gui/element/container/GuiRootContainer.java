@@ -14,6 +14,8 @@ public class GuiRootContainer extends GuiContainer
     {
         super(builder);
         this.guiScreen = builder.guiScreen;
+
+        this.addEventListener(MouseDownEvent.class, this::onMouseDown);
     }
 
     @Override
@@ -44,11 +46,8 @@ public class GuiRootContainer extends GuiContainer
         super.onInitGui(event);
     }
 
-    @Override
-    public void onMouseDown(MouseDownEvent event)
+    private void onMouseDown(MouseDownEvent event)
     {
-        super.onMouseDown(event);
-
         // "Cheat code" to print full element tree: Click in top left while holding left ctrl
         if (this.isDebug() && event.mouseX <= 25 && event.mouseY <= 25 && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL))
         {

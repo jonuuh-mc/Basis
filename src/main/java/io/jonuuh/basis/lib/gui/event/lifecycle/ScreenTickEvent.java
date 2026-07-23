@@ -1,17 +1,11 @@
 package io.jonuuh.basis.lib.gui.event.lifecycle;
 
-import io.jonuuh.basis.lib.gui.element.GuiElement;
-import io.jonuuh.basis.lib.gui.event.GuiEvent;
-import io.jonuuh.basis.lib.gui.listener.lifecycle.ScreenTickListener;
+import io.jonuuh.basis.lib.gui.event.GuiUntargetedEvent;
 
-public class ScreenTickEvent extends GuiEvent
+public class ScreenTickEvent extends GuiUntargetedEvent
 {
-    @Override
-    public void tryDispatchTo(GuiElement element)
+    public ScreenTickEvent(boolean cancelable)
     {
-        if (element instanceof ScreenTickListener)
-        {
-            ((ScreenTickListener) element).onScreenTick(this);
-        }
+        super(cancelable);
     }
 }

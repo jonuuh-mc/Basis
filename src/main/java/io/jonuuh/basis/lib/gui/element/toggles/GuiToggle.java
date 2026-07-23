@@ -1,34 +1,20 @@
 package io.jonuuh.basis.lib.gui.element.toggles;
 
 import io.jonuuh.basis.lib.gui.element.GuiElement;
-import io.jonuuh.basis.lib.gui.event.GuiEvent;
-import io.jonuuh.basis.lib.gui.event.PostEventBehaviorHost;
+import io.jonuuh.basis.lib.gui.element.behavior.ClickBehavior;
 import io.jonuuh.basis.lib.gui.event.input.MouseDownEvent;
-import io.jonuuh.basis.lib.gui.listener.input.MouseClickListener;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
-
-public abstract class GuiToggle extends GuiElement implements MouseClickListener, PostEventBehaviorHost
+public abstract class GuiToggle extends GuiElement
 {
-    private final Map<Class<? extends GuiEvent>, Consumer<GuiElement>> postBehaviors;
-    private boolean isToggled;
-    private boolean enabled;
-    private boolean mouseDown;
+    protected ClickBehavior clickBehavior;
+    protected boolean isToggled;
 
     protected GuiToggle(AbstractBuilder<?, ?> builder)
     {
         super(builder);
+        this.clickBehavior = new ClickBehavior(this);
+        this.addEventListener(MouseDownEvent.class, e -> toggle());
         this.isToggled = builder.isToggled;
-        this.enabled = builder.enabled;
-
-        this.postBehaviors = new HashMap<>();
-
-        if (builder.mouseDownBehavior != null)
-        {
-            assignPostEventBehavior(MouseDownEvent.class, builder.mouseDownBehavior);
-        }
     }
 
     public boolean isToggled()
@@ -46,70 +32,18 @@ public abstract class GuiToggle extends GuiElement implements MouseClickListener
         setToggled(!isToggled());
     }
 
-    @Override
-    public boolean isEnabled()
-    {
-        return enabled;
-    }
-
-    @Override
-    public void setEnabled(boolean enabled)
-    {
-        this.enabled = enabled;
-    }
-
-    @Override
-    public boolean isMouseDown()
-    {
-        return mouseDown;
-    }
-
-    @Override
-    public void setMouseDown(boolean mouseDown)
-    {
-        this.mouseDown = mouseDown;
-    }
-
-    @Override
-    public Map<Class<? extends GuiEvent>, Consumer<GuiElement>> getPostEventBehaviors()
-    {
-        return postBehaviors;
-    }
-
-    @Override
-    public void onMouseDown(MouseDownEvent event)
-    {
-        MouseClickListener.super.onMouseDown(event);
-        toggle();
-        tryApplyPostEventBehavior(event.getClass());
-    }
-
     protected static abstract class AbstractBuilder<T extends GuiToggle.AbstractBuilder<T, R>, R extends GuiToggle> extends GuiElement.AbstractBuilder<T, R>
     {
-        protected Consumer<GuiElement> mouseDownBehavior = null;
         protected boolean isToggled = false;
-        protected boolean enabled = true;
 
         protected AbstractBuilder(String elementName)
         {
             super(elementName);
         }
 
-        public T mouseDownBehavior(Consumer<GuiElement> mouseDownBehavior)
-        {
-            this.mouseDownBehavior = mouseDownBehavior;
-            return self();
-        }
-
         public T toggled(boolean toggled)
         {
             this.isToggled = toggled;
-            return self();
-        }
-
-        public T enabled(boolean enabled)
-        {
-            this.enabled = enabled;
             return self();
         }
     }

@@ -1,26 +1,17 @@
 package io.jonuuh.basis.lib.gui.element.slider;
 
 import io.jonuuh.basis.lib.gui.element.GuiElement;
-import io.jonuuh.basis.lib.gui.event.GuiEvent;
-import io.jonuuh.basis.lib.gui.event.PostEventBehaviorHost;
-import io.jonuuh.basis.lib.gui.event.input.MouseDownEvent;
+import io.jonuuh.basis.lib.gui.element.behavior.ClickBehavior;
 import io.jonuuh.basis.lib.gui.event.input.MouseScrollEvent;
 import io.jonuuh.basis.lib.gui.event.lifecycle.ScreenTickEvent;
-import io.jonuuh.basis.lib.gui.listener.input.MouseClickListener;
-import io.jonuuh.basis.lib.gui.listener.input.MouseScrollListener;
-import io.jonuuh.basis.lib.gui.listener.lifecycle.ScreenTickListener;
 import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.MathUtils;
 import io.jonuuh.basis.lib.util.RenderUtils;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
 
-abstract class GuiSlider extends GuiElement implements MouseClickListener, MouseScrollListener, ScreenTickListener, PostEventBehaviorHost
+abstract class GuiSlider extends GuiElement
 {
-    private final Map<Class<? extends GuiEvent>, Consumer<GuiElement>> postBehaviors;
     // min and max are (as of writing this) only non-final so that a scroll slider of a list view element
     // can change the slider's max length when more elements are added to the list
     /** The minimum value of this slider (not normalized; readable value) */
@@ -38,8 +29,7 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
     /** This slider will be treated as 'hovered' for this many more screen ticks */
     protected int hoveredTimer;
 
-    private boolean enabled;
-    private boolean mouseDown;
+    protected ClickBehavior clickBehavior;
 
     protected GuiSlider(AbstractBuilder<?, ?> builder)
     {
@@ -51,18 +41,15 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
         this.pointerColor = builder.pointerColor;
         this.trackColor = builder.trackColor;
         this.decimalFormat = builder.decimalFormat;
-        this.enabled = builder.enabled;
-
-        this.postBehaviors = new HashMap<>();
-        if (builder.valueChangeBehavior != null)
-        {
-            assignPostEventBehavior(MouseDownEvent.class, builder.valueChangeBehavior);
-        }
 
         // This is the same as `setValue(builder.startValue);`, but calling setValue() from constructor
         // is a bad idea as it also tries to apply the event behavior in setNormalizedValue()
         float value = (float) MathUtils.clamp(MathUtils.normalize(builder.startValue, min, max), 0, 1);
         this.normalValue = isInteger ? roundAgainstSliderRange(value) : value;
+
+        this.clickBehavior = new ClickBehavior(this);
+        this.addEventListener(MouseScrollEvent.class, this::onMouseScroll);
+        this.addEventListener(ScreenTickEvent.class, this::onScreenTick);
     }
 
     public float getValue()
@@ -90,7 +77,7 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
         float value = (float) MathUtils.clamp(normalValue, 0, 1);
         // If an integer slider, round proportional to the range of the slider
         this.normalValue = isInteger ? roundAgainstSliderRange(value) : value;
-        tryApplyPostEventBehavior(MouseDownEvent.class);
+        // TODO: tryApplyPostEventBehavior(MouseDownEvent.class);
     }
 
     public float getMin()
@@ -168,34 +155,9 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
                 : (worldXPos() + (normalValue * getWidth()));
     }
 
-    @Override
-    public boolean isEnabled()
-    {
-        return enabled;
-    }
-
-    @Override
-    public void setEnabled(boolean enabled)
-    {
-        this.enabled = enabled;
-    }
-
-    @Override
     public boolean isMouseDown()
     {
-        return mouseDown;
-    }
-
-    @Override
-    public void setMouseDown(boolean mouseDown)
-    {
-        this.mouseDown = mouseDown;
-    }
-
-    @Override
-    public Map<Class<? extends GuiEvent>, Consumer<GuiElement>> getPostEventBehaviors()
-    {
-        return postBehaviors;
+        return clickBehavior.isMouseDown();
     }
 
     @Override
@@ -227,12 +189,6 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
 
     protected abstract void drawHorizontalSlider();
 
-    @Override
-    public void onMouseDown(MouseDownEvent event)
-    {
-        MouseClickListener.super.onMouseDown(event);
-    }
-
     // TODO: GuiSliders are currently the only case of onScreenDraw being used for something other than actually drawing elements.
     //  Would be great to use onMouseDrag around here for setting normal value rather than onScreenDraw, except mouse
     //  drag events fire from game ticking loop (every ~50ms) rather than from rendering loop (~<fps>/1000ms?). This makes
@@ -241,15 +197,13 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
     //  (lerping from last value updated by onMouseDrag?), but you'd still ultimately need to set the normal value from onScreenDraw,
     //  so the underlying problem isn't fixed
 
-    @Override
     public void onMouseScroll(MouseScrollEvent event)
     {
         movingTimer = 10;
         setNormalizedValue(getNormalizedValue() + scaleWheelDelta(event.wheelDelta));
     }
 
-    @Override
-    public void onScreenTick(ScreenTickEvent event)
+    private void onScreenTick(ScreenTickEvent event)
     {
         if (isHovered())
         {
@@ -280,8 +234,6 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
         protected Color pointerColor = Color.GRAY;
         protected Color trackColor = Color.WHITE;
         protected DecimalFormat decimalFormat = new DecimalFormat("#.##");
-        protected boolean enabled = true;
-        protected Consumer<GuiElement> valueChangeBehavior = null;
 
         protected AbstractBuilder(String elementName)
         {
@@ -330,18 +282,6 @@ abstract class GuiSlider extends GuiElement implements MouseClickListener, Mouse
         public T decimalFormat(DecimalFormat decimalFormat)
         {
             this.decimalFormat = decimalFormat;
-            return self();
-        }
-
-        public T enabled(boolean enabled)
-        {
-            this.enabled = enabled;
-            return self();
-        }
-
-        public T stateChangeBehavior(Consumer<GuiElement> valueChangeBehavior)
-        {
-            this.valueChangeBehavior = valueChangeBehavior;
             return self();
         }
     }

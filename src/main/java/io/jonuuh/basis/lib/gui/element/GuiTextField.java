@@ -1,11 +1,9 @@
 package io.jonuuh.basis.lib.gui.element;
 
+import io.jonuuh.basis.lib.gui.element.behavior.ClickBehavior;
 import io.jonuuh.basis.lib.gui.event.input.KeyInputEvent;
 import io.jonuuh.basis.lib.gui.event.input.MouseDownEvent;
 import io.jonuuh.basis.lib.gui.event.lifecycle.ScreenTickEvent;
-import io.jonuuh.basis.lib.gui.listener.input.KeyInputListener;
-import io.jonuuh.basis.lib.gui.listener.input.MouseClickListener;
-import io.jonuuh.basis.lib.gui.listener.lifecycle.ScreenTickListener;
 import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.MathUtils;
 import io.jonuuh.basis.lib.util.RenderUtils;
@@ -15,7 +13,7 @@ import net.minecraft.util.ChatAllowedCharacters;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
-public class GuiTextField extends GuiElement implements KeyInputListener, ScreenTickListener, MouseClickListener
+public class GuiTextField extends GuiElement
 {
     protected FontRenderer fontRenderer = mc.fontRendererObj;
     protected String text;
@@ -33,22 +31,26 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
     protected int cursorFlashCounter;
     /** Used to prevent cursor flashing while typing */
     protected boolean isTyping;
-    protected boolean enabled;
-    protected boolean mouseDown;
 
     protected Color textColor;
     protected Color cursorColor;
     protected Color selectionColor;
+
+    protected ClickBehavior clickBehavior;
 
     public GuiTextField(Builder builder)
     {
         super(builder);
         this.text = builder.text;
         this.maxTextLength = builder.maxTextLength;
-        this.enabled = builder.enabled;
         this.textColor = builder.textColor;
         this.cursorColor = builder.cursorColor;
         this.selectionColor = builder.selectionColor;
+
+        this.clickBehavior = new ClickBehavior(this);
+        this.addEventListener(MouseDownEvent.class, this::onMouseDown);
+        this.addEventListener(ScreenTickEvent.class, this::onScreenTick);
+        this.addEventListener(KeyInputEvent.class, this::onKeyTyped);
 
         setHeight((mc.fontRendererObj.FONT_HEIGHT - 1) + getPadding().top() + getPadding().bottom());
     }
@@ -136,31 +138,6 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         return selectionPos >/*=*/ cursorPos;
     }
 
-    @Override
-    public boolean isEnabled()
-    {
-        return enabled;
-    }
-
-    @Override
-    public void setEnabled(boolean enabled)
-    {
-        this.enabled = enabled;
-    }
-
-    @Override
-    public boolean isMouseDown()
-    {
-        return mouseDown;
-    }
-
-    @Override
-    public void setMouseDown(boolean mouseDown)
-    {
-        this.mouseDown = mouseDown;
-    }
-
-    @Override
     public void onScreenTick(ScreenTickEvent event)
     {
         cursorFlashCounter++;
@@ -181,7 +158,7 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
                     getCornerRadius(), 1, getBackgroundColor(), getBorderColor());
         }
 
-        if (isMouseDown())
+        if (clickBehavior.isMouseDown())
         {
             setSelectionPos(getTextBelowMouseX(mouseX).length());
         }
@@ -221,11 +198,8 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         RenderUtils.drawRectangle(rectX, getInnerTopBound(), rectWidth, fontRenderer.FONT_HEIGHT - 1, selectionColor.addA(-0.4F));
     }
 
-    @Override
     public void onMouseDown(MouseDownEvent event)
     {
-        MouseClickListener.super.onMouseDown(event);
-
         if (!isFocused())
         {
             cursorFlashCounter = 0;
@@ -240,7 +214,6 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         clearSelection(); // TODO: redundant? set to cursorPos anyway in onScreenDraw
     }
 
-    @Override
     public void onKeyTyped(KeyInputEvent event)
     {
         isTyping = true;
@@ -423,7 +396,6 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
     {
         protected String text = "";
         protected int maxTextLength = 32;
-        protected boolean enabled = true;
         protected Color textColor = Color.WHITE;
         protected Color cursorColor = Color.BLUE;
         protected Color selectionColor = Color.BLUE;
@@ -442,12 +414,6 @@ public class GuiTextField extends GuiElement implements KeyInputListener, Screen
         public Builder maxTextLength(int maxTextLength)
         {
             this.maxTextLength = maxTextLength;
-            return self();
-        }
-
-        public Builder enabled(boolean enabled)
-        {
-            this.enabled = enabled;
             return self();
         }
 

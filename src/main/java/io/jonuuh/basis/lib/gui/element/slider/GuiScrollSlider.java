@@ -2,11 +2,10 @@ package io.jonuuh.basis.lib.gui.element.slider;
 
 import io.jonuuh.basis.lib.gui.event.input.MouseDownEvent;
 import io.jonuuh.basis.lib.gui.event.input.MouseDragEvent;
-import io.jonuuh.basis.lib.gui.listener.input.MouseDragListener;
 import io.jonuuh.basis.lib.util.MathUtils;
 import io.jonuuh.basis.lib.util.RenderUtils;
 
-public class GuiScrollSlider extends GuiSlider implements MouseDragListener
+public class GuiScrollSlider extends GuiSlider
 {
     /** A normalized value from 0-1: how long (height if vertical, width if horizontal) the scrollbar is */
     protected float scrollBarLength;
@@ -21,6 +20,9 @@ public class GuiScrollSlider extends GuiSlider implements MouseDragListener
     {
         super(builder);
         updateScrollBarLength();
+
+        this.addEventListener(MouseDownEvent.class, this::onMouseDown);
+        this.addEventListener(MouseDragEvent.class, this::onMouseDrag);
     }
 
     public void setMin(float min)
@@ -82,19 +84,15 @@ public class GuiScrollSlider extends GuiSlider implements MouseDragListener
 //        setNormalizedValue(getNormalizedValue() + (float) (MathUtils.normalize(event.wheelDelta * 10, min, max)));
 //    }
 
-    @Override
-    public void onMouseDrag(MouseDragEvent event)
+    private void onMouseDrag(MouseDragEvent event)
     {
         float valueAtMouse = getNormalValueAtScreenPos(event.mouseX, event.mouseY);
         float distance = valueAtMouse - grabPosValue;
         setNormalizedValue(startSliderValue + distance);
     }
 
-    @Override
-    public void onMouseDown(MouseDownEvent event)
+    private void onMouseDown(MouseDownEvent event)
     {
-        super.onMouseDown(event);
-
         grabPosValue = getNormalValueAtScreenPos(event.mouseX, event.mouseY);
 
         if (grabPosValue < getNormalizedValue() || grabPosValue > getNormalizedValue() + scrollBarLength)

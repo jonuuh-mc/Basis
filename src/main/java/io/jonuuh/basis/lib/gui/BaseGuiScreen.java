@@ -2,7 +2,7 @@ package io.jonuuh.basis.lib.gui;
 
 import io.jonuuh.basis.lib.gui.element.GuiElement;
 import io.jonuuh.basis.lib.gui.element.container.GuiRootContainer;
-import io.jonuuh.basis.lib.gui.event.GuiTargetedEvent;
+import io.jonuuh.basis.lib.gui.event.EventDispatcher;
 import io.jonuuh.basis.lib.gui.event.input.KeyInputEvent;
 import io.jonuuh.basis.lib.gui.event.input.MouseDownEvent;
 import io.jonuuh.basis.lib.gui.event.input.MouseDragEvent;
@@ -11,9 +11,7 @@ import io.jonuuh.basis.lib.gui.event.input.MouseUpEvent;
 import io.jonuuh.basis.lib.gui.event.lifecycle.CloseGuiEvent;
 import io.jonuuh.basis.lib.gui.event.lifecycle.InitGuiEvent;
 import io.jonuuh.basis.lib.gui.event.lifecycle.ScreenTickEvent;
-import io.jonuuh.basis.lib.gui.listener.input.InputListener;
 import io.jonuuh.basis.lib.gui.listener.input.MouseClickListener;
-import io.jonuuh.basis.lib.gui.listener.input.MouseScrollListener;
 import io.jonuuh.basis.lib.util.CollectionUtils;
 import io.jonuuh.basis.lib.util.MathUtils;
 import net.minecraft.client.Minecraft;
@@ -83,7 +81,7 @@ public abstract class BaseGuiScreen extends GuiScreen
     public void initGui()
     {
         Keyboard.enableRepeatEvents(true);
-        rootContainer.propagateEvent(new InitGuiEvent(new ScaledResolution(mc)));
+        EventDispatcher.dispatchUntargeted(rootContainer, new InitGuiEvent(false, new ScaledResolution(mc)));
     }
 
     /**
@@ -97,7 +95,7 @@ public abstract class BaseGuiScreen extends GuiScreen
     {
         Keyboard.enableRepeatEvents(false);
         currentFocus = null;
-        rootContainer.propagateEvent(new CloseGuiEvent());
+        EventDispatcher.dispatchUntargeted(rootContainer, new CloseGuiEvent(false));
     }
 
     /**
@@ -107,7 +105,7 @@ public abstract class BaseGuiScreen extends GuiScreen
     @Override
     public void updateScreen()
     {
-        rootContainer.propagateEvent(new ScreenTickEvent());
+        EventDispatcher.dispatchUntargeted(rootContainer, new ScreenTickEvent(false));
     }
 
     /**
@@ -131,7 +129,7 @@ public abstract class BaseGuiScreen extends GuiScreen
 
         if (hasCurrentFocus())
         {
-            dispatchTargetedEvent(new KeyInputEvent(currentFocus, typedChar, keyCode));
+            EventDispatcher.dispatchTargeted(new KeyInputEvent(currentFocus, true, false, typedChar, keyCode));
         }
     }
 
@@ -151,7 +149,7 @@ public abstract class BaseGuiScreen extends GuiScreen
         {
             if (hasCurrentFocus())
             {
-                dispatchTargetedEvent(new MouseScrollEvent(currentFocus, wheelDelta));
+                EventDispatcher.dispatchTargeted(new MouseScrollEvent(currentFocus, true, false, wheelDelta));
             }
         }
     }
@@ -231,7 +229,7 @@ public abstract class BaseGuiScreen extends GuiScreen
 
         if (hasCurrentFocus() && isEnabledClickListener(currentFocus) && ((MouseClickListener) currentFocus).isMouseDown())
         {
-            dispatchTargetedEvent(new MouseUpEvent(currentFocus, mouseX, mouseY));
+            EventDispatcher.dispatch(new MouseUpEvent(currentFocus, true, false, mouseX, mouseY));
         }
     }
 
@@ -248,29 +246,29 @@ public abstract class BaseGuiScreen extends GuiScreen
         }
     }
 
-    private static boolean isEnabledClickListener(GuiElement element)
-    {
-        return element instanceof MouseClickListener && ((InputListener) element).isEnabled();
-    }
+//    private static boolean isEnabledClickListener(GuiElement element)
+//    {
+//        return element instanceof MouseClickListener && ((InputListener) element).isEnabled();
+//    }
 
-    private static boolean isEnabledScrollListener(GuiElement element)
-    {
-        return element instanceof MouseScrollListener && ((InputListener) element).isEnabled();
-    }
+//    private static boolean isEnabledScrollListener(GuiElement element)
+//    {
+//        return element instanceof MouseScrollListener && ((InputListener) element).isEnabled();
+//    }
 
-    private static void dispatchTargetedEvent(GuiTargetedEvent event)
-    {
-        // Build propagation path: root -> ... -> target
-        List<GuiElement> path = event.target.getPropagationPath();
-
-        for (GuiElement element : path)
-        {
-            event.tryDispatchTo(element);
-
-            if (event.hasPropagationStopped())
-            {
-                return;
-            }
-        }
-    }
+//    private static void dispatchTargetedEvent(GuiTargetedEvent event)
+//    {
+//        // Build propagation path: root -> ... -> target
+//        List<GuiElement> path = event.target.getPropagationPath();
+//
+//        for (GuiElement element : path)
+//        {
+//            event.tryDispatchTo(element);
+//
+//            if (event.hasPropagationStopped())
+//            {
+//                return;
+//            }
+//        }
+//    }
 }

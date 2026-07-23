@@ -3,7 +3,7 @@ package io.jonuuh.basis.lib.gui.element.container.behavior;
 import io.jonuuh.basis.lib.gui.element.GuiElement;
 import io.jonuuh.basis.lib.gui.element.container.GuiContainer;
 import io.jonuuh.basis.lib.gui.element.slider.GuiScrollSlider;
-import io.jonuuh.basis.lib.gui.listener.input.InputListener;
+import io.jonuuh.basis.lib.gui.event.input.MouseDownEvent;
 
 import java.util.List;
 
@@ -24,8 +24,13 @@ public class ScrollBehavior
                 .localPosition(host.getWidth() - sliderWidth - sliderEdgeOffset, sliderEdgeOffset)
                 .size(sliderWidth, host.getHeight() - (sliderEdgeOffset * 2))
                 .vertical(true)
-                .stateChangeBehavior(element -> slideChildrenVertically())
+//                .stateChangeBehavior(element -> slideChildrenVertically())
                 .bounds(0, builder.scrollLength).build();
+
+        // TODO: stateChangeBehavior would only fire when value actually changed, now in this case there needs to be
+        //  some way to check whether value actually changed
+        //  Also stateChangeBehavior would fire after any of the ways a slider can change (scroll or click)
+        scrollSlider.addEventListener(MouseDownEvent.class, e -> slideChildrenVertically());
 
         host.addChild(scrollSlider);
     }
@@ -75,10 +80,7 @@ public class ScrollBehavior
             boolean isFullyOutsideBottomBound = element.getTopBound() > host.getBottomBound();
             boolean isFullyOutsideTopBound = element.getBottomBound() < host.getTopBound();
 
-            if (element instanceof InputListener)
-            {
-                ((InputListener) element).setEnabled(!isFullyOutsideBottomBound && !isFullyOutsideTopBound);
-            }
+            element.setEnabled(!isFullyOutsideBottomBound && !isFullyOutsideTopBound);
         }
     }
 

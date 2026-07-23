@@ -5,27 +5,17 @@ import io.jonuuh.basis.lib.gui.element.GuiElement;
 public abstract class GuiTargetedEvent extends GuiEvent
 {
     public final GuiElement target;
-    protected GuiElement lastCapture;
-    private boolean propagationStopped;
+    private final boolean bubbles;
 
-    protected GuiTargetedEvent(GuiElement target)
+    protected GuiTargetedEvent(GuiElement target, boolean bubbles, boolean cancelable)
     {
+        super(cancelable);
         this.target = target;
-        this.propagationStopped = false;
+        this.bubbles = bubbles;
     }
 
-    public GuiElement getLastCapture()
+    public boolean bubbles()
     {
-        return lastCapture;
-    }
-
-    public void stopPropagation()
-    {
-        propagationStopped = true;
-    }
-
-    public boolean hasPropagationStopped()
-    {
-        return propagationStopped;
+        return bubbles;
     }
 }

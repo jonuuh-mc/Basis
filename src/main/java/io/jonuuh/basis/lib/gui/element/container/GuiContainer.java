@@ -1,15 +1,12 @@
 package io.jonuuh.basis.lib.gui.element.container;
 
 import io.jonuuh.basis.lib.gui.element.GuiElement;
+import io.jonuuh.basis.lib.gui.element.behavior.ClickBehavior;
 import io.jonuuh.basis.lib.gui.element.container.behavior.FlexBehavior;
 import io.jonuuh.basis.lib.gui.element.container.behavior.ScrollBehavior;
 import io.jonuuh.basis.lib.gui.event.GuiEvent;
-import io.jonuuh.basis.lib.gui.event.input.MouseDownEvent;
 import io.jonuuh.basis.lib.gui.event.input.MouseScrollEvent;
 import io.jonuuh.basis.lib.gui.event.lifecycle.InitGuiEvent;
-import io.jonuuh.basis.lib.gui.listener.input.MouseClickListener;
-import io.jonuuh.basis.lib.gui.listener.input.MouseScrollListener;
-import io.jonuuh.basis.lib.gui.listener.lifecycle.InitGuiListener;
 import io.jonuuh.basis.lib.util.CollectionUtils;
 import io.jonuuh.basis.lib.util.Color;
 import io.jonuuh.basis.lib.util.RenderUtils;
@@ -23,24 +20,27 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public abstract class GuiContainer extends GuiElement implements InitGuiListener, MouseClickListener, MouseScrollListener
+public abstract class GuiContainer extends GuiElement
 {
     protected final List<GuiElement> children;
     protected FlexBehavior flexBehavior;
     protected ScrollBehavior scrollBehavior;
     protected boolean shouldScissor;
-    protected boolean enabled;
-    protected boolean mouseDown;
+
+    protected ClickBehavior clickBehavior;
 
     protected GuiContainer(AbstractBuilder<?, ?> builder)
     {
         super(builder);
         this.children = new ArrayList<>();
-        this.enabled = builder.enabled;
 
         this.shouldScissor = builder.shouldScissor;
 
         addChildren(builder.children);
+
+        this.clickBehavior = new ClickBehavior(this);
+        this.addEventListener(InitGuiEvent.class, this::onInitGui);
+        this.addEventListener(MouseScrollEvent.class, this::onMouseScroll);
 
         if (builder.scrollBehaviorBuilder != null)
         {
@@ -130,30 +130,6 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
     public boolean hasScrollBehavior()
     {
         return getScrollBehavior() != null;
-    }
-
-    @Override
-    public boolean isEnabled()
-    {
-        return enabled;
-    }
-
-    @Override
-    public void setEnabled(boolean enabled)
-    {
-        this.enabled = enabled;
-    }
-
-    @Override
-    public boolean isMouseDown()
-    {
-        return mouseDown;
-    }
-
-    @Override
-    public void setMouseDown(boolean mouseDown)
-    {
-        this.mouseDown = mouseDown;
     }
 
     protected boolean shouldScissor()
@@ -437,8 +413,7 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         }
     }
 
-    @Override
-    public void onInitGui(InitGuiEvent event)
+    protected void onInitGui(InitGuiEvent event)
     {
         if (flexBehavior != null)
         {
@@ -446,17 +421,10 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         }
     }
 
-    @Override
-    public void onMouseDown(MouseDownEvent event)
-    {
-        MouseClickListener.super.onMouseDown(event);
-    }
-
     /**
      * Redirect mouse wheel scroll events to the scroll behavior's slider, if it exists.
      */
-    @Override
-    public void onMouseScroll(MouseScrollEvent event)
+    protected void onMouseScroll(MouseScrollEvent event)
     {
         // Ignore propagating events to other containers
         if (event.target != this)
@@ -575,7 +543,6 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         protected FlexBehavior.Builder flexBehaviorBuilder = null;
         protected ScrollBehavior.Builder scrollBehaviorBuilder = null;
         protected boolean shouldScissor = false;
-        protected boolean enabled = true;
 
         protected AbstractBuilder(String elementName)
         {
@@ -630,12 +597,6 @@ public abstract class GuiContainer extends GuiElement implements InitGuiListener
         {
             this.scrollBehaviorBuilder = scrollBehaviorBuilder;
             this.shouldScissor = true;
-            return self();
-        }
-
-        public T enabled(boolean enabled)
-        {
-            this.enabled = enabled;
             return self();
         }
     }
